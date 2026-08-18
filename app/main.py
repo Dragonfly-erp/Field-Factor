@@ -119,6 +119,9 @@ class Обробник(BaseHTTPRequestHandler):
         if not os.path.isfile(шлях):
             return self._збій("Файл не знайдено", 404)
         тип = mimetypes.guess_type(шлях)[0] or "application/octet-stream"
+        # без цього браузер вгадує кодування сам і псує кирилицю
+        if тип.startswith("text/") or тип.endswith("javascript"):
+            тип += "; charset=utf-8"
         розмір = os.path.getsize(шлях)
         self.send_response(200)
         self.send_header("Content-Type", тип)

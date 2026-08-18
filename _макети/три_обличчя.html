@@ -1,0 +1,745 @@
+<title>Три обличчя FieldFactor</title>
+<style>
+/* ── Палітра виведена з логотипу: темна зелень напису, робоча зелень поля,
+      ґрунтовий відтінок як третій колір. Нейтральні — не сірі, а зсунуті
+      в бік ґрунту, щоб сторінка не виглядала офісним шаблоном. ───────── */
+:root {
+  --папір:        #f4f2ec;
+  --полотно:      #ffffff;
+  --рамка:        #ddd9cc;
+  --рамка-тонка:  #eae6db;
+  --чорнило:      #241f18;
+  --чорнило-тихе: #6d6656;
+  --зелень:       #3e7a32;
+  --зелень-темна: #1e4d2b;
+  --зелень-мʼяка: #edf2e6;
+  --глина:        #8a7350;
+  --тривога:      #a8442a;
+  --увага:        #96721c;
+
+  --зона1: #9c5a35;
+  --зона2: #c08a4a;
+  --зона3: #d9bd6b;
+  --зона4: #97b85c;
+  --зона5: #4b8b3c;
+  --зона6: #245c2c;
+
+  --крок: 1.5rem;
+  --вигин: 4px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --папір:        #16150f;
+    --полотно:      #1e1d16;
+    --рамка:        #35332a;
+    --рамка-тонка:  #292820;
+    --чорнило:      #ece8dc;
+    --чорнило-тихе: #9a9484;
+    --зелень:       #7fb75f;
+    --зелень-темна: #a7d08a;
+    --зелень-мʼяка: #21291c;
+    --глина:        #b09772;
+    --тривога:      #e08a68;
+    --увага:        #d5b053;
+
+    --зона1: #b06a3e;
+    --зона2: #cf9a55;
+    --зона3: #e0c777;
+    --зона4: #a3c467;
+    --зона5: #5c9c48;
+    --зона6: #2f7038;
+  }
+}
+
+:root[data-theme="dark"] {
+  --папір:        #16150f;
+  --полотно:      #1e1d16;
+  --рамка:        #35332a;
+  --рамка-тонка:  #292820;
+  --чорнило:      #ece8dc;
+  --чорнило-тихе: #9a9484;
+  --зелень:       #7fb75f;
+  --зелень-темна: #a7d08a;
+  --зелень-мʼяка: #21291c;
+  --глина:        #b09772;
+  --тривога:      #e08a68;
+  --увага:        #d5b053;
+
+  --зона1: #b06a3e;
+  --зона2: #cf9a55;
+  --зона3: #e0c777;
+  --зона4: #a3c467;
+  --зона5: #5c9c48;
+  --зона6: #2f7038;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--папір);
+  color: var(--чорнило);
+  font: 16px/1.6 "Segoe UI", system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 { font-family: Georgia, "Times New Roman", serif; font-weight: 600;
+             text-wrap: balance; margin: 0; letter-spacing: -0.01em; }
+
+.моно, .число { font-family: "Cascadia Mono", Consolas, "SF Mono", monospace;
+                font-variant-numeric: tabular-nums; }
+
+.мітка {
+  font-size: 10.5px; font-weight: 700; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--чорнило-тихе);
+}
+
+/* ── шапка ────────────────────────────────────────────────────────── */
+
+.шапка {
+  border-bottom: 1px solid var(--рамка);
+  background: var(--полотно);
+  padding: 26px 32px 0;
+}
+.шапка-нутро { max-width: 1180px; margin: 0 auto; }
+.бренд { display: flex; align-items: center; gap: 14px; }
+.бренд svg { width: 44px; height: 44px; flex: none; }
+.назва { font-family: Georgia, serif; font-size: 27px; font-weight: 400; line-height: 1.1; }
+.назва b { font-weight: 700; color: var(--зелень-темна); }
+.гасло { font-size: 10px; letter-spacing: .32em; text-transform: uppercase;
+         color: var(--зелень); font-weight: 700; margin-top: 4px; }
+
+.вступ {
+  max-width: 60ch; margin: 22px 0 26px;
+  font-size: 16.5px; color: var(--чорнило-тихе);
+}
+.вступ strong { color: var(--чорнило); font-weight: 600; }
+
+/* ── вкладки ──────────────────────────────────────────────────────── */
+
+.вкладки {
+  display: flex; gap: 2px;
+  overflow-x: auto; scrollbar-width: thin;
+  padding-bottom: 1px;                 /* щоб тінь активної вкладки не різалась */
+}
+@media (max-width: 720px) {
+  .вкладки { flex-wrap: wrap; overflow: visible; }
+  .вкладка { min-width: 0; flex: 1 1 46%; border-bottom: 1px solid var(--рамка);
+             border-radius: var(--вигин); margin-bottom: 2px; }
+  .вкладка[aria-selected="true"] { margin-bottom: 2px; }
+}
+.вкладка {
+  appearance: none; border: 1px solid var(--рамка); border-bottom: none;
+  background: transparent; color: var(--чорнило-тихе);
+  padding: 12px 20px 13px; cursor: pointer;
+  border-radius: var(--вигин) var(--вигин) 0 0;
+  font: inherit; font-size: 14px; text-align: left; line-height: 1.25;
+  display: flex; flex-direction: column; gap: 2px; min-width: 190px;
+}
+.вкладка:hover { background: var(--зелень-мʼяка); color: var(--чорнило); }
+.вкладка[aria-selected="true"] {
+  background: var(--папір); color: var(--чорнило);
+  border-color: var(--рамка); box-shadow: inset 0 3px 0 var(--зелень);
+  margin-bottom: -1px; padding-bottom: 14px;
+}
+.вкладка b { font-weight: 650; font-size: 15px; }
+.вкладка span { font-size: 12px; color: var(--чорнило-тихе); }
+.вкладка:focus-visible { outline: 2px solid var(--зелень); outline-offset: 2px; }
+
+/* ── сцена ────────────────────────────────────────────────────────── */
+
+main { max-width: 1180px; margin: 0 auto; padding: 32px 32px 72px; }
+.панель[hidden] { display: none; }
+
+.розклад { display: grid; grid-template-columns: 1fr 300px; gap: 28px; align-items: start; }
+@media (max-width: 940px) { .розклад { grid-template-columns: 1fr; } }
+
+.мокап {
+  border: 1px solid var(--рамка); border-radius: var(--вигин);
+  background: var(--полотно); overflow: hidden;
+  box-shadow: 0 1px 2px rgba(36,31,24,.06), 0 12px 32px -20px rgba(36,31,24,.35);
+}
+
+.розбір h2 { font-size: 19px; margin-bottom: 8px; }
+.розбір p { font-size: 14px; color: var(--чорнило-тихе); margin: 0 0 16px; }
+.розбір dl { display: grid; gap: 12px; margin: 0; }
+.розбір dt { font-size: 10.5px; font-weight: 700; letter-spacing: .12em;
+             text-transform: uppercase; color: var(--чорнило-тихе); margin-bottom: 2px; }
+.розбір dd { margin: 0; font-size: 14px; }
+.розбір .плюс { border-left: 2px solid var(--зелень); padding-left: 12px; }
+.розбір .мінус { border-left: 2px solid var(--глина); padding-left: 12px; }
+
+/* ── спільні дрібниці мокапів ─────────────────────────────────────── */
+
+.смуга-вікна {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 14px; border-bottom: 1px solid var(--рамка-тонка);
+  background: var(--папір); font-size: 12.5px; color: var(--чорнило-тихе);
+}
+.кружки { display: flex; gap: 5px; }
+.кружки i { width: 9px; height: 9px; border-radius: 50%; background: var(--рамка); }
+
+.чип {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 2px 9px; border-radius: 20px; font-size: 11.5px; font-weight: 600;
+}
+.чип.добре { background: var(--зелень-мʼяка); color: var(--зелень-темна); }
+.чип.увага { background: color-mix(in srgb, var(--увага) 18%, transparent); color: var(--увага); }
+.чип.стоп  { background: color-mix(in srgb, var(--тривога) 16%, transparent); color: var(--тривога); }
+
+canvas { display: block; width: 100%; }
+
+/* ══ ВАРІАНТ 1 · робочий стіл ═════════════════════════════════════ */
+
+.стіл { display: grid; grid-template-columns: 168px 1fr 196px; height: 430px; }
+.стіл-колонка { border-right: 1px solid var(--рамка-тонка); overflow: hidden;
+                display: flex; flex-direction: column; }
+.стіл-колонка:last-child { border-right: none; border-left: 1px solid var(--рамка-тонка); }
+.стіл-шапка {
+  padding: 8px 12px; border-bottom: 1px solid var(--рамка-тонка);
+  background: var(--папір);
+}
+.стіл-тіло { padding: 8px; overflow: hidden; font-size: 12px; }
+.дерево-гілка { font-weight: 650; font-size: 12.5px; padding: 4px 6px; }
+.дерево-лист { padding: 5px 8px; border-radius: 4px; line-height: 1.35; }
+.дерево-лист.обраний { background: var(--зелень); color: #fff; }
+.дерево-лист small { display: block; font-size: 10.5px; opacity: .75; }
+.карта-обгортка { position: relative; }
+.плитка-шарів {
+  position: absolute; top: 10px; left: 10px; width: 158px;
+  background: var(--полотно); border: 1px solid var(--рамка);
+  border-radius: var(--вигин); font-size: 11.5px; overflow: hidden;
+}
+.плитка-шарів div { padding: 5px 9px; border-bottom: 1px solid var(--рамка-тонка); }
+.плитка-шарів div:last-child { border-bottom: none; }
+.плитка-шарів .увімкнено { color: var(--чорнило); font-weight: 600; }
+.плитка-шарів .вимкнено { color: var(--чорнило-тихе); }
+.легенда-щабель { display: flex; align-items: center; gap: 7px; font-size: 11.5px; padding: 2px 0; }
+.легенда-щабель i { width: 20px; height: 11px; border-radius: 2px; flex: none; }
+.пари { display: grid; grid-template-columns: auto 1fr; gap: 3px 10px; font-size: 11.5px; }
+.пари dt { color: var(--чорнило-тихе); }
+.пари dd { margin: 0; font-weight: 600; }
+
+/* ══ ВАРІАНТ 2 · поле в руках ═════════════════════════════════════ */
+
+.планшет { position: relative; height: 430px; background: var(--папір); }
+.планшет-верх {
+  position: absolute; inset: 0 0 auto 0; z-index: 2;
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 16px;
+  background: linear-gradient(to bottom, color-mix(in srgb, var(--полотно) 92%, transparent), transparent);
+}
+.поле-обране { font-family: Georgia, serif; font-size: 18px; font-weight: 600; }
+.роки { display: flex; gap: 6px; margin-left: auto; }
+.рік-чип {
+  padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;
+  border: 1px solid var(--рамка); background: var(--полотно); color: var(--чорнило-тихе);
+}
+.рік-чип.тут { background: var(--зелень); border-color: var(--зелень); color: #fff; }
+.планшет-низ {
+  position: absolute; left: 16px; right: 16px; bottom: 16px; z-index: 2;
+  display: flex; gap: 12px;
+}
+.картка {
+  background: var(--полотно); border: 1px solid var(--рамка);
+  border-radius: 10px; padding: 12px 14px; flex: 1;
+  box-shadow: 0 6px 20px -12px rgba(36,31,24,.5);
+}
+.картка .число { font-family: Georgia, serif; font-size: 25px; font-weight: 600; line-height: 1.05; }
+.картка .одиниця { font-size: 12px; color: var(--чорнило-тихе); }
+.дії-справа {
+  position: absolute; right: 16px; top: 64px; z-index: 2;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.кругла {
+  width: 44px; height: 44px; border-radius: 50%;
+  border: 1px solid var(--рамка); background: var(--полотно);
+  display: grid; place-items: center; font-size: 17px; color: var(--чорнило-тихе);
+}
+
+/* ══ ВАРІАНТ 3 · розмова з господарем ═════════════════════════════ */
+
+.звіт { height: 430px; overflow-y: auto; background: var(--полотно); }
+.звіт-нутро { padding: 30px 38px 40px; max-width: 640px; }
+.звіт h2 { font-size: 25px; line-height: 1.2; margin-bottom: 10px; }
+.звіт .ліда { font-size: 15px; color: var(--чорнило-тихе); margin: 0 0 24px; max-width: 46ch; }
+.велике-число {
+  font-family: Georgia, serif; font-size: 46px; font-weight: 700;
+  line-height: 1; color: var(--зелень-темна);
+}
+.трійка { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin: 22px 0 28px; }
+.трійка p { font-size: 12.5px; color: var(--чорнило-тихе); margin: 4px 0 0; }
+.смуга-зон { display: flex; height: 30px; border-radius: 3px; overflow: hidden; margin: 6px 0 4px; }
+.смуга-зон i { display: grid; place-items: center; font-size: 11px; font-weight: 700; color: #fff; }
+.рядок-зони {
+  display: grid; grid-template-columns: 22px 1fr auto; gap: 12px; align-items: baseline;
+  padding: 11px 0; border-bottom: 1px solid var(--рамка-тонка); font-size: 14px;
+}
+.рядок-зони b { width: 22px; height: 22px; border-radius: 3px; display: grid;
+                place-items: center; color: #fff; font-size: 11.5px; }
+.рядок-зони .вердикт { font-size: 13px; color: var(--чорнило-тихе); }
+.виноска {
+  border-left: 3px solid var(--глина); padding: 12px 0 12px 16px;
+  margin: 24px 0; font-size: 14.5px;
+}
+
+footer {
+  border-top: 1px solid var(--рамка); background: var(--полотно);
+  padding: 22px 32px 60px; font-size: 13px; color: var(--чорнило-тихе);
+}
+footer div { max-width: 1180px; margin: 0 auto; max-width: 70ch; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .панель:not([hidden]) { animation: зʼява .22s ease-out; }
+  @keyframes зʼява { from { opacity: 0; transform: translateY(4px); } }
+}
+</style>
+
+<header class="шапка">
+  <div class="шапка-нутро">
+    <div class="бренд">
+      <svg viewBox="0 0 100 100" aria-hidden="true">
+        <circle cx="50" cy="50" r="47" fill="none" stroke="var(--зелень-темна)"
+                stroke-width="1.2" stroke-dasharray="5 4" opacity=".45"/>
+        <circle cx="50" cy="50" r="38" fill="none" stroke="var(--зелень)"
+                stroke-width="1" opacity=".35"/>
+        <circle cx="50" cy="3.5" r="4" fill="var(--зелень-темна)"/>
+        <circle cx="93" cy="62" r="3.4" fill="var(--зелень)"/>
+        <circle cx="30" cy="95" r="3.4" fill="var(--глина)"/>
+        <circle cx="6" cy="34" r="3" fill="var(--зелень-темна)"/>
+        <g clip-path="url(#поле)">
+          <rect x="18" y="18" width="64" height="64" fill="var(--зелень-мʼяка)"/>
+          <path d="M20 44q30-16 60 0v5q-30-16-60 0z" fill="var(--зона4)"/>
+          <path d="M20 55q30-16 60 0v5q-30-16-60 0z" fill="var(--зона5)"/>
+          <path d="M20 66q30-16 60 0v5q-30-16-60 0z" fill="var(--зона6)"/>
+          <path d="M20 77q30-16 60 0v6q-30-16-60 0z" fill="var(--глина)"/>
+        </g>
+        <defs><clipPath id="поле"><circle cx="50" cy="50" r="30"/></clipPath></defs>
+      </svg>
+      <div>
+        <div class="назва"><b>Field</b>Factor</div>
+        <div class="гасло">Data. Insight. Growth.</div>
+      </div>
+    </div>
+
+    <p class="вступ">
+      Три способи показати одне й те саме поле. Різниця не в кольорах —
+      різниця в тому, <strong>хто дивиться і що йому треба зробити далі</strong>.
+      Дані у всіх трьох справжні: поле 41,9 га, пʼять зон із рельєфу та
+      електропровідності, перевірені врожайністю, якої в їхній побудові не було.
+    </p>
+
+    <div class="вкладки" role="tablist" aria-label="Варіанти оформлення">
+      <button class="вкладка" role="tab" aria-selected="true" aria-controls="п1" id="в1">
+        <b>Робочий стіл</b><span>для агронома, цілий день</span>
+      </button>
+      <button class="вкладка" role="tab" aria-selected="false" aria-controls="п2" id="в2">
+        <b>Поле в руках</b><span>планшет, стоячи на полі</span>
+      </button>
+      <button class="вкладка" role="tab" aria-selected="false" aria-controls="п3" id="в3">
+        <b>Розмова з господарем</b><span>те, що лишається клієнту</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ── ВАРІАНТ 1 ─────────────────────────────────────────────── -->
+  <section class="панель" id="п1" role="tabpanel" aria-labelledby="в1">
+    <div class="розклад">
+      <div class="мокап">
+        <div class="смуга-вікна">
+          <span class="кружки"><i></i><i></i><i></i></span>
+          <span>FieldFactor · Зелена Поляна / Ж 03 · 41,9 га</span>
+          <span class="чип добре" style="margin-left:auto">зони пояснюють 38 % врожаю</span>
+        </div>
+        <div class="стіл">
+          <div class="стіл-колонка">
+            <div class="стіл-шапка мітка">Картотека</div>
+            <div class="стіл-тіло">
+              <div class="дерево-гілка">Зелена Поляна</div>
+              <div class="дерево-лист обраний">Ж 03<small>41,9 га · 2025, 2026</small></div>
+              <div class="дерево-лист">Ж 3-2<small>28,4 га · 2025</small></div>
+              <div class="дерево-лист">Долинка 12<small>без контуру</small></div>
+              <div class="дерево-гілка" style="margin-top:10px">Хортиця</div>
+              <div class="дерево-лист">Степове 7<small>63,1 га · 2024, 2025</small></div>
+            </div>
+          </div>
+
+          <div class="карта-обгортка">
+            <canvas data-поле="1" height="430"></canvas>
+            <div class="плитка-шарів">
+              <div class="мітка" style="padding:6px 9px;background:var(--папір)">Шари поля</div>
+              <div class="увімкнено">✓ Зони · сканування</div>
+              <div class="увімкнено">✓ Точки відбору</div>
+              <div class="вимкнено">○ Врожайність 2025</div>
+              <div class="вимкнено">○ Сканування RTK + EC</div>
+              <div class="вимкнено">○ Контур поля</div>
+            </div>
+          </div>
+
+          <div class="стіл-колонка">
+            <div class="стіл-шапка мітка">Показ шару</div>
+            <div class="стіл-тіло">
+              <div style="font-weight:650;font-size:12.5px;margin-bottom:6px">Зони · сканування</div>
+              <div class="легенда-щабель"><i style="background:var(--зона1)"></i>1 · здуті вершини</div>
+              <div class="легенда-щабель"><i style="background:var(--зона2)"></i>2 · верхній схил</div>
+              <div class="легенда-щабель"><i style="background:var(--зона3)"></i>3 · середній схил</div>
+              <div class="легенда-щабель"><i style="background:var(--зона5)"></i>4 · нижній схил</div>
+              <div class="легенда-щабель"><i style="background:var(--зона6)"></i>5 · западини</div>
+            </div>
+            <div class="стіл-шапка мітка" style="border-top:1px solid var(--рамка-тонка)">Під курсором</div>
+            <div class="стіл-тіло">
+              <dl class="пари">
+                <dt>ZONE_ID</dt><dd class="моно">3</dd>
+                <dt>AREA_HA</dt><dd class="моно">11,4</dd>
+                <dt>EC_DP</dt><dd class="моно">0,362</dd>
+                <dt>TWI_AVG</dt><dd class="моно">7,8</dd>
+                <dt>CURV_AVG</dt><dd class="моно">−0,04</dd>
+                <dt>SAMPLE</dt><dd class="моно">зразок 2</dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="розбір">
+        <h2>Робочий стіл</h2>
+        <p>Три колонки, нічого не ховається. Той, хто сидить у цьому цілий день,
+           не хоче відкривати панель заради одного числа.</p>
+        <dl>
+          <div><dt>Для кого</dt>
+            <dd>Агроном-консультант за столом. Десятки полів, порівняння років.</dd></div>
+          <div class="плюс"><dt>Сильне</dt>
+            <dd>Усе на очах одночасно: дерево, карта, легенда, атрибути точки.
+                Жодного кліку, щоб побачити, що під курсором.</dd></div>
+          <div class="мінус"><dt>Слабке</dt>
+            <dd>На ноутбуці 13″ тісно. Показати таке господарю — він побачить
+                панель приладів літака, а не своє поле.</dd></div>
+          <div><dt>Стан</dt>
+            <dd><span class="чип добре">це вже працює</span></dd></div>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── ВАРІАНТ 2 ─────────────────────────────────────────────── -->
+  <section class="панель" id="п2" role="tabpanel" aria-labelledby="в2" hidden>
+    <div class="розклад">
+      <div class="мокап">
+        <div class="смуга-вікна">
+          <span class="кружки"><i></i><i></i><i></i></span>
+          <span>FieldFactor · планшет у полі</span>
+        </div>
+        <div class="планшет">
+          <canvas data-поле="2" height="430"></canvas>
+
+          <div class="планшет-верх">
+            <span class="поле-обране">Ж 03</span>
+            <span class="мітка">41,9 га</span>
+            <span class="роки">
+              <span class="рік-чип">2024</span>
+              <span class="рік-чип">2025</span>
+              <span class="рік-чип тут">2026</span>
+            </span>
+          </div>
+
+          <div class="дії-справа">
+            <span class="кругла">＋</span>
+            <span class="кругла">◎</span>
+            <span class="кругла">☰</span>
+          </div>
+
+          <div class="планшет-низ">
+            <div class="картка">
+              <div class="мітка">Ви стоїте тут</div>
+              <div class="число">Зона 4</div>
+              <div class="одиниця">нижній схил · 9,2 га</div>
+            </div>
+            <div class="картка">
+              <div class="мітка">Провідність</div>
+              <div class="число">0,41<span class="одиниця"> dS/m</span></div>
+              <div class="одиниця">важче за середнє по полю</div>
+            </div>
+            <div class="картка">
+              <div class="мітка">Найближчий зразок</div>
+              <div class="число">78 <span class="одиниця">м</span></div>
+              <div class="одиниця">зразок 4 · зони 7+8</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="розбір">
+        <h2>Поле в руках</h2>
+        <p>Карта на весь екран, три числа внизу, решта ховається. Це те, що
+           тримають однією рукою, стоячи в борозні.</p>
+        <dl>
+          <div><dt>Для кого</dt>
+            <dd>Той, хто зараз на полі: відбірник, агроном господарства, ви на
+                показі клієнту.</dd></div>
+          <div class="плюс"><dt>Сильне</dt>
+            <dd>Веде до наступної точки відбору. Показує, у якій ви зоні і чим
+                вона відрізняється — без жодної таблиці.</dd></div>
+          <div class="мінус"><dt>Слабке</dt>
+            <dd>Порівняти два роки поруч тут неможливо. Це не інструмент аналізу,
+                це інструмент присутності.</dd></div>
+          <div><dt>Стан</dt>
+            <dd><span class="чип увага">треба робити з нуля</span></dd></div>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── ВАРІАНТ 3 ─────────────────────────────────────────────── -->
+  <section class="панель" id="п3" role="tabpanel" aria-labelledby="в3" hidden>
+    <div class="розклад">
+      <div class="мокап">
+        <div class="смуга-вікна">
+          <span class="кружки"><i></i><i></i><i></i></span>
+          <span>Ж 03 · що показало поле — для господарства</span>
+        </div>
+        <div class="звіт">
+          <div class="звіт-нутро">
+            <h2>Поле Ж 03 працює трьома різними шматками</h2>
+            <p class="ліда">Ми проїхали його сканером і подивились знімки за
+              чотири роки. Ось що виявилось — і що з цього випливає для витрат.</p>
+
+            <div class="трійка">
+              <div>
+                <div class="велике-число">41,9</div>
+                <p>гектарів обстежено</p>
+              </div>
+              <div>
+                <div class="велике-число">5</div>
+                <p>зон, які поводяться по-різному</p>
+              </div>
+              <div>
+                <div class="велике-число">38 %</div>
+                <p>різниці врожаю пояснюють ці зони</p>
+              </div>
+            </div>
+
+            <div class="мітка">Від найсухішого до найвологішого</div>
+            <div class="смуга-зон">
+              <i style="background:var(--зона1);flex:0 0 14%">1</i>
+              <i style="background:var(--зона2);flex:0 0 19%">2</i>
+              <i style="background:var(--зона3);flex:0 0 27%">3</i>
+              <i style="background:var(--зона5);flex:0 0 22%">4</i>
+              <i style="background:var(--зона6);flex:0 0 18%">5</i>
+            </div>
+
+            <div class="рядок-зони">
+              <b style="background:var(--зона1)">1</b>
+              <span>Здуті вершини, 5,9 га.<br>
+                <span class="вердикт">Легкий ґрунт, вода не тримається.</span></span>
+              <span class="чип стоп">не вкладати наосліп</span>
+            </div>
+            <div class="рядок-зони">
+              <b style="background:var(--зона3)">3</b>
+              <span>Середній схил, 11,4 га.<br>
+                <span class="вердикт">Найрівніше місце поля.</span></span>
+              <span class="чип добре">основа врожаю</span>
+            </div>
+            <div class="рядок-зони">
+              <b style="background:var(--зона6)">5</b>
+              <span>Западини, 7,5 га.<br>
+                <span class="вердикт">Волога стоїть, провідність найвища.</span></span>
+              <span class="чип увага">перевірити засолення</span>
+            </div>
+
+            <div class="виноска">
+              Слабка зона <strong>не означає</strong>, що туди треба вкладати більше.
+              Іноді там уже досить поживи, а тримає врожай зовсім інше — кислотність
+              або вода. Що саме, покажуть зразки: ми поставили пʼять точок так, щоб
+              кожна відповідала за свій шматок поля.
+            </div>
+
+            <div class="мітка">Куди їхати по зразки</div>
+            <div class="рядок-зони" style="border-bottom:none">
+              <b style="background:var(--глина)">✚</b>
+              <span>Пʼять точок, кожна в серцевині своєї групи зон<br>
+                <span class="вердикт">найближча до дороги — 120 м від вʼїзду</span></span>
+              <span class="моно">5 зразків</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="розбір">
+        <h2>Розмова з господарем</h2>
+        <p>Не інструмент, а те, що лишається на столі після зустрічі. Жодного
+           слова, яке треба пояснювати.</p>
+        <dl>
+          <div><dt>Для кого</dt>
+            <dd>Власник господарства. Він не відкриє ГІС і не має відкривати.</dd></div>
+          <div class="плюс"><dt>Сильне</dt>
+            <dd>Прямо відповідає на «а нащо мені це». Каже вголос головне:
+                слабка зона — не привід вкладати.</dd></div>
+          <div class="мінус"><dt>Слабке</dt>
+            <dd>Кожен такий звіт треба вичитувати. Автомат напише цифри,
+                але не напише, що саме сказати цьому господарству.</dd></div>
+          <div><dt>Стан</dt>
+            <dd><span class="чип стоп">немає взагалі</span></dd></div>
+        </dl>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div>
+    Кольори всюди одні — темна зелень напису, робоча зелень поля, ґрунтовий
+    відтінок як третій. Зони пофарбовані від глиняного до темно-зеленого:
+    це не «погано-добре», це положення в ландшафті, від здутої вершини до
+    западини. Сторінка сама підлаштовується під світлу чи темну тему системи.
+  </div>
+</footer>
+
+<script>
+'use strict';
+
+/* ── вкладки ──────────────────────────────────────────────────── */
+const вкладки = Array.from(document.querySelectorAll('.вкладка'));
+вкладки.forEach(в => {
+  в.addEventListener('click', () => обрати(в));
+  в.addEventListener('keydown', п => {
+    const крок = п.key === 'ArrowRight' ? 1 : п.key === 'ArrowLeft' ? -1 : 0;
+    if (!крок) return;
+    п.preventDefault();
+    const далі = вкладки[(вкладки.indexOf(в) + крок + вкладки.length) % вкладки.length];
+    далі.focus(); обрати(далі);
+  });
+});
+
+function обрати(активна) {
+  вкладки.forEach(в => {
+    const це = в === активна;
+    в.setAttribute('aria-selected', це ? 'true' : 'false');
+    document.getElementById(в.getAttribute('aria-controls')).hidden = !це;
+  });
+  малювати();
+}
+
+/* ── поле: одна й та сама геометрія у всіх варіантах ──────────── */
+
+const КОНТУР = [
+  [0.06,0.20],[0.24,0.08],[0.55,0.05],[0.82,0.12],[0.95,0.31],
+  [0.93,0.62],[0.78,0.86],[0.46,0.95],[0.19,0.88],[0.05,0.62]
+];
+
+function кольориЗон() {
+  const с = getComputedStyle(document.documentElement);
+  return [1,2,3,5,6].map(н => с.getPropertyValue('--зона' + н).trim());
+}
+
+/* Ландшафтна поверхня: пагорб на північному заході, улоговина на південному
+   сході. Те саме, що дає рельєф і провідність у справжньому полі. */
+function ландшафт(u, v) {
+  return 0.62 * Math.sin(2.4 * u + 0.5) * Math.cos(1.9 * v - 0.3)
+       + 0.42 * Math.sin(3.7 * v + 1.2)
+       - 0.55 * (u - 0.35) - 0.30 * (v - 0.30);
+}
+
+function малюватиПоле(полотно, стиль) {
+  const щ = window.devicePixelRatio || 1;
+  const ш = полотно.clientWidth, в = полотно.clientHeight || 430;
+  if (!ш) return;
+  полотно.width = Math.round(ш * щ);
+  полотно.height = Math.round(в * щ);
+  const к = полотно.getContext('2d');
+  к.setTransform(щ, 0, 0, щ, 0, 0);
+
+  const стилі = getComputedStyle(document.documentElement);
+  к.fillStyle = стилі.getPropertyValue('--папір').trim();
+  к.fillRect(0, 0, ш, в);
+
+  const поля = стиль === 'планшет' ? 0 : 26;
+  const бік = Math.min(ш - поля * 2, в - поля * 2);
+  const зx = (ш - бік) / 2, зy = (в - бік) / 2;
+  const точка = (t) => [зx + t[0] * бік, зy + t[1] * бік];
+
+  к.save();
+  к.beginPath();
+  КОНТУР.forEach((т, і) => { const [x, y] = точка(т); і ? к.lineTo(x, y) : к.moveTo(x, y); });
+  к.closePath();
+  к.clip();
+
+  // зони: значення ландшафту розбите на пʼять смуг
+  const кольори = кольориЗон();
+  const крок = стиль === 'планшет' ? 3 : 4;
+  for (let px = 0; px < ш; px += крок) {
+    for (let py = 0; py < в; py += крок) {
+      const u = (px - зx) / бік, v = (py - зy) / бік;
+      const з = ландшафт(u, v);
+      let і = Math.floor((з + 1.15) / 2.3 * 5);
+      і = Math.max(0, Math.min(4, і));
+      к.fillStyle = кольори[і];
+      к.globalAlpha = стиль === 'планшет' ? 0.82 : 1;
+      к.fillRect(px, py, крок, крок);
+    }
+  }
+  к.globalAlpha = 1;
+
+  // сліди проходів сканера — тонкі й ледь помітні, як воно і є
+  if (стиль !== 'звіт') {
+    к.strokeStyle = 'rgba(255,255,255,.18)';
+    к.lineWidth = 1;
+    for (let s = -бік; s < бік * 2; s += 22) {
+      к.beginPath();
+      к.moveTo(зx + s, зy - бік * 0.2);
+      к.lineTo(зx + s + бік * 0.42, зy + бік * 1.2);
+      к.stroke();
+    }
+  }
+  к.restore();
+
+  // межа поля
+  к.beginPath();
+  КОНТУР.forEach((т, і) => { const [x, y] = точка(т); і ? к.lineTo(x, y) : к.moveTo(x, y); });
+  к.closePath();
+  к.lineWidth = 1.8;
+  к.strokeStyle = стилі.getPropertyValue('--зелень-темна').trim();
+  к.stroke();
+
+  // точки відбору — по одній у серцевині кожної групи
+  const відбір = [[0.30,0.26],[0.62,0.24],[0.47,0.52],[0.72,0.68],[0.32,0.72]];
+  відбір.forEach((т, і) => {
+    const [x, y] = точка(т);
+    к.beginPath(); к.arc(x, y, 8, 0, 6.284);
+    к.fillStyle = стилі.getPropertyValue('--полотно').trim();
+    к.fill();
+    к.lineWidth = 2;
+    к.strokeStyle = стилі.getPropertyValue('--чорнило').trim();
+    к.stroke();
+    к.fillStyle = стилі.getPropertyValue('--чорнило').trim();
+    к.font = '600 10px "Segoe UI", sans-serif';
+    к.textAlign = 'center'; к.textBaseline = 'middle';
+    к.fillText(String(і + 1), x, y + 0.5);
+  });
+
+  // «ви тут» лише на планшеті
+  if (стиль === 'планшет') {
+    const [x, y] = точка([0.55, 0.44]);
+    к.beginPath(); к.arc(x, y, 17, 0, 6.284);
+    к.fillStyle = 'rgba(62,122,50,.22)'; к.fill();
+    к.beginPath(); к.arc(x, y, 7, 0, 6.284);
+    к.fillStyle = стилі.getPropertyValue('--зелень').trim(); к.fill();
+    к.lineWidth = 2.5; к.strokeStyle = '#fff'; к.stroke();
+  }
+}
+
+function малювати() {
+  document.querySelectorAll('canvas[data-поле]').forEach(п => {
+    if (!п.closest('.панель') || п.closest('.панель').hidden) return;
+    малюватиПоле(п, п.dataset['поле'] === '2' ? 'планшет'
+                   : п.dataset['поле'] === '3' ? 'звіт' : 'стіл');
+  });
+}
+
+window.addEventListener('resize', малювати);
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', малювати);
+малювати();
+</script>
