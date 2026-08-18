@@ -14,7 +14,7 @@ import threading
 import traceback
 import webbrowser
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-from urllib.parse import parse_qs, urlparse
+from urllib.parse import parse_qs, quote, unquote, urlparse
 
 from app.core.state import Журнал, Сеанс, безпечна_назва
 
@@ -116,9 +116,11 @@ class Обробник(BaseHTTPRequestHandler):
         self.send_header("Content-Type", тип)
         self.send_header("Content-Length", str(розмір))
         if назва_для_завантаження:
+            # заголовки їдуть у latin-1, тож кирилицю в імені файлу треба
+            # закодувати — інакше відповідь рветься просто посеред шапки
             self.send_header(
                 "Content-Disposition",
-                "attachment; filename*=UTF-8''" + назва_для_завантаження.replace(" ", "%20"),
+                "attachment; filename*=UTF-8''" + quote(назва_для_завантаження, safe=""),
             )
         self.end_headers()
         with open(шлях, "rb") as ф:
@@ -132,7 +134,8 @@ class Обробник(BaseHTTPRequestHandler):
 
     def do_GET(self):
         адреса = urlparse(self.path)
-        шлях = адреса.path
+        # кирилиця в адресі приїжджає закодованою — без цього стиль і скрипт не знайдуться
+        шлях = unquote(адреса.path)
         запит = {к: в[0] for к, в in parse_qs(адреса.query).items()}
         try:
             if шлях in ("/", "/index.html"):
@@ -151,7 +154,7 @@ class Обробник(BaseHTTPRequestHandler):
 
     def do_POST(self):
         адреса = urlparse(self.path)
-        шлях = адреса.path
+        шлях = unquote(адреса.path)
         довжина = int(self.headers.get("Content-Length") or 0)
         if довжина > МЕЖА_ТІЛА:
             return self._збій("Файл завеликий", 413)
