@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FieldFactor</title>
+<link rel="stylesheet" href="/web/стиль.css">
+</head>
+<body>
+
+<header class="шапка">
+  <div class="назва">FieldFactor<span class="версія" id="версія"></span></div>
+  <div class="підзаголовок">Карта комбайна → нормалізована точкова карта під SMS</div>
+  <div class="оновлення" id="плашка-оновлення" hidden></div>
+</header>
+
+<nav class="стежка" id="стежка"></nav>
+
+<main id="сцена">
+
+<!-- 1 ------------------------------------------------------------------ -->
+<section class="крок" data-крок="1">
+  <h1>Поле і врожай</h1>
+  <p class="пояснення">З чого починається все інше: що збирали і коли.</p>
+
+  <label>Культура
+    <input id="культура" list="культури" placeholder="пшениця озима" autocomplete="off">
+    <datalist id="культури">
+      <option value="пшениця озима"><option value="пшениця яра"><option value="ячмінь озимий">
+      <option value="ячмінь ярий"><option value="кукурудза"><option value="соняшник">
+      <option value="соя"><option value="ріпак озимий"><option value="горох"><option value="жито">
+      <option value="овес"><option value="гречка"><option value="сорго">
+    </datalist>
+  </label>
+
+  <label>Рік збирання
+    <input id="рік" type="number" min="2000" max="2100" step="1">
+  </label>
+
+  <label>Дата збирання або період <span class="не-обовʼязково">якщо памʼятаєте</span>
+    <input id="дати" placeholder="15.07.2025 — 22.07.2025">
+  </label>
+
+  <label>Назва поля <span class="не-обовʼязково">піде в назви файлів</span>
+    <input id="поле" placeholder="Долинка_12">
+  </label>
+
+  <div class="кнопки"><button class="далі" data-далі="2">Далі</button></div>
+</section>
+
+<!-- 2 ------------------------------------------------------------------ -->
+<section class="крок" data-крок="2" hidden>
+  <h1>Контур поля</h1>
+  <p class="пояснення">
+    Точна межа поля. За неї програма не вийде жодною точкою — ні зараз, ні при
+    добудові пропусків.
+  </p>
+
+  <div class="прийом" id="прийом-контур">
+    <input type="file" id="файл-контур" multiple hidden>
+    <div class="прийом-текст">
+      <strong>Перетягніть сюди файл контуру</strong>
+      <span>або натисніть, щоб вибрати</span>
+      <small>ZIP із шейпом · GPKG · KML · KMZ · GeoJSON · SHP разом із SHX, DBF, PRJ</small>
+    </div>
+  </div>
+  <ul class="список-файлів" id="список-контур"></ul>
+
+  <div class="кнопки">
+    <button class="назад" data-назад="1">Назад</button>
+    <button class="далі" data-далі="3">Далі</button>
+  </div>
+</section>
+
+<!-- 3 ------------------------------------------------------------------ -->
+<section class="крок" data-крок="3" hidden>
+  <h1>Файли монітора врожайності</h1>
+  <p class="пояснення">
+    Усе, що вивантажив комбайн по цьому полю за цей рік. Якщо комбайнів було
+    кілька — вантажте від усіх. <strong>Нічого не зводьте і не чистіть руками:</strong>
+    саме на сирих записах видно, де сенсор бреше.
+  </p>
+
+  <div class="прийом" id="прийом-монітор">
+    <input type="file" id="файл-монітор" multiple hidden>
+    <div class="прийом-текст">
+      <strong>Перетягніть сюди файли монітора</strong>
+      <span>або натисніть, щоб вибрати</span>
+      <small>ZIP · SHP з усіма частинами · GPKG · CSV · TXT</small>
+    </div>
+  </div>
+  <ul class="список-файлів" id="список-монітор"></ul>
+
+  <div class="кнопки">
+    <button class="назад" data-назад="2">Назад</button>
+    <button class="далі" data-далі="4">Далі</button>
+  </div>
+</section>
+
+<!-- 4 ------------------------------------------------------------------ -->
+<section class="крок" data-крок="4" hidden>
+  <h1>До чого приводимо</h1>
+  <p class="пояснення">
+    Без цих двох чисел карта лишиться відносною: буде видно, де краще й гірше,
+    але не буде видно скільки.
+  </p>
+
+  <label>Базисна вологість, до якої приводимо, %
+    <input id="базис" type="number" step="0.1" min="0" max="40" placeholder="14">
+    <small class="підказка">
+      Програма нічого не підставляє за замовчуванням. Скільки скажете — до того
+      і приведе. Для зерна в Україні зазвичай 14 %.
+    </small>
+  </label>
+
+  <label>Середня врожайність поля за фактом
+    <span class="рядок">
+      <input id="факт" type="number" step="0.01" min="0" placeholder="6.4">
+      <select id="одиниця-факту">
+        <option value="т/га">т/га</option>
+        <option value="кг/га">кг/га</option>
+        <option value="ц/га">ц/га</option>
+      </select>
+    </span>
+  </label>
+
+  <fieldset class="вибір">
+    <legend>Звідки це число</legend>
+    <label class="радіо"><input type="radio" name="джерело-факту" value="вивірене" checked>
+      <span><strong>Вивірене</strong> — вагова, бухгалтерія, ТТН.
+      Програма підганяє під нього середнє по полю.</span></label>
+    <label class="радіо"><input type="radio" name="джерело-факту" value="оцінка">
+      <span><strong>Оцінка на око.</strong> Використається лише як перевірка
+      здорового глузду, а не як мірило.</span></label>
+    <label class="радіо"><input type="radio" name="джерело-факту" value="немає">
+      <span><strong>Числа немає.</strong> Карта буде відносною, і це буде
+      сказано прямо у звіті.</span></label>
+  </fieldset>
+
+  <details class="тонке">
+    <summary>Тонкі налаштування — можна не чіпати</summary>
+    <label>Верхня фізична межа врожайності, кг/га
+      <input id="межа" type="number" step="100" min="1000" value="20000">
+      <small class="підказка">Усе вище — це збій сенсора, а не врожай. Помічається і не потрапляє в чисті дані.</small>
+    </label>
+    <label>Натуральна вага зерна, кг/л <span class="не-обовʼязково">щоб порахувати л/га</span>
+      <input id="натура" type="number" step="0.001" min="0.3" max="1.0" placeholder="0.760">
+      <small class="підказка">Не знаєте — лишіть порожнім. Програма не вигадає це число: поле л/га просто лишиться порожнім.</small>
+    </label>
+  </details>
+
+  <div class="кнопки">
+    <button class="назад" data-назад="3">Назад</button>
+    <button class="далі" data-далі="5">Далі</button>
+  </div>
+</section>
+
+<!-- 5 ------------------------------------------------------------------ -->
+<section class="крок" data-крок="5" hidden>
+  <h1>Що знайшлося у файлах</h1>
+  <p class="пояснення">
+    Програма прочитала все, що ви дали, і показує, що саме побачила. Якщо колонку
+    вгадано не так — виправте тут.
+  </p>
+  <div id="звіт-розвідки" class="звіт">Читаю файли…</div>
+
+  <div class="кнопки">
+    <button class="назад" data-назад="4">Назад</button>
+    <button class="далі" data-далі="6">Далі</button>
+  </div>
+</section>
+
+<!-- 6 ------------------------------------------------------------------ -->
+<section class="крок" data-крок="6" hidden>
+  <h1>Супутник</h1>
+  <p class="пояснення">
+    Знімки Sentinel-2 за сезон допомагають закрити великі пропуски — там, де
+    комбайн не записав нічого, а сусідніх проходів замало.
+  </p>
+
+  <fieldset class="вибір">
+    <legend>Чи використовувати знімки</legend>
+    <label class="радіо"><input type="radio" name="супутник" value="так" checked>
+      <span><strong>Так, спробувати.</strong> Програма завантажить знімки сезону
+      і <em>сама перевірить</em>, чи вони справді покращують відновлення. Не
+      покращують — не використає і скаже про це. Потрібен інтернет.</span></label>
+    <label class="радіо"><input type="radio" name="супутник" value="ні">
+      <span><strong>Ні, працюємо без інтернету.</strong> Пропуски закриваються
+      геометрією проходів і сусідніми записами.</span></label>
+  </fieldset>
+
+  <fieldset class="вибір">
+    <legend>Ділянки, де немає ні записів поруч, ні надійного знімка</legend>
+    <label class="радіо"><input type="radio" name="без-опори" value="ні" checked>
+      <span><strong>Лишити порожніми.</strong> Якщо підтвердити число нічим —
+      краще діра, ніж красиве вигадане значення. У звіті буде написано, скільки
+      гектарів лишилось незакритими.</span></label>
+    <label class="радіо"><input type="radio" name="без-опори" value="так">
+      <span><strong>Закрити все одно</strong> — коли потрібне суцільне покриття
+      і ви свідомо на це йдете. Такі точки отримають мітку довіри LOW і будуть
+      видні у файлі окремо.</span></label>
+  </fieldset>
+
+  <div class="кнопки">
+    <button class="назад" data-назад="5">Назад</button>
+    <button class="далі" data-далі="7">Далі</button>
+  </div>
+</section>
+
+<!-- 7 ------------------------------------------------------------------ -->
+<section class="крок" data-крок="7" hidden>
+  <h1>Готовність</h1>
+  <p class="пояснення">Звірте перед стартом. Далі програма працює сама.</p>
+  <div id="ворота" class="звіт"></div>
+  <div class="кнопки">
+    <button class="назад" data-назад="6">Назад</button>
+    <button id="пуск" class="головна">Почати обробку</button>
+  </div>
+</section>
+
+<!-- 8 ------------------------------------------------------------------ -->
+<section class="крок" data-крок="8" hidden>
+  <h1 id="заголовок-роботи">Обробка</h1>
+  <div class="смужка"><div class="смужка-заповнення" id="смужка"></div></div>
+  <div class="фаза" id="фаза"></div>
+  <pre class="журнал" id="журнал"></pre>
+</section>
+
+<!-- 9 ------------------------------------------------------------------ -->
+<section class="крок" data-крок="9" hidden>
+  <h1>Готово</h1>
+  <div id="підсумок" class="звіт"></div>
+
+  <div class="віддача" id="віддача"></div>
+
+  <div class="блок-зон">
+    <h2>Зробити ще й зони менеджменту?</h2>
+    <p class="пояснення">
+      Полігони під SMS, побудовані з цієї ж нормалізованої карти. Робиться після
+      неї, окремим файлом.
+    </p>
+    <div class="рядок-зон">
+      <label>Найменше зон <input id="зон-мін" type="number" min="2" max="10" value="3"></label>
+      <label>Бажано <input id="зон-ціль" type="number" min="2" max="10" value="4"></label>
+      <label>Найбільше <input id="зон-макс" type="number" min="2" max="12" value="6"></label>
+      <label>Найменша зона, га <input id="зон-площа" type="number" step="0.1" min="0.1" placeholder="1.5"></label>
+    </div>
+    <button id="пуск-зон">Побудувати зони</button>
+    <div id="віддача-зон" class="віддача"></div>
+  </div>
+
+  <div class="кнопки">
+    <button id="нове-поле" class="назад">Наступне поле</button>
+  </div>
+</section>
+
+</main>
+
+<footer class="підвал">
+  Дані з цієї програми нікуди не відправляються. Усе лишається на цьому
+  компʼютері, у теці <code id="тека-підвал">робота</code>.
+</footer>
+
+<script src="/web/скрипт.js"></script>
+</body>
+</html>

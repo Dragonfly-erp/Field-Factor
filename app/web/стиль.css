@@ -1,0 +1,206 @@
+:root {
+  --тло: #f6f5f1;
+  --картка: #ffffff;
+  --текст: #1d2419;
+  --тихий: #6b7266;
+  --лінія: #dcdcd2;
+  --акцент: #3d6b2f;
+  --акцент-світлий: #eef3ea;
+  --тривога: #a8442a;
+  --увага: #8a6d1f;
+  --радіус: 10px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --тло: #16181a;
+    --картка: #1e2124;
+    --текст: #e8e6e0;
+    --тихий: #9aa196;
+    --лінія: #33383c;
+    --акцент: #7fae5f;
+    --акцент-світлий: #232b20;
+    --тривога: #e08160;
+    --увага: #d6b45c;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--тло);
+  color: var(--текст);
+  font: 16px/1.55 "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+/* --- шапка --- */
+
+.шапка {
+  padding: 22px 32px 16px;
+  border-bottom: 1px solid var(--лінія);
+  background: var(--картка);
+}
+.назва { font-size: 22px; font-weight: 650; letter-spacing: -0.01em; }
+.версія { font-size: 12px; font-weight: 400; color: var(--тихий); margin-left: 8px; }
+.підзаголовок { color: var(--тихий); font-size: 14px; margin-top: 2px; }
+
+.оновлення {
+  margin-top: 12px; padding: 10px 14px;
+  background: var(--акцент-світлий); border: 1px solid var(--акцент);
+  border-radius: var(--радіус); font-size: 14px;
+}
+.оновлення button { margin-left: 12px; padding: 4px 12px; font-size: 13px; }
+
+/* --- стежка кроків --- */
+
+.стежка {
+  display: flex; flex-wrap: wrap; gap: 6px;
+  padding: 14px 32px; border-bottom: 1px solid var(--лінія);
+}
+.стежка span {
+  font-size: 12px; color: var(--тихий);
+  padding: 3px 10px; border-radius: 20px; border: 1px solid transparent;
+  white-space: nowrap;
+}
+.стежка span.є { color: var(--текст); border-color: var(--лінія); }
+.стежка span.тут {
+  color: #fff; background: var(--акцент); border-color: var(--акцент); font-weight: 600;
+}
+
+/* --- сцена --- */
+
+main { max-width: 780px; margin: 0 auto; padding: 32px 24px 60px; }
+
+h1 { font-size: 24px; margin: 0 0 6px; letter-spacing: -0.01em; }
+h2 { font-size: 18px; margin: 0 0 6px; }
+.пояснення { color: var(--тихий); margin: 0 0 24px; }
+
+label {
+  display: block; margin-bottom: 18px; font-weight: 600; font-size: 14px;
+}
+label .не-обовʼязково { font-weight: 400; color: var(--тихий); font-size: 13px; }
+
+input[type=text], input[type=number], input:not([type]), select {
+  display: block; width: 100%; margin-top: 6px;
+  padding: 10px 12px; font: inherit; font-weight: 400;
+  color: var(--текст); background: var(--картка);
+  border: 1px solid var(--лінія); border-radius: var(--радіус);
+}
+input:focus, select:focus { outline: 2px solid var(--акцент); outline-offset: -1px; }
+
+.рядок { display: flex; gap: 8px; margin-top: 6px; }
+.рядок input { margin-top: 0; }
+.рядок select { margin-top: 0; width: auto; min-width: 90px; }
+
+.підказка { display: block; font-weight: 400; color: var(--тихий); font-size: 13px; margin-top: 5px; }
+
+fieldset.вибір {
+  border: 1px solid var(--лінія); border-radius: var(--радіус);
+  padding: 14px 16px 6px; margin: 0 0 20px;
+}
+fieldset.вибір legend { font-size: 13px; font-weight: 600; color: var(--тихий); padding: 0 6px; }
+.радіо {
+  display: flex; gap: 10px; align-items: flex-start;
+  font-weight: 400; font-size: 14px; margin-bottom: 12px;
+}
+.радіо input { margin-top: 4px; flex: none; }
+
+.тонке { margin-bottom: 20px; border: 1px solid var(--лінія); border-radius: var(--радіус); padding: 0 16px; }
+.тонке summary { cursor: pointer; padding: 12px 0; font-size: 14px; color: var(--тихий); }
+.тонке[open] summary { border-bottom: 1px solid var(--лінія); margin-bottom: 16px; }
+
+/* --- прийом файлів --- */
+
+.прийом {
+  border: 2px dashed var(--лінія); border-radius: var(--радіус);
+  padding: 32px 20px; text-align: center; cursor: pointer;
+  background: var(--картка); transition: border-color .15s, background .15s;
+}
+.прийом:hover, .прийом.наведено { border-color: var(--акцент); background: var(--акцент-світлий); }
+.прийом-текст strong { display: block; font-size: 15px; }
+.прийом-текст span { display: block; color: var(--тихий); font-size: 14px; margin-top: 2px; }
+.прийом-текст small { display: block; color: var(--тихий); font-size: 12px; margin-top: 10px; }
+
+.список-файлів { list-style: none; padding: 0; margin: 14px 0 0; }
+.список-файлів li {
+  display: flex; justify-content: space-between; gap: 12px;
+  padding: 8px 12px; border: 1px solid var(--лінія); border-radius: var(--радіус);
+  background: var(--картка); margin-bottom: 6px; font-size: 14px;
+}
+.список-файлів li span { color: var(--тихий); font-size: 13px; white-space: nowrap; }
+
+/* --- кнопки --- */
+
+.кнопки { display: flex; gap: 10px; margin-top: 28px; }
+button {
+  font: inherit; font-size: 15px; font-weight: 600;
+  padding: 10px 22px; border-radius: var(--радіус); cursor: pointer;
+  border: 1px solid var(--акцент); background: var(--акцент); color: #fff;
+}
+button:hover { filter: brightness(1.08); }
+button:disabled { opacity: .45; cursor: default; filter: none; }
+button.назад { background: transparent; color: var(--текст); border-color: var(--лінія); }
+button.головна { padding: 12px 30px; font-size: 16px; }
+
+/* --- звіти й таблиці --- */
+
+.звіт {
+  background: var(--картка); border: 1px solid var(--лінія);
+  border-radius: var(--радіус); padding: 18px 20px; font-size: 14px;
+}
+.звіт h3 { font-size: 14px; margin: 18px 0 8px; text-transform: uppercase;
+  letter-spacing: .05em; color: var(--тихий); }
+.звіт h3:first-child { margin-top: 0; }
+.звіт table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.звіт th, .звіт td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--лінія); vertical-align: top; }
+.звіт th { color: var(--тихий); font-weight: 600; }
+.звіт .обгортка { overflow-x: auto; }
+.звіт select { display: inline-block; width: auto; min-width: 150px; margin: 0; padding: 4px 8px; font-size: 13px; }
+.звіт dl { display: grid; grid-template-columns: minmax(150px, auto) 1fr; gap: 6px 18px; margin: 0; }
+.звіт dt { color: var(--тихий); }
+.звіт dd { margin: 0; }
+
+.мітка { display: inline-block; padding: 1px 8px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+.мітка.добре { background: var(--акцент-світлий); color: var(--акцент); }
+.мітка.увага { background: rgba(214,180,92,.18); color: var(--увага); }
+.мітка.стоп { background: rgba(224,129,96,.18); color: var(--тривога); }
+
+/* --- прогрес --- */
+
+.смужка {
+  height: 8px; background: var(--лінія); border-radius: 20px; overflow: hidden; margin-bottom: 10px;
+}
+.смужка-заповнення { height: 100%; width: 0; background: var(--акцент); transition: width .4s ease; }
+.фаза { font-size: 14px; font-weight: 600; margin-bottom: 14px; }
+.журнал {
+  background: var(--картка); border: 1px solid var(--лінія); border-radius: var(--радіус);
+  padding: 14px 16px; font: 13px/1.7 "Cascadia Mono", Consolas, monospace;
+  white-space: pre-wrap; max-height: 420px; overflow-y: auto; margin: 0;
+}
+
+/* --- віддача --- */
+
+.віддача { margin-top: 20px; display: flex; flex-direction: column; gap: 8px; }
+.віддача a {
+  display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  padding: 14px 18px; border: 1px solid var(--акцент); border-radius: var(--радіус);
+  background: var(--акцент-світлий); color: var(--текст);
+  text-decoration: none; font-weight: 600;
+}
+.віддача a:hover { filter: brightness(1.04); }
+.віддача a small { font-weight: 400; color: var(--тихий); }
+
+.блок-зон {
+  margin-top: 40px; padding-top: 28px; border-top: 1px solid var(--лінія);
+}
+.рядок-зон { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 18px; }
+.рядок-зон label { flex: 1 1 130px; margin: 0; }
+
+/* --- підвал --- */
+
+.підвал {
+  border-top: 1px solid var(--лінія); padding: 18px 32px;
+  color: var(--тихий); font-size: 13px; background: var(--картка);
+}
+code { font: 13px "Cascadia Mono", Consolas, monospace; background: var(--тло); padding: 1px 6px; border-radius: 4px; }
