@@ -383,3 +383,30 @@ button.дрібна:hover { background: var(--акцент-світлий); bord
 @media (max-width: 1100px) {
   .сітка { grid-template-columns: 210px 1fr 250px; }
 }
+
+/* --- вибір джерел зонування --- */
+.підзаголовок-блоку {
+  font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--тихий); margin: 22px 0 10px;
+}
+.джерела { display: flex; flex-direction: column; gap: 8px; }
+.джерело {
+  border: 1px solid var(--лінія); border-radius: var(--радіус);
+  padding: 10px 14px; background: var(--тло);
+}
+.джерело.увімкнене { border-color: var(--акцент); background: var(--акцент-світлий); }
+.джерело-шапка {
+  display: flex; gap: 10px; align-items: flex-start; margin: 0;
+  font-weight: 400; font-size: 14px; cursor: pointer;
+}
+.джерело-шапка input { flex: none; margin-top: 3px; }
+.джерело-шапка small { color: var(--тихий); font-size: 12.5px; }
+.джерело-тонке { display: none; padding: 10px 0 2px 26px; }
+.джерело.увімкнене .джерело-тонке { display: block; }
+.джерело-тонке .дрібна-мітка { margin: 8px 0 3px; }
+.джерело-тонке input[type=range] { width: 160px; accent-color: var(--акцент); vertical-align: middle; }
+.роки { display: inline-flex; gap: 8px; }
+.роки input { width: 84px; padding: 5px 8px; font-size: 13px; margin: 0;
+  border: 1px solid var(--лінія); border-radius: 7px; background: var(--картка); color: var(--текст); }
+.галочка { display: block; font-weight: 400; font-size: 13px; margin: 3px 0; cursor: pointer; }
+.галочка input { margin-right: 7px; }
