@@ -219,3 +219,167 @@ button.головна { padding: 12px 30px; font-size: 16px; }
   color: var(--тихий); font-size: 13px; background: var(--картка);
 }
 code { font: 13px "Cascadia Mono", Consolas, monospace; background: var(--тло); padding: 1px 6px; border-radius: 4px; }
+
+
+/* ================================================================
+   РОБОЧЕ МІСЦЕ: картотека · карта · показ
+   ================================================================ */
+
+body.робоче-місце { height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+body.робоче-місце .шапка { padding: 12px 20px 10px; flex: none; }
+.шапка-права { margin-left: auto; }
+.де-я {
+  font-size: 14px; font-weight: 600; color: var(--акцент-темний);
+  background: var(--акцент-світлий); border: 1px solid var(--лінія);
+  padding: 6px 14px; border-radius: 20px; white-space: nowrap;
+}
+
+.сітка {
+  flex: 1; min-height: 0;
+  display: grid; grid-template-columns: 260px 1fr 300px;
+}
+
+.колонка {
+  background: var(--картка); border-right: 1px solid var(--лінія);
+  display: flex; flex-direction: column; min-height: 0; overflow: hidden;
+}
+.легенда-колонка { border-right: none; border-left: 1px solid var(--лінія); }
+.колонка-шапка {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 14px; border-bottom: 1px solid var(--лінія);
+  font-size: 11px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase;
+  color: var(--тихий); flex: none;
+}
+.дерево, .панель { overflow-y: auto; padding: 10px 12px; }
+.дерево { flex: 1; }
+.панель { flex: 1 1 50%; border-bottom: 1px solid var(--лінія); }
+.легенда-колонка .панель:last-child { border-bottom: none; }
+
+button.дрібна {
+  font-size: 13px; font-weight: 600; padding: 3px 9px; line-height: 1.3;
+  border-radius: 7px; background: transparent; color: var(--акцент-темний);
+  border: 1px solid var(--лінія);
+}
+button.дрібна:hover { background: var(--акцент-світлий); border-color: var(--акцент); filter: none; }
+.дрібно { font-size: 12.5px; color: var(--тихий); margin: 4px 0; }
+.відступ { padding-left: 10px; }
+.порожньо { padding: 18px 8px; line-height: 1.7; }
+
+/* --- дерево --- */
+.гілка { margin-bottom: 14px; }
+.гілка-шапка {
+  display: flex; align-items: center; justify-content: space-between; gap: 6px;
+  padding: 4px 2px 6px; border-bottom: 1px solid var(--лінія); margin-bottom: 4px;
+}
+.гілка-назва { font-weight: 650; font-size: 14px; }
+.лист {
+  padding: 7px 10px; border-radius: 8px; cursor: pointer;
+  display: flex; flex-direction: column; gap: 1px;
+}
+.лист:hover { background: var(--акцент-світлий); }
+.лист.обраний { background: var(--акцент); color: #fff; }
+.лист.обраний .лист-дрібно { color: rgba(255,255,255,.82); }
+.лист-назва { font-size: 14px; font-weight: 500; }
+.лист-дрібно { font-size: 11.5px; color: var(--тихий); }
+
+/* --- карта --- */
+.карта-обгортка { position: relative; overflow: hidden; background: var(--тло); }
+#полотно { width: 100%; height: 100%; display: block; cursor: grab; }
+
+.плаваюча {
+  position: absolute; background: var(--картка);
+  border: 1px solid var(--лінія); border-radius: var(--радіус);
+  box-shadow: 0 4px 16px rgba(20,30,20,.10); overflow: hidden;
+}
+.плаваюча-шапка {
+  padding: 8px 12px; font-size: 11px; font-weight: 700;
+  letter-spacing: .08em; text-transform: uppercase; color: var(--тихий);
+  border-bottom: 1px solid var(--лінія); background: var(--тло);
+}
+.шари-панель { top: 14px; left: 14px; width: 246px; }
+.список-шарів { max-height: 34vh; overflow-y: auto; padding: 6px; }
+.шари-дії { display: flex; gap: 6px; padding: 8px; border-top: 1px solid var(--лінія); }
+.шари-дії button { flex: 1; }
+
+.рядок-шару {
+  display: flex; align-items: center; gap: 8px; margin: 0;
+  padding: 6px 8px; border-radius: 7px; font-weight: 400; font-size: 13px; cursor: pointer;
+}
+.рядок-шару:hover { background: var(--тло); }
+.рядок-шару.активний { background: var(--акцент-світлий); }
+.рядок-шару input { flex: none; margin: 0; }
+.шар-назва { flex: 1; }
+.шар-тип { font-size: 10.5px; color: var(--тихий); text-transform: uppercase; letter-spacing: .05em; }
+
+.операції-панель { bottom: 14px; left: 14px; width: 246px; }
+.операції { padding: 6px; display: flex; flex-direction: column; gap: 4px; }
+.операція {
+  text-align: left; background: transparent; color: var(--текст);
+  border: 1px solid transparent; padding: 8px 10px; border-radius: 8px;
+  display: flex; flex-direction: column; gap: 1px; font-weight: 400;
+}
+.операція:hover:not(:disabled) { background: var(--акцент-світлий); border-color: var(--акцент); filter: none; }
+.операція-назва { font-size: 13.5px; font-weight: 600; }
+.операція-опис { font-size: 11.5px; color: var(--тихий); }
+.операція.скоро { opacity: .5; }
+
+.масштаб {
+  position: absolute; right: 16px; bottom: 16px;
+  border: 1px solid var(--текст); border-top: none; height: 9px;
+  font-size: 11px; color: var(--текст); text-align: center; line-height: 22px;
+  background: rgba(255,255,255,.55); backdrop-filter: blur(2px);
+}
+.порожня-карта {
+  position: absolute; inset: 0; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; text-align: center;
+  color: var(--тихий); pointer-events: none; padding: 40px;
+}
+.порожня-карта p:first-child { font-size: 19px; color: var(--текст); margin-bottom: 6px; }
+.порожня-карта .дрібно { max-width: 320px; line-height: 1.7; }
+
+/* --- панель показу --- */
+.показ-назва { font-weight: 650; font-size: 14px; margin-bottom: 6px; }
+.дрібна-мітка {
+  display: block; font-size: 11px; font-weight: 700; letter-spacing: .07em;
+  text-transform: uppercase; color: var(--тихий); margin: 12px 0 4px;
+}
+.панель select, .панель input[type=number] {
+  width: 100%; padding: 6px 9px; font-size: 13px; margin: 0;
+  border: 1px solid var(--лінія); border-radius: 7px;
+  background: var(--картка); color: var(--текст);
+}
+.пара { display: flex; gap: 8px; }
+.пара > div { flex: 1; }
+.шкала { margin-top: 12px; display: flex; flex-direction: column; gap: 3px; }
+.щабель { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+.зразок { width: 22px; height: 13px; border-radius: 3px; flex: none; border: 1px solid rgba(0,0,0,.12); }
+.панель input[type=range] { width: 100%; margin-top: 4px; accent-color: var(--акцент); }
+.властивості { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; margin: 6px 0 0; font-size: 12.5px; }
+.властивості dt { color: var(--тихий); }
+.властивості dd { margin: 0; font-weight: 500; }
+
+/* --- накладка операції --- */
+.накладка {
+  position: fixed; inset: 0; background: rgba(18,24,18,.55);
+  display: flex; align-items: center; justify-content: center; z-index: 50; padding: 24px;
+}
+.вікно {
+  background: var(--картка); border-radius: 14px; width: min(820px, 100%);
+  max-height: 90vh; display: flex; flex-direction: column; overflow: hidden;
+  box-shadow: 0 20px 60px rgba(10,20,10,.35);
+}
+.вікно.вузьке { width: min(560px, 100%); }
+.вікно-шапка {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 20px; border-bottom: 1px solid var(--лінія);
+  font-weight: 650; font-size: 16px;
+}
+.вікно-шапка .дрібна { font-size: 20px; line-height: 1; padding: 2px 10px; }
+.вікно-тіло { padding: 22px 24px 26px; overflow-y: auto; }
+.вікно .стежка { padding: 10px 20px; }
+.рядок-зон { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; }
+.рядок-зон label { flex: 1 1 110px; margin: 0; }
+
+@media (max-width: 1100px) {
+  .сітка { grid-template-columns: 210px 1fr 250px; }
+}
