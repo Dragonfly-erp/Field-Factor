@@ -8,6 +8,7 @@
 import json
 import mimetypes
 import os
+import shutil
 import socket
 import sys
 import threading
@@ -281,6 +282,8 @@ class Обробник(BaseHTTPRequestHandler):
             return self._віддати({"гаразд": True, "ключ": ключ})
         if дія == "контур":
             return self._контур(дані, файли)
+        if дія == "шар-файл":
+            return self._шар_файл(дані, файли)
         if дія == "підкладка":
             return self._підкладка(дані)
         if дія == "задача":
@@ -368,6 +371,65 @@ class Обробник(BaseHTTPRequestHandler):
             контур, опис = reading.прочитати_контур(тимчасовий)
             площа = КАРТОТЕКА.покласти_контур(г, п, контур)
         return self._віддати({"гаразд": True, "площа_га": round(площа, 2), "опис": опис})
+
+    def _шар_файл(self, поля, файли):
+        """Будь-який точковий шар у поле: сканування, EC, агрохімія."""
+        from app.core import reading
+
+        г, п = поля.get("господарство"), поля.get("поле")
+        якщо_тип = поля.get("тип") or "сканування"
+        if not г or not п:
+            return self._збій("Не вказано поле")
+        if not файли:
+            return self._збій("Файлів немає")
+
+        тимчасова = os.path.join(КАРТОТЕКА.тека_поля(г, п), "1_вхідні_дані", "прийом")
+        shutil.rmtree(тимчасова, ignore_errors=True)
+        os.makedirs(тимчасова, exist_ok=True)
+        for ф in файли:
+            with open(os.path.join(тимчасова, безпечна_назва(ф["імʼя"], "файл")), "wb") as вихід:
+                вихід.write(ф["дані"])
+
+        with ЗАМОК_ПРОСТОРУ:
+            import geopandas as gpd
+
+            контур = КАРТОТЕКА.контур(г, п)
+            if контур is None:
+                return self._збій("Спершу потрібен контур поля")
+            знайдені = reading.знайти_шари(тимчасова)
+            шар = None
+            for шлях in знайдені:
+                try:
+                    прочитане = reading.прочитати_шар(шлях)
+                except Exception:
+                    continue
+                точки = прочитане[прочитане.geometry.geom_type == "Point"]
+                if len(точки):
+                    шар = точки
+                    break
+            if шар is None:
+                return self._збій("У наданих файлах немає точок")
+            if шар.crs is None:
+                шар = шар.set_crs(4326)
+            шар = шар.to_crs(контур.crs)
+
+            ключ = безпечна_назва(поля.get("ключ") or якщо_тип, якщо_тип)
+            файл = "{}.gpkg".format(ключ)
+            тека_шарів = os.path.join(КАРТОТЕКА.тека_поля(г, п), "шари")
+            os.makedirs(тека_шарів, exist_ok=True)
+            шар.to_file(os.path.join(тека_шарів, файл), driver="GPKG", layer=ключ)
+
+            числові = [к for к in шар.columns
+                       if к != "geometry" and шар[к].dtype.kind in "if"]
+            КАРТОТЕКА.додати_шар(
+                г, п, ключ, поля.get("назва") or якщо_тип, якщо_тип, файл,
+                рік=int(поля.get("рік") or 0) or None,
+                атрибут=(числові[0] if числові else None),
+                походження=поля.get("походження") or "завантажений файл",
+                колонки=числові,
+            )
+        return self._віддати({"гаразд": True, "ключ": ключ, "точок": int(len(шар)),
+                              "колонки": числові})
 
     def _підкладка(self, дані):
         from app.core import render
