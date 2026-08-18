@@ -1,25 +1,30 @@
 :root {
-  --тло: #f6f5f1;
+  /* Палітра з логотипу FieldFactor */
+  --тло: #f7f8f5;
   --картка: #ffffff;
-  --текст: #1d2419;
-  --тихий: #6b7266;
-  --лінія: #dcdcd2;
-  --акцент: #3d6b2f;
-  --акцент-світлий: #eef3ea;
+  --текст: #22302a;
+  --тихий: #6b7a6b;
+  --лінія: #dde2d8;
+  --акцент: #3e7a32;
+  --акцент-темний: #1e4d2b;
+  --акцент-світлий: #eef4ea;
+  --ґрунт: #7a6a4f;
   --тривога: #a8442a;
   --увага: #8a6d1f;
   --радіус: 10px;
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    --тло: #16181a;
-    --картка: #1e2124;
-    --текст: #e8e6e0;
-    --тихий: #9aa196;
-    --лінія: #33383c;
-    --акцент: #7fae5f;
-    --акцент-світлий: #232b20;
+  :root:not([data-theme="light"]) {
+    --тло: #141815;
+    --картка: #1c221d;
+    --текст: #e6eae3;
+    --тихий: #94a48f;
+    --лінія: #2e3830;
+    --акцент: #7cbb5f;
+    --акцент-темний: #a5d489;
+    --акцент-світлий: #1f2a1e;
+    --ґрунт: #a08f6e;
     --тривога: #e08160;
     --увага: #d6b45c;
   }
@@ -41,9 +46,19 @@ body {
   border-bottom: 1px solid var(--лінія);
   background: var(--картка);
 }
-.назва { font-size: 22px; font-weight: 650; letter-spacing: -0.01em; }
-.версія { font-size: 12px; font-weight: 400; color: var(--тихий); margin-left: 8px; }
-.підзаголовок { color: var(--тихий); font-size: 14px; margin-top: 2px; }
+.шапка-ряд { display: flex; align-items: center; gap: 14px; }
+.знак { flex: none; width: 46px; height: 46px; }
+.назва {
+  font-size: 26px; font-weight: 300; letter-spacing: -0.02em;
+  color: var(--текст); line-height: 1.1;
+}
+.назва b { font-weight: 650; color: var(--акцент-темний); }
+.гасло {
+  font-size: 10px; letter-spacing: 0.34em; text-transform: uppercase;
+  color: var(--акцент); font-weight: 600; margin-top: 3px;
+}
+.версія { font-size: 12px; font-weight: 400; color: var(--тихий); margin-left: 10px; letter-spacing: 0; }
+.підзаголовок { color: var(--тихий); font-size: 14px; margin-top: 10px; }
 
 .оновлення {
   margin-top: 12px; padding: 10px 14px;
