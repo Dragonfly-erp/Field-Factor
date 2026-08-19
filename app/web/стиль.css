@@ -363,6 +363,10 @@ button.дрібна:hover { background: var(--акцент-світлий); bord
   position: fixed; inset: 0; background: rgba(18,24,18,.55);
   display: flex; align-items: center; justify-content: center; z-index: 50; padding: 24px;
 }
+/* без цього рядка hidden не діє: [hidden]{display:none} у браузері слабший
+   за клас, і накладка висить поверх усього — саме вона й була «порожнім
+   вікном зонування» 2026-08-19 */
+.накладка[hidden] { display: none; }
 .вікно {
   background: var(--картка); border-radius: 14px; width: min(820px, 100%);
   max-height: 90vh; display: flex; flex-direction: column; overflow: hidden;
