@@ -167,6 +167,8 @@ class Обробник(BaseHTTPRequestHandler):
                 return self._файл_з_диска(os.path.join(БАЗА, "app", "web", "метод.html"))
             if шлях == "/аналізи":
                 return self._файл_з_диска(os.path.join(БАЗА, "app", "web", "аналізи.html"))
+            if шлях == "/продукти":
+                return self._файл_з_диска(os.path.join(БАЗА, "app", "web", "продукти.html"))
             if шлях.startswith("/api/"):
                 return self._api_get(шлях[5:], запит)
             if шлях == "/завантажити":
@@ -226,6 +228,12 @@ class Обробник(BaseHTTPRequestHandler):
             from app.core import update
 
             return self._віддати(update.перевірити(НАЛАШТУВАННЯ, ВЕРСІЯ))
+        if дія == "продукти":
+            from app.core import products
+
+            return self._віддати({"продукти": products.довідник(БАЗА),
+                                  "поля": products.ПОЛЯ,
+                                  "замовчування": products.ЗАМОВЧУВАННЯ})
         if дія == "шаблони":
             from app.core import lab
 
@@ -277,6 +285,18 @@ class Обробник(BaseHTTPRequestHandler):
             return self._паспорт(дані)
         if дія == "аналізи":
             return self._аналізи(дані, файли)
+        if дія == "продукт":
+            from app.core import products
+
+            наслідок = products.зберегти(БАЗА, дані or {})
+            наслідок["продукти"] = products.довідник(БАЗА)
+            return self._віддати(наслідок)
+        if дія == "продукт-видалити":
+            from app.core import products
+
+            наслідок = products.видалити(БАЗА, (дані or {}).get("ключ"))
+            наслідок["продукти"] = products.довідник(БАЗА)
+            return self._віддати(наслідок)
         if дія == "розкладка":
             return self._розкладка(дані)
         if дія == "шаблон":

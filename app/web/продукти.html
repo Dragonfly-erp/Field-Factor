@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FieldFactor · продукти</title>
+<link rel="stylesheet" href="/web/стиль.css">
+<link rel="stylesheet" href="/web/сторінка.css">
+<style>
+.картка {
+  border: 1px solid var(--лінія); border-radius: var(--радіус);
+  background: var(--картка); padding: 16px 18px; margin-bottom: 16px;
+}
+.форма { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+         gap: 12px 18px; }
+.форма label { display: block; font-size: 13px; color: var(--тихий);
+               font-weight: 600; }
+.форма input, .форма select {
+  width: 100%; font: inherit; font-size: 14px; margin-top: 3px;
+  padding: 6px 9px; border: 1px solid var(--лінія); border-radius: 6px;
+  background: var(--тло); color: var(--текст);
+}
+.форма .широке { grid-column: 1 / -1; }
+.форма .пояснення { font-weight: 400; font-size: 12px; color: var(--тихий);
+                    margin-top: 3px; display: block; }
+.форма-заголовок { font-size: 12px; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--акцент); font-weight: 700; margin: 18px 0 8px; }
+.дії { display: flex; gap: 10px; align-items: center; margin-top: 16px;
+       flex-wrap: wrap; }
+.дії button {
+  font: inherit; font-size: 14px; padding: 7px 16px; cursor: pointer;
+  border: 1px solid var(--лінія); border-radius: 6px;
+  background: var(--картка); color: var(--текст);
+}
+.дії button.головна { background: var(--акцент); border-color: var(--акцент);
+                      color: #fff; font-weight: 600; }
+.дії button.небезпечна { color: var(--тривога); }
+.підказка-cce { font-size: 13px; color: var(--тихий); }
+tr.своє td:first-child { border-left: 3px solid var(--акцент); padding-left: 8px; }
+.рядок-дій { white-space: nowrap; }
+.рядок-дій button {
+  font: inherit; font-size: 12px; padding: 3px 9px; cursor: pointer;
+  border: 1px solid var(--лінія); border-radius: 5px;
+  background: var(--картка); color: var(--текст);
+}
+</style>
+</head>
+<body>
+
+<header class="шапка">
+  <div class="шапка-ряд">
+    <div>
+      <div class="назва"><b>Field</b>Factor</div>
+      <div class="гасло">Продукти · чим сиплемо</div>
+    </div>
+    <div class="шапка-права">
+      <a class="назад" href="/метод">метод</a>
+      <a class="назад" href="/аналізи">аналізи</a>
+      <a class="назад" href="/">← до роботи</a>
+    </div>
+  </div>
+</header>
+
+<main class="сторінка" id="сторінка">
+  <h1>Довідник продуктів</h1>
+  <p class="вступ">
+    Склад береться <b>з протоколу партії</b>, а не з довідника речовин.
+    «Дефекат» — це не формула, це те, що привезли з заводу цього тижня, і в
+    наступній машині буде інший кальцій. Нейтралізуюча здатність рахується
+    зі складу автоматично; якщо лабораторія надрукувала її прямо — беремо
+    надруковане.
+  </p>
+  <div id="вивід"><p class="вступ">Читаю…</p></div>
+</main>
+
+<script>
+const тег = (т, к, х) => {
+  const в = document.createElement(т);
+  if (к) в.className = к;
+  if (х !== undefined) в.innerHTML = х;
+  return в;
+};
+const екран = (т) => String(т === null || т === undefined ? "" : т)
+  .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+  .replace(/"/g, "&quot;");
+const мітка = (з, підпис) => `<span class="мітка ${String(з||"").replace(/\s/g,"")}"
+  >${екран(підпис || з)}</span>`;
+const ч = (з, зн) => (з === null || з === undefined || з === "")
+  ? "—" : Number(з).toFixed(зн === undefined ? 2 : зн).replace(".", ",");
+
+let ПОЛЯ = [], ЗАМОВЧУВАННЯ = {}, ПРОДУКТИ = {}, РЕДАГУЄМО = null;
+
+function таблиця(шапка, рядки, класи) {
+  const т = тег("table");
+  const го = тег("thead"), тр = тег("tr");
+  шапка.forEach(([п, кл]) => тр.appendChild(тег("th", кл, п)));
+  го.appendChild(тр); т.appendChild(го);
+  const тіло = тег("tbody");
+  рядки.forEach((р, і) => {
+    const рядок = тег("tr", (класи || [])[і] || null);
+    р.forEach((к, j) => {
+      const комірка = тег("td", (шапка[j] || [])[1] || "");
+      if (к instanceof HTMLElement) комірка.appendChild(к);
+      else комірка.innerHTML = к;
+      рядок.appendChild(комірка);
+    });
+    тіло.appendChild(рядок);
+  });
+  т.appendChild(тіло);
+  const обгортка = тег("div", "прокрутка");
+  обгортка.appendChild(т);
+  return обгортка;
+}
+
+function малювати() {
+  const к = document.getElementById("вивід");
+  к.innerHTML = "";
+  const дод = в => к.appendChild(в);
+
+  const ключі = Object.keys(ПРОДУКТИ);
+  const рядки = [], класи = [];
+  ключі.forEach(ключ => {
+    const п = ПРОДУКТИ[ключ];
+    класи.push(п.своє ? "своє" : null);
+
+    const дії = тег("span", "рядок-дій");
+    const правити = тег("button", null, п.своє ? "правити" : "своя партія");
+    правити.addEventListener("click", () => відкрити(ключ));
+    дії.appendChild(правити);
+    if (п.своє) {
+      const прибрати = тег("button", null, "прибрати");
+      прибрати.addEventListener("click", () => видалити(ключ, п.назва));
+      дії.appendChild(прибрати);
+    }
+
+    const зауваги = (п.зауваги || []).length
+      ? '<span class="тиха">' + п.зауваги.map(з =>
+          (з.вага === "помилка" ? "✖ " : "⚠ ") + екран(з.що)).join("<br>") + "</span>"
+      : "";
+
+    рядки.push([
+      "<b>" + екран(п.назва) + "</b>" +
+        (п.у_обсязі === false ? ' <span class="тиха">· поза обсягом</span>' : "") +
+        '<br><span class="тиха">' + екран(п.звідки) +
+        (п.перекриває_заготовку ? " · перекриває заготовку" : "") + "</span>",
+      екран(п.тип),
+      ч(п.CaO), ч(п.MgO), ч(п.K2O), ч(п.S), ч(п.H2O),
+      "<b>" + ч(п.CCE) + "</b><br><span class='тиха'>" + екран(п.CCE_звідки) + "</span>",
+      мітка(п.статус),
+      '<span class="тиха">' + екран(п.джерело || "—") + "</span>",
+      зауваги,
+      дії,
+    ]);
+  });
+
+  дод(тег("h2", null, "Що в довіднику"));
+  дод(таблиця([["продукт"], ["тип"], ["CaO %", "ч"], ["MgO %", "ч"],
+               ["K₂O %", "ч"], ["S %", "ч"], ["вода %", "ч"],
+               ["CCE %", "ч"], ["статус"], ["звідки склад"], ["зауваги"], [""]],
+              рядки, класи));
+  дод(тег("p", "тиха",
+    "Зеленою рискою — картки, заведені в господарстві. Решта прийшла зі " +
+    "знімком методу з майстерні: її не видалити, але можна перекрити своєю " +
+    "партією під тим самим іменем."));
+
+  дод(тег("h2", null, РЕДАГУЄМО ? "Картка продукту" : "Завести продукт"));
+  дод(форма());
+}
+
+function поле_вводу(п, значення) {
+  let в;
+  if (п.вид === "вибір") {
+    в = тег("select");
+    (п.варіанти || []).forEach(([з, підпис]) =>
+      в.appendChild(new Option(підпис, з)));
+    в.value = значення === undefined || значення === null ? п.варіанти[0][0] : значення;
+  } else {
+    в = тег("input");
+    в.type = п.вид === "число" ? "number" : "text";
+    if (п.вид === "число") в.step = "0.01";
+    в.value = значення === undefined || значення === null ? "" : значення;
+  }
+  в.id = "поле-" + п.ключ;
+  в.dataset.ключ = п.ключ;
+  return в;
+}
+
+function форма() {
+  const обгортка = тег("div", "картка");
+  const п0 = РЕДАГУЄМО ? ПРОДУКТИ[РЕДАГУЄМО] : {};
+  const початкові = Object.assign({}, ЗАМОВЧУВАННЯ, п0);
+
+  const групи = [[null, "Продукт"], ["склад", "Склад із протоколу"],
+                 ["технологія", "Технологічні межі"]];
+  групи.forEach(([група, підпис]) => {
+    const поля = ПОЛЯ.filter(п => (п.група || null) === група);
+    if (!поля.length) return;
+    обгортка.appendChild(тег("div", "форма-заголовок", підпис));
+    const сітка = тег("div", "форма");
+    поля.forEach(п => {
+      const мітка_поля = тег("label", п.ключ === "джерело" || п.ключ === "примітка"
+        ? "широке" : null);
+      мітка_поля.innerHTML = екран(п.підпис) +
+        (п.одиниця ? ", " + екран(п.одиниця) : "") +
+        (п.обовʼязкове ? " *" : "");
+      мітка_поля.appendChild(поле_вводу(п, початкові[п.ключ]));
+      if (п.пояснення) {
+        мітка_поля.appendChild(тег("span", "пояснення", екран(п.пояснення)));
+      }
+      сітка.appendChild(мітка_поля);
+    });
+    обгортка.appendChild(сітка);
+  });
+
+  const підказка = тег("div", "підказка-cce");
+  обгортка.appendChild(тег("div", "форма-заголовок", "Нейтралізуюча здатність"));
+  обгортка.appendChild(підказка);
+
+  // Читаємо поля з самої форми, а не через document: коли підказка рахується
+  // вперше, форма ще не вставлена в сторінку, і document її не бачить —
+  // тип виходив порожнім, і на карбонаті писалось «сіль».
+  const перерахувати = () => {
+    const з = зібрати(обгортка);
+    const cce = з.тип === "карбонат"
+      ? (Number(з.CaO || 0) * 1.78480 + Number(з.MgO || 0) * 2.48328) : 0;
+    const свій = з.CCE_протокол;
+    підказка.innerHTML = свій
+      ? "Береться з протоколу: <b>" + ч(свій) + " %</b>. Зі складу вийшло б " +
+        ч(cce) + " %."
+      : "Зі складу виходить <b>" + ч(cce) + " %</b>" +
+        (з.тип === "карбонат" ? " CaCO₃-еквівалента."
+          : " — сіль кислотності не знімає.");
+  };
+  обгортка.querySelectorAll("input, select").forEach(в =>
+    в.addEventListener("input", перерахувати));
+  перерахувати();
+
+  const дії = тег("div", "дії");
+  const зберегти = тег("button", "головна",
+    РЕДАГУЄМО ? "Зберегти картку" : "Додати в довідник");
+  const слово = тег("span", "тиха", "");
+  дії.appendChild(зберегти);
+  if (РЕДАГУЄМО) {
+    const скасувати = тег("button", null, "Скасувати");
+    скасувати.addEventListener("click", () => { РЕДАГУЄМО = null; малювати(); });
+    дії.appendChild(скасувати);
+  }
+  дії.appendChild(слово);
+  обгортка.appendChild(дії);
+
+  const зауваги_тут = тег("div");
+  обгортка.appendChild(зауваги_тут);
+
+  зберегти.addEventListener("click", () => {
+    const тіло = зібрати(обгортка);
+    if (РЕДАГУЄМО) тіло.ключ = РЕДАГУЄМО;
+    слово.textContent = "…";
+    fetch("/api/продукт", {method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify(тіло)})
+      .then(в => в.json())
+      .then(в => {
+        зауваги_тут.innerHTML = "";
+        (в.зауваги || []).forEach(з => {
+          зауваги_тут.appendChild(тег("div",
+            "смуга " + (з.вага === "помилка" ? "тривога" : "жовта"),
+            мітка(з.вага === "помилка" ? "стоп" : "увага",
+                  з.вага === "помилка" ? "не приймається" : "увага") +
+            " <b>" + екран(з.що) + "</b><div class='чому'>" +
+            екран(з.чому) + "</div>"));
+        });
+        if (!в.гаразд) { слово.textContent = "Картку не прийнято"; return; }
+        ПРОДУКТИ = в.продукти;
+        РЕДАГУЄМО = null;
+        const було = зауваги_тут.innerHTML;
+        малювати();
+        if (було) document.getElementById("вивід").appendChild(
+          тег("div", null, було));
+      });
+  });
+
+  return обгортка;
+}
+
+function зібрати(корінь) {
+  const де = корінь || document;
+  const з = {};
+  де.querySelectorAll("[data-ключ]").forEach(поле => {
+    з[поле.dataset.ключ] = поле.value === "" ? "" : поле.value;
+  });
+  return з;
+}
+
+function відкрити(ключ) {
+  const п = ПРОДУКТИ[ключ];
+  // Заготовку з майстерні не правимо на місці: заводимо свою партію під тим
+  // самим ключем, а заготовка лишається такою, якою прийшла.
+  РЕДАГУЄМО = ключ;
+  малювати();
+  document.querySelector(".картка").scrollIntoView({block: "start"});
+  if (!п.своє) {
+    document.getElementById("вивід").insertBefore(
+      тег("div", "смуга жовта",
+        "<b>Це заготовка зі знімка методу.</b><div class='чому'>Зберігши, " +
+        "ви заведете свою партію під тим самим іменем. Заготовка лишиться " +
+        "недоторканою — на ній тримається звірка з майстернею.</div>"),
+      document.querySelector(".картка"));
+  }
+}
+
+function видалити(ключ, назва) {
+  fetch("/api/продукт-видалити", {method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ключ: ключ})})
+    .then(в => в.json())
+    .then(в => {
+      if (в.продукти) ПРОДУКТИ = в.продукти;
+      РЕДАГУЄМО = null;
+      малювати();
+      if (!в.гаразд) {
+        document.getElementById("вивід").insertBefore(
+          тег("div", "смуга тривога", "<b>" + екран(назва) + "</b><div class='чому'>" +
+              екран(в.чому || "не прибралось") + "</div>"),
+          document.getElementById("вивід").firstChild);
+      }
+    });
+}
+
+fetch("/api/продукти").then(в => в.json()).then(д => {
+  ПОЛЯ = д.поля; ЗАМОВЧУВАННЯ = д.замовчування; ПРОДУКТИ = д.продукти;
+  малювати();
+}).catch(п => {
+  document.getElementById("вивід").innerHTML =
+    '<div class="смуга тривога">Не вдалось прочитати довідник: ' + екран(п) + "</div>";
+});
+</script>
+</body>
+</html>
