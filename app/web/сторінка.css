@@ -1,0 +1,68 @@
+/* Оформлення окремих сторінок-довідок: «Метод», «Аналізи».
+   Робоче місце має свій каркас у стиль.css — сюди воно не заходить. */
+
+.сторінка { max-width: 1120px; margin: 0 auto; padding: 26px 32px 80px; }
+.сторінка h1 { font-size: 23px; font-weight: 400; margin: 0 0 6px; }
+.сторінка h2 {
+  font-size: 12px; letter-spacing: .16em; text-transform: uppercase;
+  color: var(--акцент); font-weight: 700; margin: 34px 0 12px;
+  border-bottom: 1px solid var(--лінія); padding-bottom: 6px;
+}
+.сторінка p.вступ { color: var(--тихий); margin: 0 0 14px; max-width: 74ch; }
+
+.прокрутка { overflow-x: auto; }
+.сторінка table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.сторінка th {
+  text-align: left; font-weight: 600; color: var(--тихий); font-size: 11px;
+  text-transform: uppercase; letter-spacing: .06em;
+  padding: 6px 10px 6px 0; border-bottom: 1px solid var(--лінія);
+  vertical-align: bottom; white-space: nowrap;
+}
+.сторінка td {
+  padding: 7px 10px 7px 0; border-bottom: 1px solid var(--лінія);
+  vertical-align: top;
+}
+.сторінка th.ч, .сторінка td.ч {
+  text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.сторінка .тиха { color: var(--тихий); font-size: 13px; }
+.сторінка code { font-size: 13px; color: var(--ґрунт); word-break: break-all; }
+.сторінка ul { margin: 8px 0 0; padding-left: 20px; color: var(--тихий); font-size: 14px; }
+.сторінка li { margin-bottom: 4px; }
+
+.мітка {
+  display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .05em;
+  padding: 1px 7px; border-radius: 999px; white-space: nowrap;
+}
+.мітка.CANON, .мітка.VALIDATED, .мітка.збіг, .мітка.чинний {
+  background: var(--акцент-світлий); color: var(--акцент-темний);
+}
+.мітка.WORKING, .мітка.увага, .мітка.цензуровано, .мітка.підпитанням {
+  background: var(--увага-тло); color: var(--увага);
+}
+.мітка.ОСПОРЕНО, .мітка.ЗМІНЕНО, .мітка.стоп, .мітка.немає, .мітка.НЕВІДОМО {
+  background: var(--тривога-тло); color: var(--тривога);
+}
+.мітка.недоступне, .мітка.немаєвиміру, .мітка.нечитане {
+  background: var(--лінія); color: var(--тихий);
+}
+
+.смуга {
+  border: 1px solid var(--лінія); border-left: 3px solid var(--акцент);
+  background: var(--картка); border-radius: var(--радіус);
+  padding: 12px 16px; margin: 0 0 12px;
+}
+.смуга.тривога { border-left-color: var(--тривога); }
+.смуга.жовта { border-left-color: var(--увага); }
+.смуга b { font-weight: 650; }
+.смуга .чому { color: var(--тихий); font-size: 13px; margin-top: 4px; }
+
+.назад { font-size: 13px; color: var(--акцент); text-decoration: none; }
+.назад:hover { text-decoration: underline; }
+.шапка-права { margin-left: auto; }
+
+:root { --увага-тло: #f3ecd6; --тривога-тло: #f6e0d8; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --увага-тло: #332c14; --тривога-тло: #3a1f16; }
+}
+:root[data-theme="dark"] { --увага-тло: #332c14; --тривога-тло: #3a1f16; }
