@@ -158,6 +158,8 @@ class Обробник(BaseHTTPRequestHandler):
             if шлях.startswith("/web/"):
                 імʼя = os.path.basename(шлях)
                 return self._файл_з_диска(os.path.join(БАЗА, "app", "web", імʼя))
+            if шлях == "/метод":
+                return self._файл_з_диска(os.path.join(БАЗА, "app", "web", "метод.html"))
             if шлях.startswith("/api/"):
                 return self._api_get(шлях[5:], запит)
             if шлях == "/завантажити":
@@ -212,6 +214,10 @@ class Обробник(BaseHTTPRequestHandler):
             from app.core import update
 
             return self._віддати(update.перевірити(НАЛАШТУВАННЯ, ВЕРСІЯ))
+        if дія == "метод":
+            from app.core import norms
+
+            return self._віддати(norms.знімок())
         if дія == "картотека":
             return self._віддати({"господарства": КАРТОТЕКА.господарства()})
         if дія == "поле":

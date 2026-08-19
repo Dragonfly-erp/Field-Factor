@@ -227,7 +227,13 @@ code { font: 13px "Cascadia Mono", Consolas, monospace; background: var(--тло
 
 body.робоче-місце { height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 body.робоче-місце .шапка { padding: 12px 20px 10px; flex: none; }
-.шапка-права { margin-left: auto; }
+.шапка-права { margin-left: auto; display: flex; align-items: center; gap: 14px; }
+.до-методу {
+  font-size: 12px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--тихий); text-decoration: none; font-weight: 600;
+  border-bottom: 1px solid transparent; padding-bottom: 1px;
+}
+.до-методу:hover { color: var(--акцент); border-bottom-color: var(--акцент); }
 .де-я {
   font-size: 14px; font-weight: 600; color: var(--акцент-темний);
   background: var(--акцент-світлий); border: 1px solid var(--лінія);
