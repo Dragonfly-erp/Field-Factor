@@ -25,6 +25,7 @@
 комірку. Тому мінімум тут не 0,1 га, як у західних посібниках, а два.
 """
 
+import io
 import math
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -603,3 +604,201 @@ def порівняти(класичні, динамічні, контраст, �
         без_контрасту=без_контрасту,
         поріг_однорідності=round(100.0 * ОДНОРІДНІСТЬ),
     )
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# ГЕОМЕТРІЯ ДЛЯ ЕКРАНА
+# ═══════════════════════════════════════════════════════════════════════
+# Сітку треба побачити, а не прочитати числом. Але 0,01 га на 40 гектарах —
+# це чотири тисячі комірок, і слати їх у браузер немає сенсу: людина все
+# одно побачить сіру заливку. Тому є стеля показу, і про неї сказано вголос.
+
+СТЕЛЯ_ПОКАЗУ = 1500
+
+
+def _кільця(геометрія):
+    шматки = (list(геометрія.geoms)
+              if геометрія.geom_type == "MultiPolygon" else [геометрія])
+    вихід = []
+    for шматок in шматки:
+        вихід.append([[round(x, 7), round(y, 7)]
+                      for x, y in шматок.exterior.coords])
+    return вихід
+
+
+def для_карти(контур, комірки, точки_відбору, стеля=СТЕЛЯ_ПОКАЗУ):
+    """Усе, що потрібно намалювати сітку на екрані, у градусах."""
+    from shapely.ops import unary_union
+
+    межа = контур.to_crs(4326) if контур.crs is not None else контур.set_crs(4326)
+    к = комірки.to_crs(4326) if комірки.crs is not None else комірки.set_crs(4326)
+    т = (точки_відбору.to_crs(4326) if точки_відбору.crs is not None
+         else точки_відбору.set_crs(4326))
+
+    поле = unary_union(list(межа.geometry.values))
+    показуємо = len(к) <= стеля
+
+    намальовані = []
+    if показуємо:
+        for _, рядок in к.iterrows():
+            намальовані.append(dict(
+                клас=_без_nan(рядок.get("клас")),
+                кільця=_кільця(рядок.geometry)))
+
+    x0, y0, x1, y1 = поле.bounds
+    return dict(
+        контур=_кільця(поле),
+        межі=[x0, y0, x1, y1],
+        комірки=намальовані,
+        комірок=len(к),
+        показано=показуємо,
+        стеля=стеля,
+        точки=[dict(номер=int(р.get("SAMPLE_ID") or 0),
+                    клас=_без_nan(р.get("клас")),
+                    площа_га=float(р.get("площа_га") or 0),
+                    тісно=bool(р.get("тісно")),
+                    lon=round(float(г.x), 7), lat=round(float(г.y), 7))
+               for (_, р), г in zip(т.iterrows(), т.geometry.values)],
+    )
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# ЗАЯВКА НА ВІДБІР
+# ═══════════════════════════════════════════════════════════════════════
+# Те, що їде відбірнику: комірки, точки й KML, який відкривається на
+# будь-якому телефоні. KML пишемо руками, а не драйвером: тут важливі
+# назви точок, порядок і те, щоб файл читався в Google Earth без бубна.
+
+КОЛЬОРИ_KML = ("ff4ea55f", "ff5fb0d6", "ff8f6fd0", "ff6fd0c0", "ffd08f6f",
+               "ff9f9f9f")
+
+
+def _kml_колір(клас):
+    if клас is None:
+        return КОЛЬОРИ_KML[-1]
+    try:
+        return КОЛЬОРИ_KML[int(клас) % (len(КОЛЬОРИ_KML) - 1)]
+    except (TypeError, ValueError):
+        return КОЛЬОРИ_KML[-1]
+
+
+def _екранувати(текст):
+    return (str(текст or "").replace("&", "&amp;").replace("<", "&lt;")
+            .replace(">", "&gt;"))
+
+
+def записати_kml(шлях, комірки, точки_відбору, назва_поля, підпис=""):
+    """KML із комірками й точками. Відкривається в Google Earth і в телефоні.
+
+    Кирилиця тут дозволена, на відміну від shapefile: цей файл читає людина,
+    а не монітор трактора, і KML за стандартом у UTF-8."""
+    к = комірки.to_crs(4326) if комірки.crs is not None else комірки.set_crs(4326)
+    т = (точки_відбору.to_crs(4326) if точки_відбору.crs is not None
+         else точки_відбору.set_crs(4326))
+
+    частини = ['<?xml version="1.0" encoding="UTF-8"?>',
+               '<kml xmlns="http://www.opengis.net/kml/2.2"><Document>',
+               "<name>%s</name>" % _екранувати(назва_поля)]
+    if підпис:
+        частини.append("<description>%s</description>" % _екранувати(підпис))
+
+    використані = sorted({_без_nan(рядок.get("клас")) for _, рядок in к.iterrows()},
+                         key=lambda з: (з is None, str(з)))
+    for клас in використані:
+        частини.append(
+            '<Style id="z%s"><LineStyle><color>ff333333</color><width>1</width>'
+            '</LineStyle><PolyStyle><color>7f%s</color></PolyStyle></Style>'
+            % (_екранувати(клас if клас is not None else "none"),
+               _kml_колір(клас)[2:]))
+    частини.append(
+        '<Style id="tochka"><IconStyle><color>ff2b2bd0</color><scale>1.1</scale>'
+        '<Icon><href>http://maps.google.com/mapfiles/kml/paddle/red-circle.png'
+        "</href></Icon></IconStyle></Style>")
+
+    # Площі рахуємо один раз у метричній проєкції, а не в циклі: перепроєкція
+    # на кожну комірку окремо — це той самий обчислювальний борг, тільки
+    # захований у гарний рядок.
+    площі_га = [г.area / 10000.0 for г in _у_метри(комірки).geometry.values]
+
+    частини.append("<Folder><name>Комірки</name>")
+    for номер, (_, рядок) in enumerate(к.iterrows(), start=1):
+        клас = _без_nan(рядок.get("клас"))
+        частини.append("<Placemark><name>Комірка %d</name>" % номер)
+        частини.append("<description>Площа %.2f га%s</description>"
+                       % (площі_га[номер - 1],
+                          "" if клас is None else ", ділянка %s" % клас))
+        частини.append('<styleUrl>#z%s</styleUrl>'
+                       % _екранувати(клас if клас is not None else "none"))
+        for кільце in _кільця(рядок.geometry):
+            координати = " ".join("%.7f,%.7f,0" % (x, y) for x, y in кільце)
+            частини.append("<Polygon><outerBoundaryIs><LinearRing>"
+                           "<coordinates>%s</coordinates>"
+                           "</LinearRing></outerBoundaryIs></Polygon>" % координати)
+        частини.append("</Placemark>")
+    частини.append("</Folder>")
+
+    частини.append("<Folder><name>Точки відбору</name>")
+    for (_, рядок), г in zip(т.iterrows(), т.geometry.values):
+        частини.append(
+            "<Placemark><name>%s</name><description>Комірка %.2f га%s</description>"
+            '<styleUrl>#tochka</styleUrl>'
+            "<Point><coordinates>%.7f,%.7f,0</coordinates></Point></Placemark>"
+            % (_екранувати(рядок.get("SAMPLE_ID")),
+               float(рядок.get("площа_га") or 0),
+               ", близько до межі" if рядок.get("тісно") else "",
+               г.x, г.y))
+    частини.append("</Folder></Document></kml>")
+
+    with io.open(шлях, "w", encoding="utf-8", newline="\n") as ф:
+        ф.write("\n".join(частини))
+    return шлях
+
+
+def записати_заявку(тека, комірки, точки_відбору, назва, назва_поля,
+                    підпис=""):
+    """Комірки, точки й KML — усе, що потрібно, щоб замовити відбір."""
+    import os
+
+    from app.core import rx
+
+    os.makedirs(тека, exist_ok=True)
+    основа = rx.імʼя_файлу(назва, "sampling")
+
+    комірки_шар = комірки.copy()
+    комірки_шар["CELL_ID"] = range(1, len(комірки_шар) + 1)
+    комірки_шар["AREA_HA"] = [round(г.area / 10000.0, 3)
+                              for г in _у_метри(комірки).geometry.values]
+    комірки_шар["ZONE_ID"] = [(-1 if _без_nan(к) is None else int(к))
+                              for к in комірки_шар.get("клас",
+                                                       [None] * len(комірки_шар))]
+    комірки_шар = комірки_шар.drop(columns=["клас"], errors="ignore")
+
+    точки_шар = точки_відбору.copy()
+    точки_шар["ZONE_ID"] = [(-1 if _без_nan(к) is None else int(к))
+                            for к in точки_шар.get("клас",
+                                                   [None] * len(точки_шар))]
+    точки_шар["AREA_HA"] = точки_шар.pop("площа_га")
+    точки_шар["EDGE_M"] = точки_шар.pop("від_межі_м")
+    точки_шар["TIGHT"] = [int(bool(з)) for з in точки_шар.pop("тісно")]
+    точки_шар = точки_шар.drop(columns=["клас"], errors="ignore")
+
+    файли = []
+    for шар, хвіст in ((комірки_шар, "_cells"), (точки_шар, "_points")):
+        шлях = os.path.join(тека, основа + хвіст + ".shp")
+        for х in (".shp", ".shx", ".dbf", ".prj", ".cpg"):
+            старий = os.path.join(тека, основа + хвіст + х)
+            if os.path.isfile(старий):
+                os.remove(старий)
+        шар.to_crs(4326).to_file(шлях, driver="ESRI Shapefile",
+                                 engine="pyogrio", encoding="UTF-8")
+        with io.open(os.path.splitext(шлях)[0] + ".cpg", "w",
+                     encoding="ascii") as ф:
+            ф.write("UTF-8")
+        файли.extend(os.path.join(тека, основа + хвіст + х)
+                     for х in (".shp", ".shx", ".dbf", ".prj", ".cpg")
+                     if os.path.isfile(os.path.join(тека, основа + хвіст + х)))
+
+    kml = os.path.join(тека, основа + ".kml")
+    записати_kml(kml, комірки, точки_відбору, назва_поля, підпис)
+    файли.append(kml)
+    return файли

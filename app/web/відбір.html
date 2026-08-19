@@ -1,0 +1,469 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FieldFactor · відбір</title>
+<link rel="stylesheet" href="/web/стиль.css">
+<link rel="stylesheet" href="/web/сторінка.css">
+<style>
+.крок { border: 1px solid var(--лінія); border-radius: var(--радіус);
+        background: var(--картка); padding: 14px 18px; margin-bottom: 14px; }
+.крок-назва { font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--акцент); font-weight: 700; margin-bottom: 10px; }
+.ряд { display: flex; gap: 14px; align-items: flex-end; flex-wrap: wrap; }
+.ряд label { font-size: 13px; color: var(--тихий); font-weight: 600; }
+.ряд input, .ряд select {
+  display: block; font: inherit; font-size: 14px; margin-top: 3px;
+  padding: 6px 9px; border: 1px solid var(--лінія); border-radius: 6px;
+  background: var(--тло); color: var(--текст); min-width: 130px;
+}
+.ряд input.вузьке { min-width: 90px; width: 90px; text-align: right; }
+button {
+  font: inherit; font-size: 14px; padding: 7px 16px; cursor: pointer;
+  border: 1px solid var(--лінія); border-radius: 6px;
+  background: var(--картка); color: var(--текст);
+}
+button.головна { background: var(--акцент); border-color: var(--акцент);
+                 color: #fff; font-weight: 600; }
+button.дрібна { font-size: 13px; padding: 4px 10px; }
+button:disabled { opacity: .45; cursor: default; }
+
+/* --- вибір варіанта: дві картки, а не рядок у списку --- */
+.варіанти { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 14px; }
+.варіант {
+  border: 2px solid var(--лінія); border-radius: var(--радіус);
+  background: var(--картка); padding: 14px 16px; cursor: pointer;
+  text-align: left; display: block; width: 100%;
+}
+.варіант:hover { border-color: var(--акцент-світлий); }
+.варіант.обрано { border-color: var(--акцент); background: var(--акцент-світлий); }
+.варіант h3 { margin: 0 0 6px; font-size: 16px; font-weight: 650; }
+.варіант p { margin: 0; font-size: 13px; color: var(--тихий); line-height: 1.45; }
+
+/* --- карта --- */
+.полотно { width: 100%; height: auto; background: var(--тло);
+           border: 1px solid var(--лінія); border-radius: var(--радіус); }
+.легенда { display: flex; gap: 14px; flex-wrap: wrap; font-size: 13px;
+           color: var(--тихий); margin-top: 8px; align-items: center; }
+.клаптик { display: inline-block; width: 13px; height: 13px; border-radius: 3px;
+           border: 1px solid rgba(0,0,0,.25); vertical-align: -2px;
+           margin-right: 5px; }
+.числа { display: flex; gap: 26px; flex-wrap: wrap; margin: 0 0 10px; }
+.число { font-size: 13px; color: var(--тихий); }
+.число b { display: block; font-size: 22px; font-weight: 650; color: var(--текст);
+           line-height: 1.2; }
+.число.виграш b { color: var(--акцент); }
+.підказка { font-size: 13px; color: var(--тихий); margin-top: 6px; }
+</style>
+</head>
+<body>
+
+<header class="шапка">
+  <div class="шапка-ряд">
+    <div>
+      <div class="назва"><b>Field</b>Factor</div>
+      <div class="гасло">Відбір · де брати зразки</div>
+    </div>
+    <div class="шапка-права">
+      <a class="назад" href="/карта">карта внесення</a>
+      <a class="назад" href="/аналізи">аналізи</a>
+      <a class="назад" href="/">← до роботи</a>
+    </div>
+  </div>
+</header>
+
+<main class="сторінка" id="сторінка">
+  <h1>Завдання на відбір</h1>
+  <p class="вступ">
+    Комірка не має накривати дві протилежні ділянки. Зразок, зсипаний
+    із маківки горба разом з улоговиною, дає середнє, якого немає ніде —
+    ні там, ні там. Далі це число піде в норму й буде неправильним
+    в обох місцях одразу.
+  </p>
+  <div id="вивід"><p class="вступ">Читаю…</p></div>
+</main>
+
+<script>
+const NS = "http://www.w3.org/2000/svg";
+const тег = (т, к, х) => {
+  const в = document.createElement(т);
+  if (к) в.className = к;
+  if (х !== undefined) в.innerHTML = х;
+  return в;
+};
+const svg = (т, атр) => {
+  const в = document.createElementNS(NS, т);
+  for (const к in (атр || {})) в.setAttribute(к, атр[к]);
+  return в;
+};
+const екран = (т) => String(т === null || т === undefined ? "" : т)
+  .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+  .replace(/"/g, "&quot;");
+const мітка = (з, п) =>
+  `<span class="мітка ${String(з||"").replace(/\s/g,"")}">${екран(п||з)}</span>`;
+const ч = (з, зн) => (з === null || з === undefined)
+  ? "—" : Number(з).toFixed(зн === undefined ? 2 : зн).replace(".", ",");
+
+// Кольори ділянок. Номер зони — це положення в ландшафті, від сухого до
+// вологого, тому шкала йде від піщано-жовтого до синього, а не веселкою.
+const КОЛЬОРИ = ["#c9a227", "#8fae3c", "#4e9a3e", "#3a8f7a", "#3b6ea5",
+                 "#6b5ca5", "#a05a8a"];
+const колір = (клас) => (клас === null || клас === undefined)
+  ? "#9aa39a" : КОЛЬОРИ[Math.abs(Math.round(Number(клас))) % КОЛЬОРИ.length];
+
+let ПОЛЕ = {}, ДЖЕРЕЛА = {}, ВАРІАНТ = "класична", ОСТАННЄ = null;
+
+// ─────────────────────────────────────────────────────────── карта
+function намалювати(карта) {
+  const ширина = 900, поле_межі = карта.межі;
+  const [x0, y0, x1, y1] = поле_межі;
+  // Градус довготи на нашій широті коротший за градус широти — без цієї
+  // поправки поле виходить розтягнутим упоперек і зовсім не схожим на себе.
+  const стиск = Math.cos((y0 + y1) / 2 * Math.PI / 180);
+  const шир_град = (x1 - x0) * стиск, вис_град = (y1 - y0);
+  const поля = 12;
+  const масштаб = (ширина - поля * 2) / шир_град;
+  const висота = вис_град * масштаб + поля * 2;
+  const X = (lon) => поля + (lon - x0) * стиск * масштаб;
+  const Y = (lat) => висота - поля - (lat - y0) * масштаб;
+
+  const п = svg("svg", {viewBox: "0 0 " + ширина + " " + Math.round(висота),
+                        class: "полотно", role: "img"});
+  const шлях = (кільця) => кільця.map(к =>
+    "M" + к.map(([lon, lat]) => X(lon).toFixed(1) + "," + Y(lat).toFixed(1))
+      .join("L") + "Z").join(" ");
+
+  (карта.комірки || []).forEach(к => {
+    п.appendChild(svg("path", {d: шлях(к.кільця), fill: колір(к.клас),
+      "fill-opacity": "0.55", stroke: "#2b3a2b", "stroke-width": "0.7"}));
+  });
+  п.appendChild(svg("path", {d: шлях(карта.контур), fill: "none",
+    stroke: "var(--акцент-темний)", "stroke-width": "2"}));
+  (карта.точки || []).forEach(т => {
+    const г = svg("g", {});
+    г.appendChild(svg("circle", {cx: X(т.lon), cy: Y(т.lat), r: "5",
+      fill: т.тісно ? "#a8442a" : "#ffffff",
+      stroke: "#1b2b1b", "stroke-width": "1.6"}));
+    const підпис = svg("text", {x: X(т.lon), y: Y(т.lat) + 3.5,
+      "text-anchor": "middle", "font-size": "8",
+      fill: т.тісно ? "#ffffff" : "#1b2b1b", "font-weight": "700"});
+    підпис.textContent = т.номер;
+    г.appendChild(підпис);
+    const назва = svg("title", {});
+    назва.textContent = "Точка " + т.номер + " · " + ч(т.площа_га, 2) + " га" +
+      (т.клас === null ? "" : " · ділянка " + т.клас) +
+      (т.тісно ? " · близько до межі" : "");
+    г.appendChild(назва);
+    п.appendChild(г);
+  });
+  return п;
+}
+
+function легенда(карта) {
+  const л = тег("div", "легенда");
+  const класи = [...new Set((карта.комірки || []).map(к => к.клас))]
+    .sort((a, b) => (a === null) - (b === null) || a - b);
+  класи.forEach(к => {
+    л.appendChild(тег("span", null,
+      '<span class="клаптик" style="background:' + колір(к) + '"></span>' +
+      (к === null ? "поза шаром ділянок" : "ділянка " + к)));
+  });
+  л.appendChild(тег("span", null,
+    '<span class="клаптик" style="background:#fff;border-radius:50%"></span>' +
+    "точка відбору"));
+  л.appendChild(тег("span", null,
+    '<span class="клаптик" style="background:#a8442a;border-radius:50%"></span>' +
+    "точка близько до межі"));
+  return л;
+}
+
+// ─────────────────────────────────────────────────────────── сторінка
+function малювати() {
+  const к = document.getElementById("вивід");
+  к.innerHTML = "";
+  const дод = в => к.appendChild(в);
+
+  if (!ПОЛЕ.поле) {
+    дод(тег("div", "смуга жовта", "<b>Поле не обране.</b><div class='чому'>" +
+      "Оберіть поле в робочому місці.</div>"));
+    return;
+  }
+  if (!ДЖЕРЕЛА.є_контур) {
+    дод(тег("div", "смуга тривога", "<b>У поля немає контуру.</b>" +
+      "<div class='чому'>Сітку нема на що класти. Завантажте контур поля.</div>"));
+    return;
+  }
+
+  дод(тег("p", "тиха", "Поле <b>" + екран(ПОЛЕ.назва || ПОЛЕ.поле) +
+    "</b> · <b>" + ч(ДЖЕРЕЛА.площа_га, 2) + " га</b>"));
+
+  // --- крок 1 · варіант
+  const крок1 = тег("div", "крок");
+  крок1.appendChild(тег("div", "крок-назва", "1 · Який відбір"));
+  const вар = тег("div", "варіанти");
+  const картка = (ключ, заголовок, опис) => {
+    const б = тег("button", "варіант" + (ВАРІАНТ === ключ ? " обрано" : ""));
+    б.appendChild(тег("h3", null, екран(заголовок)));
+    б.appendChild(тег("p", null, опис));
+    б.dataset.варіант = ключ;
+    б.addEventListener("click", () => { ВАРІАНТ = ключ; ОСТАННЄ = null; малювати(); });
+    return б;
+  };
+  вар.appendChild(картка("класична", "Класична сітка",
+    "Рівні комірки того розміру, який ви скажете — хоч 0,01 га. " +
+    "Програма нічого не виправляє: ви платите за аналізи, ви й вирішуєте, " +
+    "скільки їх буде."));
+  вар.appendChild(картка("оптимізована", "Оптимізоване дослідження",
+    "Межі комірок підтягуються до меж різних ділянок поля, щоб зразок " +
+    "не збирався з двох протилежних місць. Зразків виходить менше, " +
+    "і кожен щось означає."));
+  крок1.appendChild(вар);
+  дод(крок1);
+
+  // --- крок 2 · налаштування
+  const крок2 = тег("div", "крок");
+  крок2.appendChild(тег("div", "крок-назва",
+    ВАРІАНТ === "класична" ? "2 · Розмір комірки" : "2 · Ділянки й розмір"));
+  const ряд = тег("div", "ряд");
+
+  const поле_га = тег("input");
+  поле_га.type = "number"; поле_га.step = "0.01"; поле_га.min = "0.0001";
+  поле_га.className = "вузьке";
+  поле_га.value = ВАРІАНТ === "класична" ? "1" : "2";
+
+  const поле_кут = тег("input");
+  поле_кут.type = "number"; поле_кут.step = "5"; поле_кут.min = "0";
+  поле_кут.max = "90"; поле_кут.value = "0"; поле_кут.className = "вузьке";
+
+  let вибір_контрасту = null;
+  if (ВАРІАНТ === "оптимізована") {
+    вибір_контрасту = тег("select");
+    if (!(ДЖЕРЕЛА.контраст || []).length) {
+      вибір_контрасту.appendChild(new Option("зон ще немає", ""));
+      вибір_контрасту.disabled = true;
+    } else {
+      ДЖЕРЕЛА.контраст.forEach(ш => вибір_контрасту.appendChild(
+        new Option(ш.назва + (ш.рік ? " · " + ш.рік : ""), ш.ключ)));
+    }
+    ряд.appendChild(підпис_поля("Що ділить поле на ділянки", вибір_контрасту));
+  }
+  ряд.appendChild(підпис_поля("Комірка, га", поле_га));
+  ряд.appendChild(підпис_поля("Поворот сітки, °", поле_кут));
+
+  let галочка = null;
+  if (ВАРІАНТ === "класична") {
+    const обгортка = тег("label", null, "");
+    галочка = document.createElement("input");
+    галочка.type = "checkbox";
+    обгортка.appendChild(галочка);
+    обгортка.appendChild(document.createTextNode(" зливати крайові уламки"));
+    обгортка.style.fontWeight = "500";
+    ряд.appendChild(обгортка);
+  }
+  крок2.appendChild(ряд);
+
+  if (ВАРІАНТ === "класична") {
+    const швидкі = тег("div", "ряд");
+    швидкі.style.marginTop = "10px";
+    швидкі.appendChild(тег("span", "тиха", "Часто беруть:"));
+    [0.01, 0.5, 1, 2, 3, 5].forEach(г => {
+      const б = тег("button", "дрібна", ч(г, г < 1 ? 2 : 0) + " га");
+      б.addEventListener("click", () => {
+        поле_га.value = г; оцінка_наперед();
+      });
+      швидкі.appendChild(б);
+    });
+    крок2.appendChild(швидкі);
+    var наперед = тег("p", "підказка", "");
+    крок2.appendChild(наперед);
+  }
+
+  function оцінка_наперед() {
+    if (!наперед) return;
+    const г = Number(поле_га.value || 0);
+    if (!(г > 0)) { наперед.textContent = ""; return; }
+    const скільки = Math.round(ДЖЕРЕЛА.площа_га / г);
+    наперед.innerHTML = "Приблизно <b>" + скільки + "</b> комірок на цьому полі" +
+      (скільки > ДЖЕРЕЛА.межі.стеля_показу
+        ? " — на карті стільки не покажемо, тільки порахуємо" : "");
+  }
+  if (наперед) { поле_га.addEventListener("input", оцінка_наперед); оцінка_наперед(); }
+
+  const дії = тег("div", "ряд");
+  дії.style.marginTop = "12px";
+  const кн_показати = тег("button", "головна", "Побудувати й показати");
+  const слово = тег("span", "тиха", "");
+  дії.appendChild(кн_показати);
+  дії.appendChild(слово);
+  крок2.appendChild(дії);
+  дод(крок2);
+
+  const зібрати = (писати) => ({
+    господарство: ПОЛЕ.господарство, поле: ПОЛЕ.поле,
+    назва_поля: ПОЛЕ.назва || ПОЛЕ.поле,
+    варіант: ВАРІАНТ,
+    га: Number(поле_га.value || 0),
+    кут: Number(поле_кут.value || 0),
+    контраст: вибір_контрасту ? вибір_контрасту.value : null,
+    зливати_край: галочка ? галочка.checked : false,
+    порівняти_з: 1.0,
+    писати: !!писати,
+  });
+
+  const будувати = (писати) => {
+    слово.textContent = "рахую…";
+    кн_показати.disabled = true;
+    запит("/api/відбір", зібрати(писати)).then(в => {
+      слово.textContent = "";
+      кн_показати.disabled = false;
+      while (к.children.length > 3) к.removeChild(к.lastChild);
+      if (в.помилка) {
+        дод(тег("div", "смуга тривога", екран(в.помилка)));
+        return;
+      }
+      ОСТАННЄ = в;
+      наслідок(в, дод, будувати);
+    });
+  };
+  кн_показати.addEventListener("click", () => будувати(false));
+
+  if (ОСТАННЄ) наслідок(ОСТАННЄ, дод, будувати);
+}
+
+function підпис_поля(текст, елемент) {
+  const л = тег("label", null, екран(текст));
+  л.appendChild(елемент);
+  return л;
+}
+
+function наслідок(в, дод, будувати) {
+  const крок3 = тег("div", "крок");
+  крок3.appendChild(тег("div", "крок-назва", "3 · Що вийшло"));
+
+  const оц = в.оцінка;
+  const числа = тег("div", "числа");
+  const число = (підпис, значення, клас) => тег("div", "число" + (клас || ""),
+    "<b>" + значення + "</b>" + екран(підпис));
+  числа.appendChild(число("зразків", оц.точок));
+  числа.appendChild(число("комірок", оц.комірок));
+  числа.appendChild(число("середня комірка, га", ч(оц.середня_га, 2)));
+  числа.appendChild(число("від / до, га",
+    ч(оц.найменша_га, 2) + " – " + ч(оц.найбільша_га, 2)));
+  крок3.appendChild(числа);
+
+  if (в.порівняння) {
+    const п = в.порівняння;
+    // Два числа поруч, і завжди сказано, чиє яке: перше — що зробила б
+    // звичайна сітка того самого розміру, друге — що вийшло в нас.
+    const наших = п.змішаних_у_нашій === undefined ? null : п.змішаних_у_нашій;
+    крок3.appendChild(тег("div",
+      "смуга " + (наших ? "жовта" : ""),
+      "<b>Зразків із двох різних ділянок одразу: у нас " +
+      (наших === null ? "—" : наших) + ", у звичайної сітки того самого " +
+      "розміру було б " + п.змішаних + " із " + п.класичних + ".</b>" +
+      "<div class='чому'>" +
+      (п.змішаних
+        ? "Найгірша комірка звичайної сітки набирала б " +
+          ч(п.найгірша_домішка, 0) + " % чужої ділянки. "
+        : "") +
+      (наших === 0
+        ? "У нашій сітці кожен зразок збирається в межах однієї ділянки — " +
+          "саме заради цього все й робиться."
+        : "Ті, що лишились змішаними, — це клапті, яким нема до кого " +
+          "прирости; дивіться зауваги нижче.") + "</div>"));
+  }
+
+  if (в.порада) {
+    const р = в.порада;
+    крок3.appendChild(тег("div", "смуга",
+      "<b>Класична сітка по " + ч(р.класична_га, 1) + " га дала б " +
+      r_зразків(р.зразків_класично) + ", оптимізована — " +
+      r_зразків(в.оцінка.точок) + ".</b>" +
+      (р.заощадження > 0
+        ? "<div class='чому'>Це на " + р.заощадження + " зразків менше. " +
+          екран(р.чому) + "</div>"
+        : "<div class='чому'>" + екран(р.чому) + "</div>")));
+  }
+
+  (оц.зауваги || []).forEach(з => {
+    крок3.appendChild(тег("div",
+      "смуга " + (з.вага === "стоп" ? "тривога" : "жовта"),
+      мітка(з.вага) + " <b>" + екран(з.що) + "</b><div class='чому'>" +
+      екран(з.чому) + "</div>"));
+  });
+
+  // --- карта
+  if (в.карта.показано) {
+    крок3.appendChild(намалювати(в.карта));
+    крок3.appendChild(легенда(в.карта));
+  } else {
+    крок3.appendChild(тег("div", "смуга жовта",
+      "<b>Комірок " + в.карта.комірок + " — на карті не показуємо.</b>" +
+      "<div class='чому'>Понад " + в.карта.стеля + " комірок зіллються " +
+      "в суцільну заливку, з якої нічого не видно. Файли зробляться " +
+      "повністю.</div>"));
+  }
+
+  if (в.як && в.як.зрізано) {
+    крок3.appendChild(тег("p", "підказка",
+      "Як робилось: сітку порізано на " + в.як.зрізано + " шматків, " +
+      в.як.приросло + " уламків приросло до сусідів свого класу" +
+      (в.як.поділено ? ", " + в.як.поділено + " завеликих поділено" : "") +
+      (в.як.спеків ? ", викинуто " + в.як.спеків + " клаптів сумарно " +
+        ч(в.як.спеків_га, 2) + " га — це залишки обрізання контуру" : "") + "."));
+  }
+  дод(крок3);
+
+  // --- крок 4 · віддача
+  const крок4 = тег("div", "крок");
+  крок4.appendChild(тег("div", "крок-назва", "4 · Заявка на відбір"));
+  крок4.appendChild(тег("p", "тиха",
+    "Комірки й точки в shapefile — для GPS відбірника. KML — щоб " +
+    "відкрити на телефоні або надіслати в лабораторію."));
+  const ряд4 = тег("div", "ряд");
+  const кн_файли = тег("button", "головна", "Зробити файли заявки");
+  ряд4.appendChild(кн_файли);
+  крок4.appendChild(ряд4);
+  кн_файли.addEventListener("click", () => будувати(true));
+
+  if ((в.файли || []).length) {
+    крок4.appendChild(тег("div", "смуга", "<b>Файли записані.</b>"));
+    крок4.appendChild(тег("p", "тиха",
+      "Тека: <code>" + екран(в.тека) + "</code>"));
+    const сп = тег("ul");
+    в.файли.forEach(ф => сп.appendChild(тег("li", null,
+      "<code>" + екран(ф) + "</code>")));
+    крок4.appendChild(сп);
+  }
+  дод(крок4);
+}
+
+const r_зразків = (n) => n + " " +
+  (n % 10 === 1 && n % 100 !== 11 ? "зразок"
+   : [2, 3, 4].includes(n % 10) && ![12, 13, 14].includes(n % 100) ? "зразки"
+   : "зразків");
+
+function запит(адреса, тіло) {
+  return fetch(адреса, {method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify(тіло)}).then(в => в.json());
+}
+
+fetch("/api/стан").then(в => в.json()).then(с => {
+  const вибір = с.вибір || {};
+  ПОЛЕ = {господарство: вибір.господарство, поле: вибір.поле,
+          назва: (с.паспорт || {}).поле};
+  if (!ПОЛЕ.поле) { малювати(); return; }
+  return fetch("/api/відбір-джерела?господарство=" +
+      encodeURIComponent(ПОЛЕ.господарство) + "&поле=" +
+      encodeURIComponent(ПОЛЕ.поле))
+    .then(в => в.json()).then(д => { ДЖЕРЕЛА = д; малювати(); });
+}).catch(п => {
+  document.getElementById("вивід").innerHTML =
+    '<div class="смуга тривога">Збій: ' + екран(п) + "</div>";
+});
+</script>
+</body>
+</html>
