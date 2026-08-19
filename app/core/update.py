@@ -14,7 +14,7 @@ import zipfile
 from urllib.request import Request, urlopen
 
 # Що перезаписується при оновленні. Решта лишається як є.
-ОНОВЛЮВАНЕ = ("app", "_збірка", "start.py", "version.json", "ЗАПУСК.bat", "ВСТАНОВИТИ.bat")
+ОНОВЛЮВАНЕ = ("app", "setup", "start.py", "version.json", "ЗАПУСК.bat", "ВСТАНОВИТИ.bat")
 
 
 def _число(версія):
