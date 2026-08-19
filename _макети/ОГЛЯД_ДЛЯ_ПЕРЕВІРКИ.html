@@ -1,0 +1,446 @@
+<title>FieldFactor зсередини</title>
+<style>
+  :root {
+    --ground:#F1F4EF; --surface:#FFFFFF; --sunk:#E8EDE6;
+    --ink:#161B17; --muted:#5B6A60; --faint:#8A968D;
+    --line:#D7DED5; --line-soft:#E5EAE3;
+    --accent:#2C6A45; --accent-soft:#DCEBE0;
+    --clay:#A2542C; --clay-soft:#F3E3D8;
+    --warn:#8A6A12; --warn-soft:#F5EDD5;
+    --shadow:0 1px 2px rgba(22,27,23,.06), 0 8px 24px -16px rgba(22,27,23,.28);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:#0F1310; --surface:#161B17; --sunk:#1B211C;
+      --ink:#E6ECE5; --muted:#9CA99F; --faint:#75817A;
+      --line:#28302A; --line-soft:#212823;
+      --accent:#78C594; --accent-soft:#1C2E23;
+      --clay:#D78F62; --clay-soft:#2E211A;
+      --warn:#D9B35C; --warn-soft:#2B2517;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.8);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground:#0F1310; --surface:#161B17; --sunk:#1B211C;
+    --ink:#E6ECE5; --muted:#9CA99F; --faint:#75817A;
+    --line:#28302A; --line-soft:#212823;
+    --accent:#78C594; --accent-soft:#1C2E23;
+    --clay:#D78F62; --clay-soft:#2E211A;
+    --warn:#D9B35C; --warn-soft:#2B2517;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.8);
+  }
+
+  * { box-sizing:border-box; }
+  body {
+    margin:0; background:var(--ground); color:var(--ink);
+    font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+    font-size:17px; line-height:1.62;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap { max-width:1120px; margin:0 auto; padding:0 24px 96px; }
+
+  h1,h2,h3,.ui {
+    font-family:ui-sans-serif,"Segoe UI Variable Text","Segoe UI",system-ui,sans-serif;
+  }
+  .mono, code, pre, .chip, .num {
+    font-family:ui-monospace,"Cascadia Mono","SF Mono",Consolas,monospace;
+  }
+
+  header.top { padding:64px 0 40px; border-bottom:1px solid var(--line); }
+  .eyebrow {
+    font-family:ui-monospace,"Cascadia Mono",Consolas,monospace;
+    font-size:12px; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--accent); margin:0 0 14px;
+  }
+  h1 {
+    font-size:clamp(32px,5vw,52px); line-height:1.08; margin:0 0 18px;
+    letter-spacing:-.02em; text-wrap:balance; font-weight:640;
+  }
+  .lede { font-size:clamp(18px,2.2vw,21px); color:var(--muted); max-width:64ch; margin:0; }
+
+  .meta {
+    display:flex; flex-wrap:wrap; gap:8px 28px; margin-top:28px;
+    font-family:ui-monospace,Consolas,monospace; font-size:12.5px; color:var(--faint);
+  }
+
+  main { display:grid; grid-template-columns:1fr; gap:0; }
+  @media (min-width:1000px) {
+    main { grid-template-columns:210px 1fr; gap:56px; align-items:start; }
+    nav.toc { position:sticky; top:32px; padding-top:56px; }
+  }
+  nav.toc ol { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:2px; }
+  nav.toc a {
+    display:block; padding:6px 10px; border-radius:5px; text-decoration:none;
+    font-family:ui-sans-serif,"Segoe UI",system-ui,sans-serif;
+    font-size:13.5px; color:var(--muted); border-left:2px solid transparent;
+  }
+  nav.toc a:hover { background:var(--sunk); color:var(--ink); border-left-color:var(--accent); }
+  nav.toc a:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+
+  section { padding:56px 0; border-bottom:1px solid var(--line-soft); }
+  section:last-of-type { border-bottom:none; }
+  h2 {
+    font-size:26px; margin:0 0 6px; letter-spacing:-.01em; font-weight:620; text-wrap:balance;
+  }
+  h2 .idx {
+    font-family:ui-monospace,Consolas,monospace; font-size:13px; color:var(--faint);
+    margin-right:12px; font-weight:400;
+  }
+  .sub { color:var(--muted); margin:0 0 28px; max-width:66ch; }
+  p { max-width:68ch; }
+  h3 { font-size:17px; margin:32px 0 10px; font-weight:620; letter-spacing:-.005em; }
+
+  .chip {
+    display:inline-flex; align-items:center; gap:6px; white-space:nowrap;
+    font-size:11px; letter-spacing:.04em; text-transform:uppercase;
+    padding:3px 8px; border-radius:4px; border:1px solid transparent;
+  }
+  .c-ok   { background:var(--accent-soft); color:var(--accent); border-color:var(--accent); }
+  .c-warn { background:var(--warn-soft);   color:var(--warn);   border-color:var(--warn); }
+  .c-plan { background:var(--sunk);        color:var(--faint);  border-color:var(--line); }
+  .c-none { background:var(--clay-soft);   color:var(--clay);   border-color:var(--clay); }
+
+  .tablewrap { overflow-x:auto; margin:22px 0; border:1px solid var(--line); border-radius:8px; background:var(--surface); }
+  table { border-collapse:collapse; width:100%; font-size:14.5px; }
+  th, td { text-align:left; padding:11px 14px; border-bottom:1px solid var(--line-soft); vertical-align:top; }
+  th {
+    font-family:ui-sans-serif,"Segoe UI",system-ui,sans-serif;
+    font-size:11.5px; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--faint); font-weight:600; background:var(--sunk); white-space:nowrap;
+  }
+  tr:last-child td { border-bottom:none; }
+  td.name { font-family:ui-monospace,Consolas,monospace; font-size:13px; white-space:nowrap; }
+  .num { font-variant-numeric:tabular-nums; }
+
+  pre {
+    background:var(--surface); border:1px solid var(--line); border-radius:8px;
+    padding:18px 20px; overflow-x:auto; font-size:13px; line-height:1.65; margin:22px 0;
+    color:var(--ink);
+  }
+
+  .steps { display:flex; flex-direction:column; gap:0; margin:26px 0; }
+  .step {
+    display:grid; grid-template-columns:44px 1fr; gap:18px;
+    padding:18px 0; border-top:1px solid var(--line-soft);
+  }
+  .step:last-child { border-bottom:1px solid var(--line-soft); }
+  .step .n {
+    font-family:ui-monospace,Consolas,monospace; font-size:13px; color:var(--accent);
+    padding-top:3px; font-variant-numeric:tabular-nums;
+  }
+  .step h4 {
+    margin:0 0 6px; font-family:ui-sans-serif,"Segoe UI",system-ui,sans-serif;
+    font-size:16px; font-weight:620; display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  }
+  .step p { margin:0; font-size:15px; color:var(--muted); }
+
+  .callout {
+    background:var(--surface); border:1px solid var(--line); border-left:3px solid var(--clay);
+    border-radius:6px; padding:18px 22px; margin:26px 0; box-shadow:var(--shadow);
+  }
+  .callout p:last-child { margin-bottom:0; }
+  .callout .lbl {
+    font-family:ui-sans-serif,"Segoe UI",system-ui,sans-serif;
+    font-size:11.5px; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--clay); font-weight:600; display:block; margin-bottom:8px;
+  }
+
+  ol.ask { counter-reset:q; list-style:none; padding:0; margin:26px 0 0; display:flex; flex-direction:column; gap:18px; }
+  ol.ask li { counter-increment:q; display:grid; grid-template-columns:34px 1fr; gap:16px; }
+  ol.ask li::before {
+    content:counter(q,decimal-leading-zero);
+    font-family:ui-monospace,Consolas,monospace; font-size:12.5px; color:var(--clay);
+    padding-top:5px;
+  }
+  ol.ask strong { display:block; font-size:16px; margin-bottom:3px;
+    font-family:ui-sans-serif,"Segoe UI",system-ui,sans-serif; font-weight:620; }
+  ol.ask span { color:var(--muted); font-size:15px; }
+
+  ul.plain { padding-left:1.15em; }
+  ul.plain li { margin-bottom:8px; max-width:66ch; }
+
+  footer { padding:44px 0 0; color:var(--faint); font-size:13.5px; }
+  a { color:var(--accent); }
+</style>
+
+<div class="wrap">
+
+<header class="top">
+  <p class="eyebrow">Матеріал для зовнішньої перевірки</p>
+  <h1>FieldFactor зсередини</h1>
+  <p class="lede">Портативна програма для агрономічного консалтингу: сирі дані з поля перетворюються на зони керування, завдання на відбір зразків, файли під термінал і звіт для господарства. Нижче — з чого вона складається, що вже працює, і де проходить межа чесності.</p>
+  <div class="meta">
+    <span>версія 1.0.0</span>
+    <span>Python 3.12 у власному рантаймі</span>
+    <span>24 модулі обробки · ≈7 500 рядків</span>
+    <span>станом на 19.08.2026</span>
+  </div>
+</header>
+
+<main>
+
+<nav class="toc" aria-label="Зміст">
+  <ol>
+    <li><a href="#s1">Що це і для кого</a></li>
+    <li><a href="#s2">Ланцюг роботи</a></li>
+    <li><a href="#s3">Як влаштовані дані</a></li>
+    <li><a href="#s4">Модулі</a></li>
+    <li><a href="#s5">Що перевірено</a></li>
+    <li><a href="#s6">Межі й відмови</a></li>
+    <li><a href="#s7">Питання до вас</a></li>
+  </ol>
+</nav>
+
+<div>
+
+<section id="s1">
+  <h2><span class="idx">01</span>Що це і для кого</h2>
+  <p class="sub">Інструмент консультанта, а не програма для господарства.</p>
+
+  <p>Господарство приносить те, що в нього є: контури полів, вивантаження з монітора комбайна, файли електромагнітного сканування, протоколи лабораторії. На виході воно отримує поділ поля на зони, координати точок відбору ґрунту, файли під термінал і звіт, написаний словами, а не термінами.</p>
+
+  <p>Програма портативна: власний рантайм у своїй теці, сервер слухає лише локальну адресу, дані нікуди не відправляються. Працює один користувач — консультант.</p>
+
+  <h3>Головна теза продукту</h3>
+  <div class="callout">
+    <span class="lbl">Це вирішено і не переобговорюється</span>
+    <p><strong>Карта не каже, скільки чого сипати. Карта каже, де брати зразок.</strong> Слабка зона не означає, що туди треба вкладати більше: часто поживи там уже досить, а врожай тримає кислотність, вода або ущільнення. Норму по зоні дає аналіз ґрунту з цієї зони — і тільки він.</p>
+  </div>
+
+  <p>Номер зони — це положення в ландшафті, а не оцінка: перша зона найсухіша й найбільш здута, остання — найвологіша. Так зона 3 на одному полі означає те саме, що на іншому.</p>
+</section>
+
+<section id="s2">
+  <h2><span class="idx">02</span>Ланцюг роботи</h2>
+  <p class="sub">Шість кроків, які видно на екрані одночасно — щоб було зрозуміло, чим робота закінчиться ще до того, як вона почалась.</p>
+
+  <div class="steps">
+    <div class="step">
+      <div class="n">01</div>
+      <div>
+        <h4>Вхідні <span class="chip c-ok">працює</span></h4>
+        <p>У кожного поля є своя тека вхідних даних. Файл можна перетягнути з розпізнаванням або скинути все як є і розібрати майстром. Сире зберігається назавжди й недоторканим. Те, що не вдалося впізнати, лишається зі статусом «не розібрано» — видимим, а не загубленим.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="n">02</div>
+      <div>
+        <h4>Підготовка <span class="chip c-ok">працює</span></h4>
+        <p>Врожайність із монітора: відсів того, що не є врожаєм, зведення кількох комбайнів, приведення до базисної вологості, добудова пропусків. Сканування: вирівнювання по проходах сканера, відкидання мертвих каналів. Виправлені значення лягають окремою колонкою — сирі числа лишаються недоторканими.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="n">03</div>
+      <div>
+        <h4>Зони <span class="chip c-ok">працює</span> <span class="chip c-plan">інтерфейс переробляється</span></h4>
+        <p>Мета роботи, допущені джерела, до восьми важелів налаштування, пресети. Мета міняє не тільки ваги джерел, а й кількість зон, мінімальну площу і те, що є виходом. На полі може жити від двох до десяти карт зон одночасно, і програма показує числом, наскільки вони різні.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="n">04</div>
+      <div>
+        <h4>Зразки <span class="chip c-ok">план відбору працює</span> <span class="chip c-plan">решта — план</span></h4>
+        <p>Точки ставляться в серцевині зон, а не на межі: зразок із межі змішує два різні ґрунти й псує весь аналіз. Далі формується завдання для того, хто поїде в поле — точки, номери, приналежність до зони, маршрут, вивантаження в SHP і KML. Аналізи, що прийдуть із лабораторії, прив'язуються до того самого завдання.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="n">05</div>
+      <div>
+        <h4>Перевірка <span class="chip c-warn">у розробці</span></h4>
+        <p>Крок існує в ланцюзі й чесно підписаний як незавершений. Що в ньому буде — ще не вирішено. Кандидати: чи тримаються зони роками; чи розкид аналізів <em>між</em> зонами більший за розкид <em>усередині</em> зони.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="n">06</div>
+      <div>
+        <h4>Видача <span class="chip c-ok">працює</span></h4>
+        <p>Шейпфайли під термінал, звіт для господарства, координати точок для навігатора, завдання на відбір, і все разом одним архівом. Перед видачею проходять ворота перевірки — доки звірка не чиста, звіт не віддається.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="s3">
+  <h2><span class="idx">03</span>Як влаштовані дані</h2>
+  <p class="sub">Три рівні над полем, далі — операції. Так само, як у SMS Ag Leader, щоб обмін із господарством не вимагав перекладу структури.</p>
+
+  <p>Одиниця класифікації — <strong>операція</strong>. Усе, що є на полі, належить якійсь операції, а операція має екземпляри з датами. Окремої купи «розібраних даних» немає.</p>
+
+<pre>Клієнт
+ └─ Господарство
+     └─ Поле
+         ├─ Вхідні дані                    сире, недоторкане
+         └─ Операції
+             ├─ Контур поля            → 2019
+             ├─ Сканування ЕМ          → кв. 2025 · 6 854 точки
+             ├─ Збирання (врожайність) → 2025 · 24 проходи · 2026
+             ├─ Зони керування         → під вапнування · під посів
+             ├─ Відбір ґрунту          → Завдання №14 → Аналізи по №14
+             ├─ Посів                  → сховище: не рахуємо, зберігаємо
+             └─ Видача клієнту         → пакет 20.08.2026</pre>
+
+  <h3>Правила, які тримають цю структуру</h3>
+  <ul class="plain">
+    <li>кожен екземпляр несе дату, походження і статус — без цього число в звіті не має підстави;</li>
+    <li>новий розрахунок не затирає попередній: він стає новим екземпляром, старий іде в історію;</li>
+    <li>завдання на відбір і аналізи, що по ньому прийшли, пов'язані між собою — саме цей зв'язок робить можливою будь-яку подальшу перевірку;</li>
+    <li>операції, яких програма не рахує (посів, внесення, обприскування), заводяться як сховище: файли лежать, показуються шаром, у розрахунок не входять.</li>
+  </ul>
+</section>
+
+<section id="s4">
+  <h2><span class="idx">04</span>Модулі</h2>
+  <p class="sub">Двадцять чотири модулі обробки. Розділені за тим, з чим працюють, а не за тим, коли писалися.</p>
+
+  <h3>Читання і приведення до ладу</h3>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Модуль</th><th>Що робить</th><th>Стан</th></tr></thead>
+    <tbody>
+      <tr><td class="name">reading</td><td>Читає контур поля і всі файли монітора врожайності: ZIP, SHP із частинами, GPKG, CSV, TXT</td><td><span class="chip c-ok">перевірено</span></td></tr>
+      <tr><td class="name">qc</td><td>Зводить різні монітори до спільного вигляду і відсіює те, що не є врожаєм: розвороти, зупинки, фізично неможливі числа</td><td><span class="chip c-ok">перевірено</span></td></tr>
+      <tr><td class="name">machines</td><td>Зводить кілька комбайнів на одному полі до спільної шкали</td><td><span class="chip c-ok">перевірено</span></td></tr>
+      <tr><td class="name">moisture</td><td>Приводить до базисної вологості та звіряє з фактично вивезеною вагою</td><td><span class="chip c-ok">перевірено</span></td></tr>
+      <tr><td class="name">passes</td><td>Відновлює геометрію проходів комбайна</td><td><span class="chip c-ok">перевірено</span></td></tr>
+      <tr><td class="name">util</td><td>Системи координат, вгадування колонок, одиниці виміру</td><td><span class="chip c-ok">перевірено</span></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>Сканування і його чесність</h3>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Модуль</th><th>Що робить</th><th>Стан</th></tr></thead>
+    <tbody>
+      <tr><td class="name">scanner</td><td>Читає електромагнітне сканування, розпізнає канали, ловить мертві</td><td><span class="chip c-ok">перевірено</span></td></tr>
+      <tr><td class="name">ec_clean</td><td>Знімає сліди техніки з електропровідності</td><td><span class="chip c-warn">лише попередження</span></td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="callout">
+    <span class="lbl">Свідома відмова</span>
+    <p>Піксельний фільтр аномалій електропровідності <strong>не міняє чисел</strong> і лишений тільки як попередження. На перевірці з відомою правдою він знімав 29&nbsp;% справжніх слідів техніки і при цьому зачіпав 13&nbsp;% чистого поля — ціна виявилась вищою за користь. Справжню роботу робить вирівнювання по проходах сканера.</p>
+  </div>
+
+  <h3>Заповнення пропусків</h3>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Модуль</th><th>Що робить</th><th>Стан</th></tr></thead>
+    <tbody>
+      <tr><td class="name">gaps</td><td>Знаходить, де саме монітор мовчав, і вирішує, куди класти точки</td><td><span class="chip c-ok">перевірено</span></td></tr>
+      <tr><td class="name">modeling</td><td>Обирає, чим заповнювати пропуск, і рахує довіру до кожної добудованої точки</td><td><span class="chip c-ok">перевірено</span></td></tr>
+      <tr><td class="name">satellite</td><td>Тягне знімки Sentinel-2 як допоміжного свідка</td><td><span class="chip c-ok">перевірено</span></td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>Метод відновлення обирається окремо для близьких розривів і для великих дірок — це різні задачі. У схованому проході опора є з обох боків; у дірці на пʼять гектарів опори немає взагалі, і там працює модель по вегетації.</p>
+
+  <h3>Зони і те, що з них виходить</h3>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Модуль</th><th>Що робить</th><th>Стан</th></tr></thead>
+    <tbody>
+      <tr><td class="name">zones</td><td>Ріже поле за одним джерелом або за кількома з вагами; тримає мінімальну площу зони</td><td><span class="chip c-ok">перевірено</span></td></tr>
+      <tr><td class="name">sources</td><td>Зводить різні джерела до спільної шкали перед поділом</td><td><span class="chip c-ok">перевірено</span></td></tr>
+      <tr><td class="name">water</td><td>Куди тече вода і де вона стоїть: схил, кривина, водозбір, індекс зволоження</td><td><span class="chip c-ok">перевірено</span></td></tr>
+      <tr><td class="name">export_points</td><td>Точки відбору й усе, що має лежати поруч із ними</td><td><span class="chip c-ok">перевірено</span></td></tr>
+      <tr><td class="name">validation</td><td>Ворота перед видачею: доки звірка не чиста, звіт не віддається</td><td><span class="chip c-ok">перевірено</span></td></tr>
+      <tr><td class="name">report</td><td>Звіт для господарства</td><td><span class="chip c-ok">перевірено</span></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>Каркас програми</h3>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Модуль</th><th>Що робить</th><th>Стан</th></tr></thead>
+    <tbody>
+      <tr><td class="name">catalog</td><td>Картотека: господарство → поле → рік → шари</td><td><span class="chip c-plan">переробляється під три рівні</span></td></tr>
+      <tr><td class="name">tasks</td><td>Операції над полем</td><td><span class="chip c-plan">переробляється під ланцюг</span></td></tr>
+      <tr><td class="name">pipeline</td><td>Повний прогін: від сирих файлів монітора до готового пакета</td><td><span class="chip c-ok">перевірено</span></td></tr>
+      <tr><td class="name">render</td><td>Готує шари до показу і збирає підкладку з реального знімка</td><td><span class="chip c-ok">перевірено</span></td></tr>
+      <tr><td class="name">state</td><td>Стан сеансу: паспорт замовлення, тека, журнал прогону</td><td><span class="chip c-ok">перевірено</span></td></tr>
+      <tr><td class="name">update</td><td>Оновлення програми</td><td><span class="chip c-warn">код є, релізу ще не було</span></td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section id="s5">
+  <h2><span class="idx">05</span>Що перевірено</h2>
+  <p class="sub">Числа нижче — з фактичних прогонів. Там, де перевірка була на синтетичному полі, це сказано прямо.</p>
+
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Що</th><th>Чим підтверджено</th></tr></thead>
+    <tbody>
+      <tr><td>Нормалізація карти врожайності</td><td>синтетичне поле, врожайність якого побудована з реального NDVI: діра <span class="num">4,8</span> га відновлена з похибкою <span class="num">260</span> кг/га (<span class="num">4,5</span>&nbsp;%), кореляція <span class="num">0,91</span></td></tr>
+      <tr><td>Добудова великих пропусків вегетацією</td><td>на дірках <span class="num">272</span> кг/га проти <span class="num">380</span> у локального методу — на <span class="num">28</span>&nbsp;% менше похибки</td></tr>
+      <tr><td>Зведення кількох комбайнів</td><td>закладений зсув <span class="num">+14</span>&nbsp;% знайдено як <span class="num">×1,131</span></td></tr>
+      <tr><td>Вирівнювання сканування по проходах</td><td><strong>на справжньому файлі з поля</strong>: <span class="num">24</span> проходи, <span class="num">4</span> зсунуті цілком вирівняно, розбіжність між проходами <span class="num">0,0186 → 0,0160</span> dS/m</td></tr>
+      <tr><td>Мертвий канал сканера</td><td>канал-константа розпізнано й відкинуто автоматично</td></tr>
+      <tr><td>Зонування</td><td>усі шість варіантів прогнані на демо-полі</td></tr>
+      <tr><td>Перевірка зон незалежним свідком</td><td>зони з рельєфу та електропровідності пояснюють <span class="num">34–41</span>&nbsp;% різниці врожаю, <strong>якого в їхній побудові не було</strong></td></tr>
+      <tr><td>План відбору</td><td><span class="num">5</span> груп із <span class="num">10</span> зон, точка в серцевині кожної</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p>Останнє в цьому списку — найважливіше методично. Врожайність навмисно не бралася в побудову зон, тому вона лишається незалежним свідком: якщо зони, зроблені без неї, все одно пояснюють третину різниці врожаю — поділ щось таки означає.</p>
+</section>
+
+<section id="s6">
+  <h2><span class="idx">06</span>Межі й відмови</h2>
+  <p class="sub">Те, чого програма свідомо не робить. Це не список недоліків — це межа, за якою ми не маємо підстав.</p>
+
+  <div class="callout">
+    <span class="lbl">Головне обмеження, яке треба знати перед оцінкою</span>
+    <p><strong>Немає жодного поля з аналізами ґрунту, прив'язаними до зон.</strong> Тобто твердження «зони розділяють калій» або «зони розділяють кислотність» на даних <em>не доведене</em>. Воно спирається на агрономічну логіку, а не на вимір. Доки такого кейсу немає, програма не має права стверджувати, що зони під конкретний елемент щось означають.</p>
+  </div>
+
+  <h3>Наскільки міцна підстава — по елементах</h3>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Під що</th><th>Підстава</th><th>Чому саме так</th></tr></thead>
+    <tbody>
+      <tr><td>Вапнування</td><td><span class="chip c-ok">найсильніша</span></td><td>норма залежить від буферності, а буферність — це глина й гумус, тобто стабільні властивості, які електропровідність і яскравість ґрунту міряють фізично</td></tr>
+      <tr><td>Калій</td><td><span class="chip c-warn">середня</span></td><td>тримається на глинистих мінералах і ємності поглинання — просторовий звʼязок очікується, але слабший</td></tr>
+      <tr><td>Фосфор</td><td><span class="chip c-none">слабка</span></td><td>плямистий, керується історією внесення й кислотністю більше, ніж ландшафтом</td></tr>
+      <tr><td>Азот</td><td><span class="chip c-none">окремий випадок</span></td><td>рухливий, у зоні не «лежить» — зони по стабільних властивостях його не тримають</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>Інші межі</h3>
+  <ul class="plain">
+    <li><strong>Немає аналізу в зоні — немає розрахунку.</strong> Нулі й «потрібне обстеження», без підстановок. Порожнє краще за вигадане.</li>
+    <li><strong>Радянські норми інтерпретації не беруться</strong> — ні Чирікова, ні Мачигіна, ні Кірсанова. Але сам метод аналізу записується як частина числа: без нього число не має сенсу.</li>
+    <li><strong>Цільові співвідношення катіонів як підстава для норм — оспорено.</strong> Поважне джерело прямо спростовує цей підхід, тому він не застосовується мовчки.</li>
+    <li><strong>Механізм оновлення не перевірений на справжньому релізі.</strong> Код є, релізу ще не було.</li>
+    <li><strong>Варіант для планшета в полі</strong> існує тільки як макет.</li>
+  </ul>
+</section>
+
+<section id="s7">
+  <h2><span class="idx">07</span>Питання до вас</h2>
+  <p class="sub">Нас цікавить не «чи гарно виглядає». Нас цікавить, чи це цілісний продукт і чи є в ньому цінність для того, хто робить цю роботу руками.</p>
+
+  <ol class="ask">
+    <li><strong>Чи збігається ланцюг із тим, як ви реально працюєте?</strong><span>Шість кроків від вхідних даних до видачі. Чого в цьому ланцюзі бракує, а що зайве? Де порядок неправильний?</span></li>
+    <li><strong>Чи зрозуміло з першого погляду, чим закінчиться робота?</strong><span>Це головна вимога до інтерфейсу. Якщо людина відкриває програму й не бачить, до чого вона йде — ми не впорались.</span></li>
+    <li><strong>Чи повірили б ви карті зон, зробленій без жодного аналізу ґрунту?</strong><span>І якщо ні — що конкретно має бути на екрані чи в звіті, щоб ви повірили?</span></li>
+    <li><strong>Чи має сенс різати поле під конкретний елемент?</strong><span>З вашого досвіду: калій, фосфор, кислотність — де поділ поля дає різницю, яку видно в полі, а де це самообман?</span></li>
+    <li><strong>Скільки зон і точок відбору реально оплачує господарство?</strong><span>Стоково закладено пʼять зон і пʼять місць відбору. Це збігається з життям?</span></li>
+    <li><strong>Що ви робите з отриманим файлом далі?</strong><span>Який формат обовʼязковий, у якій програмі він відкривається, що ламається найчастіше.</span></li>
+    <li><strong>Що з описаного ви б викинули?</strong><span>Найцінніша відповідь. Функція, яка виглядає розумною, але якою ніхто не користуватиметься, дорожча за відсутню.</span></li>
+    <li><strong>У який момент ви б кинули цю програму й повернулись до звичного інструменту?</strong><span>Назвіть конкретний крок.</span></li>
+  </ol>
+</section>
+
+<footer>
+  <p>Документ описує стан на 19 серпня 2026 року. Усі приклади в дереві даних — вигадані: справжні дані господарств у цьому документі не наводяться й теку продукту не залишають.</p>
+</footer>
+
+</div>
+</main>
+</div>

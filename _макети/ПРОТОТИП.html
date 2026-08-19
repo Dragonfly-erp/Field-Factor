@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FieldFactor · прототип каркаса</title>
+<style>
+:root{
+  --ground:#EEF1EC; --panel:#F7F8F6; --surface:#FFFFFF; --sunk:#E4E9E2;
+  --ink:#14181500; --ink:#151A16; --muted:#5D6A61; --faint:#8B968E;
+  --line:#CFD7CD; --line-soft:#E1E7DF;
+  --accent:#2C6A45; --accent-weak:#DDEBE1;
+  --clay:#A2542C; --warn:#8A6A12; --warn-weak:#F6EED6;
+  --z1:#8C4A2F; --z2:#C08040; --z3:#E3C566; --z4:#A9C87C; --z5:#4C7A46;
+  --ui:-apple-system,"Segoe UI Variable Text","Segoe UI",Roboto,system-ui,sans-serif;
+  --mono:ui-monospace,"Cascadia Mono",Consolas,monospace;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--ui);font-size:13px;
+     display:flex;flex-direction:column;overflow:hidden}
+
+/* ── шапка ─────────────────────────────────────────── */
+.шапка{height:46px;flex:none;background:var(--surface);border-bottom:1px solid var(--line);
+       display:flex;align-items:center;gap:18px;padding:0 14px}
+.лого{font-weight:700;letter-spacing:-.2px;font-size:15px}
+.лого span{color:var(--accent)}
+.версія{font:11px/1 var(--mono);color:var(--faint)}
+.адреса{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);margin-left:6px}
+.адреса b{color:var(--ink);font-weight:600}
+.адреса .роз{color:var(--line)}
+.шапка .право{margin-left:auto;display:flex;gap:8px;align-items:center}
+.кн{font:inherit;border:1px solid var(--line);background:var(--surface);color:var(--ink);
+    padding:5px 11px;border-radius:3px;cursor:pointer}
+.кн:hover{border-color:var(--accent);color:var(--accent)}
+.кн.гол{background:var(--accent);border-color:var(--accent);color:#fff}
+
+/* ── ряд 1: ланцюг ─────────────────────────────────── */
+.ланцюг{height:48px;flex:none;background:var(--panel);border-bottom:1px solid var(--line);
+        display:flex;align-items:stretch;padding:0 8px;gap:2px;overflow-x:auto}
+.крок{position:relative;display:flex;flex-direction:column;justify-content:center;gap:2px;
+      padding:0 16px 0 14px;border:none;background:none;font:inherit;color:var(--muted);
+      cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent}
+.крок b{font-size:12.5px;font-weight:600;letter-spacing:.01em;display:flex;align-items:center;gap:7px}
+.крок small{font:10.5px/1 var(--mono);color:var(--faint)}
+.крок:hover{color:var(--ink);background:var(--sunk)}
+.крок.акт{color:var(--ink);background:var(--surface);border-bottom-color:var(--accent)}
+.крок.акт b{color:var(--accent)}
+.крок.нема{color:var(--faint);cursor:default}
+.крок.нема:hover{background:none;color:var(--faint)}
+.крок::after{content:"›";position:absolute;right:-1px;top:50%;transform:translateY(-50%);
+             color:var(--line);font-size:14px}
+.крок:last-child::after{content:""}
+.мітка{width:7px;height:7px;border-radius:50%;flex:none}
+.м-є{background:var(--accent)} .м-нема{background:var(--line)} .м-увага{background:var(--warn)}
+
+/* ── ряд 2: підтаби ────────────────────────────────── */
+.підтаби{height:34px;flex:none;background:var(--surface);border-bottom:1px solid var(--line);
+         display:flex;align-items:center;gap:4px;padding:0 12px}
+.підтаб{font:inherit;font-size:12.5px;border:1px solid transparent;background:none;color:var(--muted);
+        padding:4px 10px;border-radius:3px;cursor:pointer}
+.підтаб:hover{background:var(--sunk);color:var(--ink)}
+.підтаб.акт{background:var(--accent-weak);border-color:var(--accent);color:var(--accent);font-weight:600}
+.підтаби .чесність{margin-left:auto;display:flex;align-items:center;gap:7px;font-size:12px;
+                   color:var(--warn);background:var(--warn-weak);border:1px solid #E4D9B4;
+                   padding:3px 9px;border-radius:3px;cursor:pointer}
+
+/* ── робоча область ────────────────────────────────── */
+.робота{flex:1;display:grid;grid-template-columns:246px 1fr 288px;min-height:0}
+.колонка{background:var(--panel);display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.скрол{flex:1;overflow-y:auto;min-height:0}
+.ліва{border-right:1px solid var(--line)}
+.права{border-left:1px solid var(--line)}
+.заг{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--faint);
+     font-weight:600;padding:9px 12px 6px;display:flex;align-items:center;justify-content:space-between}
+.заг .дія{color:var(--accent);cursor:pointer;font-size:11px;letter-spacing:0;text-transform:none}
+
+/* дерево */
+.дерево{flex:1;overflow:auto;padding:0 0 8px}
+.вузол{display:flex;align-items:center;gap:6px;padding:3px 12px;cursor:pointer;white-space:nowrap;
+       font-size:12.5px;color:var(--ink)}
+.вузол:hover{background:var(--sunk)}
+.вузол.обр{background:var(--accent-weak);box-shadow:inset 2px 0 0 var(--accent)}
+.вузол .ік{width:13px;text-align:center;color:var(--faint);font:11px/1 var(--mono);flex:none}
+.вузол .лічильник{margin-left:auto;font:10.5px/1 var(--mono);color:var(--faint)}
+.вузол.тьм{color:var(--faint)}
+.в1{padding-left:12px} .в2{padding-left:26px} .в3{padding-left:42px} .в4{padding-left:58px}
+.прев{flex:none;border-top:1px solid var(--line);padding:9px 12px 12px}
+.прев .рамка{height:104px;background:var(--surface);border:1px solid var(--line);
+             display:flex;align-items:center;justify-content:center;overflow:hidden}
+.прев .підпис{font:10.5px/1.5 var(--mono);color:var(--faint);margin-top:6px}
+
+/* центр */
+.центр{position:relative;background:#DFE4DA;min-height:0;display:flex;flex-direction:column}
+.полотно{flex:1;position:relative;overflow:hidden}
+.полотно svg{position:absolute;inset:0;width:100%;height:100%}
+.масштаб{position:absolute;left:14px;bottom:12px;font:10.5px/1 var(--mono);color:#33413A;
+         background:rgba(255,255,255,.86);border:1px solid var(--line);padding:4px 8px}
+.компас{position:absolute;right:14px;top:12px;width:30px;height:30px;background:rgba(255,255,255,.86);
+        border:1px solid var(--line);display:flex;align-items:center;justify-content:center;
+        font:10px/1 var(--mono);color:#33413A;flex-direction:column;gap:1px}
+.мапкн{position:absolute;left:14px;top:12px;display:flex;gap:4px}
+.мапкн button{width:26px;height:26px;background:rgba(255,255,255,.9);border:1px solid var(--line);
+              cursor:pointer;font:13px/1 var(--ui);color:#33413A}
+
+/* контекст під картою */
+.контекст{flex:none;height:104px;background:var(--surface);border-top:1px solid var(--line);
+          display:grid;grid-template-columns:1fr 1fr 1fr;min-height:0}
+.кблок{padding:8px 12px;border-right:1px solid var(--line-soft);overflow:auto}
+.кблок:last-child{border-right:none}
+.кназва{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--faint);
+        font-weight:600;margin-bottom:5px}
+.пара{display:flex;justify-content:space-between;gap:10px;font-size:12px;padding:1.5px 0}
+.пара span{color:var(--muted)} .пара b{font-weight:600;font-variant-numeric:tabular-nums}
+.шарик{display:flex;align-items:center;gap:6px;font-size:12px;padding:2px 0;color:var(--muted);cursor:pointer}
+.шарик:hover{color:var(--ink)}
+.шарик i{width:9px;height:9px;border-radius:2px;flex:none;background:var(--line);font-style:normal}
+
+/* права колонка */
+.поле{padding:7px 12px}
+.мітка-поля{font-size:11.5px;color:var(--muted);display:block;margin-bottom:4px}
+.поле select,.поле input[type=number],.поле input[type=text]{
+  width:100%;font:inherit;font-size:12.5px;padding:4px 7px;border:1px solid var(--line);
+  border-radius:3px;background:var(--surface);color:var(--ink)}
+.поле input[type=range]{width:100%;accent-color:var(--accent)}
+.дворяд{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.легенда{padding:2px 12px 10px}
+.лрядок{display:flex;align-items:center;gap:8px;padding:2.5px 0;font-size:12px}
+.лрядок i{width:22px;height:11px;border-radius:2px;flex:none}
+.лрядок span{color:var(--muted);font-variant-numeric:tabular-nums}
+.лрядок b{margin-left:auto;font-weight:600;font-variant-numeric:tabular-nums;color:var(--ink)}
+.розділ{border-top:1px solid var(--line-soft);margin:6px 0}
+.права .низ{flex:none;border-top:1px solid var(--line);padding:10px 12px;display:flex;gap:8px;background:var(--panel)}
+.права .низ .кн{flex:1;text-align:center}
+.підказка{font-size:11.5px;color:var(--faint);padding:0 12px 10px;line-height:1.45}
+
+/* стан «немає даних» */
+.пусто{margin:10px 12px;border:1px dashed var(--line);background:var(--surface);
+       padding:12px;font-size:12px;color:var(--muted);line-height:1.5}
+.пусто b{color:var(--ink);display:block;margin-bottom:3px;font-size:12.5px}
+</style>
+</head>
+<body>
+
+<div class="шапка">
+  <div class="лого">Field<span>Factor</span></div>
+  <div class="версія">1.0.0</div>
+  <div class="адреса">
+    <b>Угринів</b><span class="роз">›</span><b>Гречка</b>
+    <span class="роз">·</span>54,34 га<span class="роз">·</span>UTM 35N
+  </div>
+  <div class="право">
+    <button class="кн">Картотека</button>
+    <button class="кн">Кабінет</button>
+  </div>
+</div>
+
+<div class="ланцюг">
+  <button class="крок"><b><i class="мітка м-є"></i>Вхідні</b><small>4 файли · 1 не розібрано</small></button>
+  <button class="крок"><b><i class="мітка м-є"></i>Підготовка</b><small>сканування вирівняно</small></button>
+  <button class="крок акт"><b><i class="мітка м-є"></i>Зони</b><small>3 карти · активна: під вапнування</small></button>
+  <button class="крок"><b><i class="мітка м-увага"></i>Зразки</b><small>завдання не сформоване</small></button>
+  <button class="крок нема"><b><i class="мітка м-нема"></i>Аналізи</b><small>немає протоколів</small></button>
+  <button class="крок нема"><b><i class="мітка м-нема"></i>Норми</b><small>потрібні аналізи</small></button>
+  <button class="крок нема"><b><i class="мітка м-нема"></i>Видача</b><small>—</small></button>
+</div>
+
+<div class="підтаби">
+  <button class="підтаб">Мета</button>
+  <button class="підтаб">Джерела</button>
+  <button class="підтаб акт">Налаштування</button>
+  <button class="підтаб">Результат</button>
+  <div class="чесність">Перевірка · базової лінії ще немає</div>
+</div>
+
+<div class="робота">
+
+  <!-- ЛІВА: дерево + прев'ю -->
+  <div class="колонка ліва">
+    <div class="заг">Дерево <span class="дія">розгорнути все</span></div>
+    <div class="дерево">
+      <div class="вузол в1"><i class="ік">▾</i>Угринів</div>
+      <div class="вузол в2"><i class="ік">▾</i>Угринів · господарство</div>
+      <div class="вузол в3 обр"><i class="ік">▾</i>Гречка<span class="лічильник">54,34 га</span></div>
+      <div class="вузол в4"><i class="ік">▸</i>Вхідні дані<span class="лічильник">4</span></div>
+      <div class="вузол в4"><i class="ік">▾</i>Операції</div>
+      <div class="вузол в4" style="padding-left:74px"><i class="ік">▸</i>Контур поля<span class="лічильник">1</span></div>
+      <div class="вузол в4" style="padding-left:74px"><i class="ік">▾</i>Сканування ЕМ<span class="лічильник">1</span></div>
+      <div class="вузол в4 обр" style="padding-left:90px"><i class="ік">·</i>10.08.2026<span class="лічильник">4 362</span></div>
+      <div class="вузол в4" style="padding-left:74px"><i class="ік">▾</i>Зони керування<span class="лічильник">3</span></div>
+      <div class="вузол в4" style="padding-left:90px"><i class="ік">·</i>під вапнування<span class="лічильник">5 зон</span></div>
+      <div class="вузол в4" style="padding-left:90px"><i class="ік">·</i>під посів<span class="лічильник">4 зони</span></div>
+      <div class="вузол в4" style="padding-left:90px"><i class="ік">·</i>дослідження<span class="лічильник">7 зон</span></div>
+      <div class="вузол в4 тьм" style="padding-left:74px"><i class="ік">▸</i>Відбір ґрунту<span class="лічильник">—</span></div>
+      <div class="вузол в4 тьм" style="padding-left:74px"><i class="ік">▸</i>Посів<span class="лічильник">сховище</span></div>
+      <div class="вузол в4 тьм" style="padding-left:74px"><i class="ік">▸</i>Видача клієнту<span class="лічильник">—</span></div>
+    </div>
+    <div class="прев">
+      <div class="рамка">
+        <svg viewBox="0 0 200 104" width="100%" height="100%" aria-label="прев'ю шару">
+          <rect width="200" height="104" fill="#EEF1EC"/>
+          <g transform="translate(40,8)">
+            <path d="M8 4 L104 0 L120 74 L26 88 Z" fill="var(--z3)" stroke="#fff" stroke-width="1"/>
+            <path d="M8 4 L60 2 L66 46 L14 50 Z" fill="var(--z2)" stroke="#fff" stroke-width="1"/>
+            <path d="M60 2 L104 0 L112 40 L66 46 Z" fill="var(--z4)" stroke="#fff" stroke-width="1"/>
+            <path d="M14 50 L66 46 L74 84 L26 88 Z" fill="var(--z5)" stroke="#fff" stroke-width="1"/>
+          </g>
+        </svg>
+      </div>
+      <div class="підпис">зони · під вапнування · 12.08.2026 · 5 зон</div>
+    </div>
+  </div>
+
+  <!-- ЦЕНТР: карта + контекст -->
+  <div class="центр">
+    <div class="полотно">
+      <svg viewBox="0 0 900 560" preserveAspectRatio="xMidYMid meet" aria-label="карта поля">
+        <defs>
+          <pattern id="штрих" width="7" height="7" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
+            <line x1="0" y1="0" x2="0" y2="7" stroke="#2B2B2B" stroke-opacity=".38" stroke-width="2"/>
+          </pattern>
+        </defs>
+        <rect width="900" height="560" fill="#DFE4DA"/>
+        <g stroke="#D2D8CD" stroke-width="1">
+          <path d="M0 90H900M0 180H900M0 270H900M0 360H900M0 450H900"/>
+          <path d="M120 0V560M240 0V560M360 0V560M480 0V560M600 0V560M720 0V560"/>
+        </g>
+        <g transform="translate(150,58)">
+          <path d="M18 10 L520 0 L596 402 L86 448 Z" fill="var(--z3)"/>
+          <path d="M18 10 L268 5 L300 232 L52 250 Z" fill="var(--z2)"/>
+          <path d="M18 10 L150 8 L168 128 L34 136 Z" fill="var(--z1)"/>
+          <path d="M268 5 L520 0 L556 210 L300 232 Z" fill="var(--z4)"/>
+          <path d="M300 232 L556 210 L596 402 L340 424 Z" fill="var(--z5)"/>
+          <path d="M52 250 L300 232 L340 424 L86 448 Z" fill="var(--z4)"/>
+          <path d="M18 10 L150 8 L168 128 L34 136 Z" fill="url(#штрих)"/>
+          <path d="M18 10 L520 0 L596 402 L86 448 Z" fill="none" stroke="#2E3A32" stroke-width="2.5"/>
+          <g fill="none" stroke="#fff" stroke-width="1.6" stroke-opacity=".85">
+            <path d="M18 10 L268 5 L300 232 L52 250 Z"/>
+            <path d="M268 5 L520 0 L556 210 L300 232 Z"/>
+            <path d="M300 232 L556 210 L596 402 L340 424 Z"/>
+            <path d="M52 250 L300 232 L340 424 L86 448 Z"/>
+            <path d="M18 10 L150 8 L168 128 L34 136 Z"/>
+          </g>
+          <g font="600 15px var(--ui)" fill="#1E2A22" text-anchor="middle">
+            <text x="95" y="76">1</text><text x="175" y="130">2</text>
+            <text x="410" y="118">3</text><text x="200" y="345">4</text>
+            <text x="450" y="320">5</text>
+          </g>
+        </g>
+      </svg>
+      <div class="мапкн"><button title="збільшити">+</button><button title="зменшити">−</button><button title="вписати">⤢</button></div>
+      <div class="компас"><span>Пн</span><b>▲</b></div>
+      <div class="масштаб">├───────┤ 200 м</div>
+    </div>
+
+    <div class="контекст">
+      <div class="кблок">
+        <div class="кназва">Активний шар</div>
+        <div class="пара"><span>Зони · під вапнування</span><b>5 зон</b></div>
+        <div class="пара"><span>Побудовано</span><b>12.08.2026</b></div>
+        <div class="пара"><span>Джерела</span><b>рельєф · EC</b></div>
+        <div class="пара"><span>Мін. зона</span><b>1,00 га</b></div>
+      </div>
+      <div class="кблок">
+        <div class="кназва">Є на полі для порівняння</div>
+        <div class="шарик"><i style="background:var(--z5)"></i>Зони під посів · 4 зони</div>
+        <div class="шарик"><i style="background:var(--z2)"></i>Зони дослідження · 7 зон</div>
+        <div class="шарик"><i style="background:#5B7FA6"></i>EC глибока · 4 362 точки</div>
+        <div class="шарик"><i style="background:#7A6A55"></i>Висота RTK · перепад 42,3 м</div>
+      </div>
+      <div class="кблок">
+        <div class="кназва">Наскільки цьому вірити</div>
+        <div class="пара"><span>Вимір</span><b>78 %</b></div>
+        <div class="пара"><span>Модель <i style="opacity:.5">(штрих)</i></span><b>22 %</b></div>
+        <div class="пара"><span>Зона 1</span><b style="color:var(--warn)">частково модельна</b></div>
+        <div class="пара"><span>Смугастість проходів</span><b>не виявлено</b></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ПРАВА: інструменти шару -->
+  <div class="колонка права">
+    <div class="скрол">
+    <div class="заг">Показ шару</div>
+    <div class="поле">
+      <label class="мітка-поля">Фарбувати за</label>
+      <select><option>Номер зони</option><option>Середня EC глибока</option><option>Середня висота</option><option>Площа зони</option></select>
+    </div>
+    <div class="поле дворяд">
+      <div><label class="мітка-поля">Класів</label><input type="number" value="5"></div>
+      <div><label class="мітка-поля">Розбиття</label><select><option>природні розриви</option><option>квантилі</option><option>рівні інтервали</option></select></div>
+    </div>
+    <div class="поле"><label class="мітка-поля">Прозорість</label><input type="range" value="82"></div>
+
+    <div class="легенда">
+      <div class="лрядок"><i style="background:var(--z1)"></i><span>вершини, здуті</span><b>4,1 га</b></div>
+      <div class="лрядок"><i style="background:var(--z2)"></i><span>схил верхній</span><b>11,8 га</b></div>
+      <div class="лрядок"><i style="background:var(--z3)"></i><span>схил середній</span><b>13,0 га</b></div>
+      <div class="лрядок"><i style="background:var(--z4)"></i><span>схил нижній</span><b>16,2 га</b></div>
+      <div class="лрядок"><i style="background:var(--z5)"></i><span>западини</span><b>9,2 га</b></div>
+    </div>
+
+    <div class="розділ"></div>
+    <div class="заг">Налаштування зон</div>
+    <div class="поле">
+      <label class="мітка-поля">Пресет</label>
+      <select><option>Під вапнування · базовий</option><option>Під посів · базовий</option><option>Мій: важкі ґрунти</option></select>
+    </div>
+    <div class="поле"><label class="мітка-поля">Більше зон ← → менше зон</label><input type="range" value="45"></div>
+    <div class="поле дворяд">
+      <div><label class="мітка-поля">Мін. зона, га</label><input type="number" value="1.00" step="0.25"></div>
+      <div><label class="мітка-поля">Техніка</label><select><option>МВУ без VRA</option><option>Amazone ZA-TS · ISOBUS</option></select></div>
+    </div>
+    <div class="підказка">Розкидач без змінної норми — на виході таблиця «зона · гектари · тонни», не карта. Зон не більше трьох.</div>
+    <details class="поле"><summary style="cursor:pointer;color:var(--accent);font-size:12.5px">Тонке налаштування</summary>
+      <div style="padding-top:8px">
+        <label class="мітка-поля">Згладжування меж</label><input type="range" value="30">
+        <label class="мітка-поля">Розмір комірки, м</label><input type="number" value="10">
+        <label class="мітка-поля">Відступ від межі поля, м</label><input type="number" value="12">
+      </div>
+    </details>
+
+</div>
+    <div class="низ">
+      <button class="кн">Скинути</button>
+      <button class="кн гол">Побудувати зони</button>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
