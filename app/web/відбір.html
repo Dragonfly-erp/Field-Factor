@@ -79,11 +79,7 @@ button:disabled { opacity: .45; cursor: default; }
       <div class="назва"><b>Field</b>Factor</div>
       <div class="гасло">Відбір · де брати зразки</div>
     </div>
-    <div class="шапка-права">
-      <a class="назад" href="/карта">карта внесення</a>
-      <a class="назад" href="/аналізи">аналізи</a>
-      <a class="назад" href="/">← до роботи</a>
-    </div>
+    <div class="шапка-права" id="меню"></div>
   </div>
 </header>
 
@@ -671,5 +667,6 @@ fetch("/api/стан").then(в => в.json()).then(с => {
     '<div class="смуга тривога">Збій: ' + екран(п) + "</div>";
 });
 </script>
+<script src="/web/меню.js"></script>
 </body>
 </html>
