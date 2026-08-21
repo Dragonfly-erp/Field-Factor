@@ -64,6 +64,13 @@ def _спростити(назва):
     ],
     "прохід": ["passnum", "pass", "swathnum", "tracknum", "track", "прохід", "проход"],
     "довжина": ["distance", "dist", "logdist", "sectiondist"],
+    # Тривалість запису. Без неї крок у метрах ні про що не каже: монітор
+    # пише то раз на секунду, то п'ять разів, і робочий крок міняється
+    # уп'ятеро при тій самій швидкості.
+    "тривалість": [
+        "duration", "sectiontime", "logtime", "elapsed", "interval",
+        "тривалість", "продолжительность",
+    ],
     "потік": ["flow", "massflow", "grainflow", "wetmassflow"],
     "курс": ["heading", "track_deg", "course", "direction", "azimuth", "курс"],
 }
