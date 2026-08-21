@@ -14,7 +14,7 @@ from datetime import datetime
 import numpy as np
 
 from app.core import (export_points, gaps, machines, modeling, moisture, passes,
-                      qc, reading, satellite, thinning, validation)
+                      qc, reading, satellite, thinning, util, validation)
 
 
 def виконати(сеанс):
@@ -244,7 +244,7 @@ def _прогін(сеанс):
                 None if свої_ознаки is None else свої_ознаки[куди]
             )
             назва_методу[куди] = вибір["метод"]
-        межа = float(паспорт.get("межа") or 20000)
+        межа = float(паспорт.get("межа") or util.МЕЖА_КГ_ГА)
         значення = np.clip(значення, 0.0, межа)
 
         довіра = modeling.довіра(кандидати["відстань_до_опори"], геометрія["ширина_м"],
@@ -285,7 +285,7 @@ def _прогін(сеанс):
     if звіт_ваги["коефіцієнт"] != 1.0 and "YLD_LHA" in точки.columns:
         точки["YLD_LHA"] = точки["YLD_LHA"] * звіт_ваги["коефіцієнт"]
     застереження += звіт_ваги.get("застереження", [])
-    точки["YLD_KGHA"] = np.clip(точки["YLD_KGHA"], 0.0, float(паспорт.get("межа") or 20000))
+    точки["YLD_KGHA"] = np.clip(точки["YLD_KGHA"], 0.0, float(паспорт.get("межа") or util.МЕЖА_КГ_ГА))
 
     # ---- густина ------------------------------------------------------
     # Рахували на всіх записах — і правильно: середнє з вісімнадцяти чисел
