@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FieldFactor · налаштування</title>
+<link rel="stylesheet" href="/web/стиль.css">
+<link rel="stylesheet" href="/web/сторінка.css">
+<style>
+.розділ { background:var(--картка); border:1px solid var(--лінія);
+  border-radius:var(--радіус); margin-bottom:14px; overflow:hidden; }
+.розділ-шапка { padding:9px 14px; border-bottom:1px solid var(--лінія);
+  background:var(--картка2); display:flex; align-items:baseline; gap:10px; }
+.розділ-шапка b { font-size:13px; font-weight:650 }
+.розділ-шапка span { font-size:12px; color:var(--тихий) }
+.розділ-тіло { padding:13px 14px }
+
+/* Одне налаштування — один рядок: підпис ліворуч, поле праворуч, пояснення
+   під ним. Сітка в дві колонки читається згори вниз, а не зигзагом. */
+.рядок-н { display:grid; grid-template-columns:minmax(200px,1fr) 220px;
+  gap:4px 16px; align-items:start; padding:9px 0;
+  border-bottom:1px solid var(--лінія-тиха); }
+.рядок-н:last-child { border-bottom:0 }
+.рядок-н .імʼя { font-size:13px; font-weight:600 }
+.рядок-н .чому { grid-column:1; font-size:11.5px; color:var(--тихий);
+  line-height:1.45; margin-top:2px }
+.рядок-н .поле { grid-row:1 / span 2; }
+.рядок-н input, .рядок-н select { margin:0; width:100% }
+.рядок-н input[type=checkbox] { width:auto; margin-top:4px }
+.одиниця { font-size:11px; color:var(--тихий); font-family:var(--числа) }
+.знак-перезапуску { font-size:10px; font-weight:700; letter-spacing:.04em;
+  color:var(--увага); background:rgba(227,179,65,.16);
+  border-radius:var(--радіус-дрібний); padding:1px 6px; margin-left:7px }
+
+.низ { position:sticky; bottom:0; background:var(--тло);
+  border-top:1px solid var(--лінія); padding:12px 0; margin-top:6px;
+  display:flex; gap:8px; align-items:center; }
+.низ .відступ { flex:1 }
+.про { font-size:12px; color:var(--тихий); font-family:var(--числа) }
+</style>
+</head>
+<body>
+
+<header class="шапка">
+  <div class="шапка-ряд">
+    <div class="назва"><b>Field</b>Factor</div>
+    <div class="шапка-права" id="меню"></div>
+  </div>
+</header>
+
+<main class="сторінка">
+  <h1>Налаштування</h1>
+  <p class="вступ">Усе, що програма памʼятає між запусками. Те, що позначене
+    <span class="знак-перезапуску">перезапуск</span>, застосується, коли
+    програму буде запущено наново — на живій його змінити чесно не можна.</p>
+
+  <div id="місце"></div>
+
+  <div class="низ">
+    <button class="головна" id="зберегти">Зберегти</button>
+    <button class="назад" id="скинути">Повернути як було</button>
+    <div class="відступ"></div>
+    <span class="про" id="про"></span>
+  </div>
+</main>
+
+<script src="/web/меню.js"></script>
+<script>
+"use strict";
+const $ = с => document.querySelector(с);
+const тег = (я, к, т) => { const е = document.createElement(я);
+  if (к) е.className = к; if (т !== undefined) е.textContent = т; return е; };
+
+let ОПИС = null, ПОЛЯ = {};
+
+function намалювати(д) {
+  ОПИС = д; ПОЛЯ = {};
+  const місце = $("#місце"); місце.textContent = "";
+  д.розділи.forEach(р => {
+    const свої = д.поля.filter(п => п.розділ === р.ключ);
+    if (!свої.length) return;
+    const блок = тег("div", "розділ");
+    const шапка = тег("div", "розділ-шапка");
+    шапка.appendChild(тег("b", "", р.підпис));
+    шапка.appendChild(тег("span", "", р.пояснення || ""));
+    блок.appendChild(шапка);
+    const тіло = тег("div", "розділ-тіло");
+
+    свої.forEach(п => {
+      const рядок = тег("div", "рядок-н");
+      const імʼя = тег("div", "імʼя");
+      імʼя.appendChild(document.createTextNode(п.підпис));
+      if (п.одиниця) імʼя.appendChild(тег("span", "одиниця", " , " + п.одиниця));
+      if (п.перезапуск) імʼя.appendChild(тег("span", "знак-перезапуску", "перезапуск"));
+      рядок.appendChild(імʼя);
+
+      const обгортка = тег("div", "поле");
+      let поле;
+      if (п.вид === "вибір") {
+        поле = document.createElement("select");
+        (п.варіанти || []).forEach(([з, підпис]) => поле.appendChild(new Option(підпис, з)));
+      } else if (п.вид === "прапорець") {
+        поле = document.createElement("input"); поле.type = "checkbox";
+      } else {
+        поле = document.createElement("input");
+        поле.type = п.вид === "число" ? "number" : "text";
+        if (п.вид === "число") поле.step = "any";
+        поле.placeholder = п.замовчування === undefined || п.замовчування === null
+          ? "порожньо" : String(п.замовчування);
+      }
+      const значення = д.значення[п.ключ];
+      if (п.вид === "прапорець") поле.checked = !!значення;
+      else if (значення !== null && значення !== undefined) поле.value = значення;
+      обгортка.appendChild(поле);
+      рядок.appendChild(обгортка);
+
+      if (п.пояснення) рядок.appendChild(тег("div", "чому", п.пояснення));
+      ПОЛЯ[п.ключ] = {поле, опис: п};
+      тіло.appendChild(рядок);
+    });
+    блок.appendChild(тіло);
+    місце.appendChild(блок);
+  });
+  $("#про").textContent = "версія " + (д.версія || "?") + " · " + (д.база || "");
+}
+
+function зібрати() {
+  const з = {};
+  Object.keys(ПОЛЯ).forEach(к => {
+    const {поле, опис} = ПОЛЯ[к];
+    if (опис.вид === "прапорець") з[к] = поле.checked;
+    else if (опис.вид === "число") з[к] = поле.value === "" ? null : Number(поле.value);
+    else з[к] = поле.value;
+  });
+  return з;
+}
+
+function сказати(клас, заголовок, рядки) {
+  document.querySelectorAll("main > .смуга").forEach(е => е.remove());
+  const с = тег("div", "смуга " + клас);
+  с.appendChild(тег("b", "", заголовок));
+  if (рядки && рядки.length) {
+    const сп = document.createElement("ul");
+    рядки.forEach(р => сп.appendChild(тег("li", "", р)));
+    с.appendChild(сп);
+  }
+  $("main").insertBefore(с, $("#місце"));
+  с.scrollIntoView({block: "nearest"});
+}
+
+$("#зберегти").onclick = async () => {
+  const в = await fetch("/api/налаштування", {
+    method: "POST", headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({значення: зібрати()})});
+  const д = await в.json();
+  if (!д.гаразд) { сказати("тривога", "Не збережено", д.зауваги || [д.повідомлення]); return; }
+  if ((д.перезапуск || []).length) {
+    сказати("жовта", "Збережено. Ці зміни застосуються після перезапуску програми:",
+            д.перезапуск);
+  } else {
+    сказати("", "Збережено. Діє одразу.", []);
+  }
+  ОПИС.значення = д.значення;
+};
+
+$("#скинути").onclick = () => прочитати();
+
+async function прочитати() {
+  const в = await fetch("/api/налаштування");
+  намалювати(await в.json());
+}
+
+намалювати_меню("#меню");
+прочитати().catch(п => сказати("тривога", "Не вдалось прочитати налаштування: " + п));
+</script>
+</body>
+</html>
