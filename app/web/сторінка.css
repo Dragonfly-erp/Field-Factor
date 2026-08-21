@@ -1,41 +1,67 @@
-/* Оформлення окремих сторінок-довідок: «Метод», «Аналізи».
-   Робоче місце має свій каркас у стиль.css — сюди воно не заходить. */
+/* Оформлення окремих сторінок-довідок: «Метод», «Аналізи», «Продукти».
+   Робоче місце має свій каркас у стиль.css — сюди воно не заходить.
 
-.сторінка { max-width: 1120px; margin: 0 auto; padding: 26px 32px 80px; }
-.сторінка h1 { font-size: 23px; font-weight: 400; margin: 0 0 6px; }
-.сторінка h2 {
-  font-size: 12px; letter-spacing: .16em; text-transform: uppercase;
-  color: var(--акцент); font-weight: 700; margin: 34px 0 12px;
-  border-bottom: 1px solid var(--лінія); padding-bottom: 6px;
+   Вигляд «Пульт», обраний Власником 21.08.2026: густо, числа моноширинні
+   й праворуч, статуси — сталою мовою кольору. Той самий набір токенів, що
+   й у стиль.css: тут не заводиться жодного власного кольору. */
+
+:root {
+  --увага-тло:   rgba(227, 179, 65, .16);
+  --тривога-тло: rgba(255, 122, 89, .16);
+  --добре-тло:   rgba(87, 201, 106, .16);
 }
-.сторінка p.вступ { color: var(--тихий); margin: 0 0 14px; max-width: 74ch; }
+:root[data-theme="light"] {
+  --увага-тло:   rgba(154, 116, 20, .12);
+  --тривога-тло: rgba(193, 80, 47, .12);
+  --добре-тло:   rgba(43, 139, 61, .12);
+}
+
+.сторінка { max-width: 1180px; margin: 0 auto; padding: 20px 20px 60px; }
+.сторінка h1 { font-size: 20px; font-weight: 700; margin: 0 0 5px; letter-spacing: -.015em; }
+.сторінка h2 {
+  font-size: 10.5px; letter-spacing: .11em; text-transform: uppercase;
+  color: var(--тихий); font-weight: 700; margin: 26px 0 9px;
+  border-bottom: 1px solid var(--лінія); padding-bottom: 5px;
+}
+.сторінка p.вступ { color: var(--тихий); margin: 0 0 12px; max-width: 78ch; font-size: 13px; }
 
 .прокрутка { overflow-x: auto; }
-.сторінка table { width: 100%; border-collapse: collapse; font-size: 14px; }
+/* Таблиця сама собі скролер. Таблиці на цих сторінках будує JS, і обгортку
+   `.прокрутка` йому ніхто не ставить — а широка таблиця із заголовками
+   `nowrap` зсувала вбік УСЮ сторінку. Хай їде таблиця, а не сторінка. */
+.сторінка table {
+  width: 100%; border-collapse: collapse; font-size: 12.5px;
+  display: block; overflow-x: auto; max-width: 100%;
+}
+.сторінка table thead, .сторінка table tbody { display: table; width: 100%; }
 .сторінка th {
-  text-align: left; font-weight: 600; color: var(--тихий); font-size: 11px;
-  text-transform: uppercase; letter-spacing: .06em;
-  padding: 6px 10px 6px 0; border-bottom: 1px solid var(--лінія);
+  text-align: left; font: 700 10.5px var(--шрифт); color: var(--тихий);
+  text-transform: uppercase; letter-spacing: .07em;
+  padding: 0 10px 6px 0; border-bottom: 1px solid var(--лінія);
   vertical-align: bottom; white-space: nowrap;
 }
 .сторінка td {
-  padding: 7px 10px 7px 0; border-bottom: 1px solid var(--лінія);
+  padding: 5px 10px 5px 0; border-bottom: 1px solid var(--лінія-тиха);
   vertical-align: top;
 }
+.сторінка tbody tr:hover { background: var(--картка); }
+/* Число читають, порівнюючи розряди: моноширинно й праворуч, інакше
+   колонка не читається взагалі. */
 .сторінка th.ч, .сторінка td.ч {
-  text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap;
+  text-align: right; font-family: var(--числа); white-space: nowrap;
 }
-.сторінка .тиха { color: var(--тихий); font-size: 13px; }
-.сторінка code { font-size: 13px; color: var(--ґрунт); word-break: break-all; }
-.сторінка ul { margin: 8px 0 0; padding-left: 20px; color: var(--тихий); font-size: 14px; }
-.сторінка li { margin-bottom: 4px; }
+.сторінка .тиха { color: var(--тихий); font-size: 12px; }
+.сторінка code { font: 12px var(--числа); color: var(--ґрунт); word-break: break-all;
+  background: transparent; padding: 0; }
+.сторінка ul { margin: 6px 0 0; padding-left: 18px; color: var(--тихий); font-size: 12.5px; }
+.сторінка li { margin-bottom: 3px; }
 
 .мітка {
-  display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .05em;
-  padding: 1px 7px; border-radius: 999px; white-space: nowrap;
+  display: inline-block; font-size: 10.5px; font-weight: 700; letter-spacing: .02em;
+  padding: 1px 7px; border-radius: var(--радіус-дрібний); white-space: nowrap;
 }
-.мітка.CANON, .мітка.VALIDATED, .мітка.збіг, .мітка.чинний {
-  background: var(--акцент-світлий); color: var(--акцент-темний);
+.мітка.CANON, .мітка.VALIDATED, .мітка.збіг, .мітка.чинний, .мітка.добре {
+  background: var(--добре-тло); color: var(--зелень);
 }
 .мітка.WORKING, .мітка.увага, .мітка.цензуровано, .мітка.підпитанням {
   background: var(--увага-тло); color: var(--увага);
@@ -44,52 +70,48 @@
   background: var(--тривога-тло); color: var(--тривога);
 }
 .мітка.недоступне, .мітка.немаєвиміру, .мітка.нечитане {
-  background: var(--лінія); color: var(--тихий);
+  background: var(--картка2); color: var(--тихий);
 }
 
 .смуга {
-  border: 1px solid var(--лінія); border-left: 3px solid var(--акцент);
+  border: 1px solid var(--лінія); border-left: 2px solid var(--акцент);
   background: var(--картка); border-radius: var(--радіус);
-  padding: 12px 16px; margin: 0 0 12px;
+  padding: 9px 13px; margin: 0 0 9px; font-size: 13px;
 }
 .смуга.тривога { border-left-color: var(--тривога); }
 .смуга.жовта { border-left-color: var(--увага); }
 .смуга b { font-weight: 650; }
-.смуга .чому { color: var(--тихий); font-size: 13px; margin-top: 4px; }
+.смуга .чому { color: var(--тихий); font-size: 12px; margin-top: 3px; }
 
-.назад { font-size: 13px; color: var(--акцент); text-decoration: none; }
+.назад { font-size: 12.5px; color: var(--акцент); text-decoration: none; }
 .назад:hover { text-decoration: underline; }
 .шапка-права { margin-left: auto; }
-
-:root { --увага-тло: #f3ecd6; --тривога-тло: #f6e0d8; }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) { --увага-тло: #332c14; --тривога-тло: #3a1f16; }
-}
-:root[data-theme="dark"] { --увага-тло: #332c14; --тривога-тло: #3a1f16; }
 
 /* ── Верхнє робоче меню ─────────────────────────────────────────────────
    Ланцюг видно завжди й цілком: людина має розуміти, чим закінчиться її
    робота і які кроки для цього треба пройти. Крок, на якому стоїмо,
-   підсвічений; довідники відділені рискою, бо вони не крок. */
+   підсвічений вкладкою; довідники відділені рискою, бо вони не крок. */
 
-.меню { display: flex; align-items: center; flex-wrap: wrap; gap: 2px; }
+.меню { display: flex; align-items: stretch; flex-wrap: wrap; gap: 0; height: 44px; }
 .меню-пункт {
-  font-size: 13px; font-weight: 600; text-decoration: none;
-  color: var(--тихий); padding: 5px 10px; border-radius: 6px;
-  white-space: nowrap; border: 1px solid transparent;
+  display: flex; align-items: center;
+  font-size: 13px; font-weight: 500; text-decoration: none;
+  color: var(--тихий); padding: 0 12px;
+  white-space: nowrap; border-bottom: 2px solid transparent;
 }
-.меню-пункт:hover { color: var(--текст); background: var(--картка); }
+.меню-пункт:hover { color: var(--текст); background: var(--картка2); }
 .меню-пункт.тут {
-  color: var(--акцент-темний); background: var(--акцент-світлий);
-  border-color: var(--акцент);
+  color: var(--текст); background: transparent;
+  border-bottom-color: var(--акцент); font-weight: 650;
 }
 .меню-пункт.довідник { font-weight: 500; }
-.меню-стрілка { color: var(--лінія); font-size: 12px; user-select: none; }
+.меню-стрілка { color: var(--лінія); font-size: 11px; user-select: none;
+  display: flex; align-items: center; }
 .меню-розрив {
-  width: 1px; height: 18px; background: var(--лінія); margin: 0 10px;
+  width: 1px; height: 16px; background: var(--лінія); margin: auto 8px;
   display: inline-block;
 }
 @media (max-width: 900px) {
   .меню-стрілка { display: none; }
-  .меню-пункт { padding: 5px 7px; }
+  .меню-пункт { padding: 0 8px; }
 }

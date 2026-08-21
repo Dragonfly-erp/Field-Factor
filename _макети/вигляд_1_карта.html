@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<title>FieldFactor · вигляд 1 «Карта»</title>
+<style>
+/* ═══════════════════════════════════════════════════════════════════════
+   ВИГЛЯД 1 · «КАРТА»
+   Рідня: OneSoil, Climate FieldView, Trimble Ag.
+   Ідея: карта — це і є програма. Усе інше пливе поверх неї напівпрозорими
+   панелями. Темна оправа, щоб кольори поля світились.
+   ═══════════════════════════════════════════════════════════════════════ */
+:root{
+  --тло:#0e1512; --скло:rgba(20,29,25,.86); --скло-край:rgba(255,255,255,.10);
+  --текст:#e8f0ea; --тихий:#8fa398; --акцент:#7ddc6a; --акцент-темний:#3f8f45;
+  --тривога:#ff8a5b; --радіус:12px;
+  --шрифт:"Segoe UI",-apple-system,Roboto,Arial,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--тло);color:var(--текст);font:14px/1.45 var(--шрифт);
+     height:100vh;overflow:hidden}
+
+/* ---- карта на весь екран ---- */
+.карта{position:fixed;inset:0;background:
+   radial-gradient(120% 90% at 30% 20%,#1b2a20 0%,#0d1310 70%)}
+.карта svg{position:absolute;inset:0;width:100%;height:100%}
+
+/* ---- ліва рейка з іконками ---- */
+.рейка{position:fixed;left:0;top:0;bottom:0;width:56px;z-index:5;
+  background:var(--скло);backdrop-filter:blur(14px);
+  border-right:1px solid var(--скло-край);
+  display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 0}
+.знак{width:32px;height:32px;border-radius:9px;
+  background:linear-gradient(150deg,var(--акцент),var(--акцент-темний));
+  display:grid;place-items:center;font-weight:800;color:#0e1512;font-size:15px;
+  margin-bottom:10px}
+.іконка{width:40px;height:40px;border-radius:10px;display:grid;place-items:center;
+  color:var(--тихий);cursor:pointer;border:1px solid transparent;font-size:17px}
+.іконка:hover{background:rgba(255,255,255,.06);color:var(--текст)}
+.іконка.є{background:rgba(125,220,106,.14);color:var(--акцент);
+  border-color:rgba(125,220,106,.28)}
+.рейка .низ{margin-top:auto}
+
+/* ---- панель полів ---- */
+.поля{position:fixed;left:56px;top:0;bottom:0;width:280px;z-index:4;
+  background:var(--скло);backdrop-filter:blur(14px);
+  border-right:1px solid var(--скло-край);display:flex;flex-direction:column}
+.поля header{padding:14px 16px 10px;border-bottom:1px solid var(--скло-край)}
+.поля h2{font-size:12px;letter-spacing:.10em;text-transform:uppercase;
+  color:var(--тихий);font-weight:600}
+.шукач{margin:10px 16px;padding:8px 11px;border-radius:9px;font:13px var(--шрифт);
+  background:rgba(255,255,255,.05);border:1px solid var(--скло-край);
+  color:var(--текст);width:calc(100% - 32px)}
+.шукач::placeholder{color:var(--тихий)}
+.група{padding:12px 16px 4px;font-size:11px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--тихий)}
+.поле{display:flex;align-items:center;gap:10px;padding:9px 16px;cursor:pointer;
+  border-left:2px solid transparent}
+.поле:hover{background:rgba(255,255,255,.05)}
+.поле.є{background:rgba(125,220,106,.10);border-left-color:var(--акцент)}
+.крапка{width:9px;height:9px;border-radius:3px;flex:none}
+.поле .імʼя{flex:1;font-size:13.5px}
+.поле .га{font-size:12px;color:var(--тихий);font-variant-numeric:tabular-nums}
+
+/* ---- верхня плаваюча стрічка ---- */
+.стрічка{position:fixed;left:352px;right:16px;top:14px;z-index:6;
+  display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.пігулка{background:var(--скло);backdrop-filter:blur(14px);
+  border:1px solid var(--скло-край);border-radius:999px;padding:8px 14px;
+  font-size:13px;cursor:pointer;display:flex;align-items:center;gap:8px;
+  white-space:nowrap}
+.пігулка:hover{border-color:rgba(255,255,255,.22)}
+.пігулка.є{background:var(--акцент);color:#0c1410;border-color:var(--акцент);
+  font-weight:600}
+.пігулка .лічильник{background:rgba(255,255,255,.14);border-radius:999px;
+  padding:1px 7px;font-size:11px;font-variant-numeric:tabular-nums}
+.пігулка.є .лічильник{background:rgba(0,0,0,.18)}
+.стрічка .відступ{flex:1}
+
+/* ---- картка поля знизу праворуч ---- */
+.картка{position:fixed;right:16px;bottom:16px;width:340px;z-index:6;
+  background:var(--скло);backdrop-filter:blur(14px);
+  border:1px solid var(--скло-край);border-radius:var(--радіус);overflow:hidden}
+.картка-шапка{padding:14px 16px 10px}
+.картка h3{font-size:17px;font-weight:650}
+.картка .під{color:var(--тихий);font-size:12.5px;margin-top:2px}
+.числа{display:grid;grid-template-columns:1fr 1fr 1fr;
+  border-top:1px solid var(--скло-край)}
+.число{padding:12px 14px;border-right:1px solid var(--скло-край)}
+.число:last-child{border-right:0}
+.число b{display:block;font-size:19px;font-weight:650;
+  font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.число span{font-size:11px;color:var(--тихий);text-transform:uppercase;
+  letter-spacing:.05em}
+.втрата{padding:11px 16px;border-top:1px solid var(--скло-край);
+  background:rgba(255,138,91,.10);display:flex;align-items:center;gap:10px}
+.втрата .знак-у{width:22px;height:22px;border-radius:7px;flex:none;
+  background:rgba(255,138,91,.22);color:var(--тривога);display:grid;
+  place-items:center;font-size:13px;font-weight:700}
+.втрата div{font-size:12.5px;line-height:1.35}
+.втрата b{color:var(--тривога)}
+
+/* ---- легенда знизу ліворуч ---- */
+.легенда{position:fixed;left:368px;bottom:16px;z-index:6;
+  background:var(--скло);backdrop-filter:blur(14px);
+  border:1px solid var(--скло-край);border-radius:var(--радіус);padding:11px 13px}
+.легенда .назва{font-size:11px;color:var(--тихий);text-transform:uppercase;
+  letter-spacing:.07em;margin-bottom:7px}
+.смуга{display:flex;height:9px;border-radius:4px;overflow:hidden;width:230px}
+.смуга i{flex:1}
+.межі{display:flex;justify-content:space-between;margin-top:5px;font-size:10.5px;
+  color:var(--тихий);font-variant-numeric:tabular-nums}
+
+/* ---- кроки роботи ---- */
+.кроки{position:fixed;right:16px;top:64px;z-index:6;width:340px;
+  background:var(--скло);backdrop-filter:blur(14px);
+  border:1px solid var(--скло-край);border-radius:var(--радіус);padding:6px}
+.крок{display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:9px;
+  cursor:pointer}
+.крок:hover{background:rgba(255,255,255,.05)}
+.мітка{width:20px;height:20px;border-radius:50%;flex:none;display:grid;
+  place-items:center;font-size:11px;font-weight:700;
+  border:1.5px solid rgba(255,255,255,.16);color:var(--тихий)}
+.крок.готово .мітка{background:var(--акцент);border-color:var(--акцент);color:#0c1410}
+.крок.зараз .мітка{border-color:var(--акцент);color:var(--акцент)}
+.крок .текст{flex:1;font-size:13.5px}
+.крок.готово .текст{color:var(--тихий)}
+.крок .коли{font-size:11px;color:var(--тихий)}
+
+.зум{position:fixed;right:16px;bottom:210px;z-index:6;display:flex;
+  flex-direction:column;background:var(--скло);border:1px solid var(--скло-край);
+  border-radius:10px;overflow:hidden;backdrop-filter:blur(14px)}
+.зум button{width:34px;height:34px;background:none;border:0;color:var(--текст);
+  font-size:16px;cursor:pointer}
+.зум button+button{border-top:1px solid var(--скло-край)}
+</style>
+</head>
+<body>
+
+<div class="карта">
+  <svg viewBox="0 0 1000 620" preserveAspectRatio="xMidYMid slice">
+    <defs>
+      <clipPath id="контур">
+        <path d="M250 90 L720 130 L790 300 L735 470 L470 520 L300 455 L235 270 Z"/>
+      </clipPath>
+      <filter id="мʼяко"><feGaussianBlur stdDeviation="7"/></filter>
+    </defs>
+    <!-- сусідні поля, ледь помітні -->
+    <g opacity=".22" fill="none" stroke="#3d5347" stroke-width="1.5">
+      <path d="M80 40 L240 60 L230 300 L60 280 Z"/>
+      <path d="M810 150 L960 190 L940 430 L800 400 Z"/>
+      <path d="M330 540 L640 560 L620 610 L340 600 Z"/>
+    </g>
+    <g clip-path="url(#контур)" filter="url(#мʼяко)">
+      <rect x="200" y="60" width="640" height="500" fill="#8e3f2a"/>
+      <path d="M200 60 q160 70 320 20 t320 -10 v130 q-160 60 -320 20 t-320 10 z" fill="#c07a3e"/>
+      <path d="M200 190 q160 70 320 20 t320 -10 v120 q-160 60 -320 20 t-320 10 z" fill="#d9c88b"/>
+      <path d="M200 300 q160 70 320 20 t320 -10 v110 q-160 60 -320 20 t-320 10 z" fill="#8fbf55"/>
+      <path d="M200 400 q160 70 320 20 t320 -10 v160 q-160 60 -320 20 t-320 10 z" fill="#3f8f45"/>
+      <!-- ділянка недобору -->
+      <ellipse cx="430" cy="255" rx="95" ry="62" fill="#8e3f2a" opacity=".85"/>
+      <ellipse cx="620" cy="370" rx="70" ry="45" fill="#c07a3e" opacity=".75"/>
+    </g>
+    <path d="M250 90 L720 130 L790 300 L735 470 L470 520 L300 455 L235 270 Z"
+          fill="none" stroke="#ffffff" stroke-width="2" opacity=".85"/>
+    <!-- номер ділянки уваги -->
+    <g>
+      <circle cx="430" cy="255" r="15" fill="#0e1512" stroke="#ff8a5b" stroke-width="2"/>
+      <text x="430" y="261" text-anchor="middle" fill="#ff8a5b"
+            font-family="Segoe UI,Arial" font-size="15" font-weight="700">1</text>
+    </g>
+    <g>
+      <circle cx="620" cy="370" r="15" fill="#0e1512" stroke="#ff8a5b" stroke-width="2"/>
+      <text x="620" y="376" text-anchor="middle" fill="#ff8a5b"
+            font-family="Segoe UI,Arial" font-size="15" font-weight="700">2</text>
+    </g>
+  </svg>
+</div>
+
+<nav class="рейка">
+  <div class="знак">F</div>
+  <div class="іконка є" title="Поля">▦</div>
+  <div class="іконка" title="Аналізи">⚗</div>
+  <div class="іконка" title="Відбір">◎</div>
+  <div class="іконка" title="Карта внесення">▤</div>
+  <div class="іконка" title="Продукти">◈</div>
+  <div class="іконка" title="Звіти">▣</div>
+  <div class="іконка низ" title="Метод">☰</div>
+</nav>
+
+<aside class="поля">
+  <header>
+    <h2>Картотека</h2>
+    <input class="шукач" placeholder="Поле, господарство…">
+  </header>
+  <div style="overflow:auto;flex:1">
+    <div class="група">Зелена Поляна · 6 полів</div>
+    <div class="поле є"><i class="крапка" style="background:#7ddc6a"></i>
+      <span class="імʼя">Г-03</span><span class="га">177,80 га</span></div>
+    <div class="поле"><i class="крапка" style="background:#d9c88b"></i>
+      <span class="імʼя">Г-05</span><span class="га">92,40 га</span></div>
+    <div class="поле"><i class="крапка" style="background:#c07a3e"></i>
+      <span class="імʼя">Г-11</span><span class="га">143,15 га</span></div>
+    <div class="група">Угринів · 2 поля</div>
+    <div class="поле"><i class="крапка" style="background:#8fbf55"></i>
+      <span class="імʼя">Гречка</span><span class="га">64,20 га</span></div>
+    <div class="поле"><i class="крапка" style="background:#4a5b52"></i>
+      <span class="імʼя">За фермою</span><span class="га">38,90 га</span></div>
+    <div class="група">Демо</div>
+    <div class="поле"><i class="крапка" style="background:#4a5b52"></i>
+      <span class="імʼя">Долинка 12</span><span class="га">120,00 га</span></div>
+  </div>
+</aside>
+
+<div class="стрічка">
+  <div class="пігулка є">Врожайність 2025 <span class="лічильник">17 102</span></div>
+  <div class="пігулка">Вегетація · 5 років</div>
+  <div class="пігулка">Рельєф</div>
+  <div class="пігулка">Голий ґрунт</div>
+  <div class="пігулка">Зони <span class="лічильник">5</span></div>
+  <div class="відступ"></div>
+  <div class="пігулка">＋ шар</div>
+  <div class="пігулка">Знімок тлом</div>
+</div>
+
+<section class="кроки">
+  <div class="крок готово"><i class="мітка">✓</i>
+    <span class="текст">Нормалізація врожайності</span><span class="коли">21.08</span></div>
+  <div class="крок зараз"><i class="мітка">2</i>
+    <span class="текст">Зонування поля</span><span class="коли">зараз</span></div>
+  <div class="крок"><i class="мітка">3</i><span class="текст">Завдання на відбір</span></div>
+  <div class="крок"><i class="мітка">4</i><span class="текст">Аналізи з лабораторії</span></div>
+  <div class="крок"><i class="мітка">5</i><span class="текст">Карта внесення</span></div>
+</section>
+
+<div class="зум"><button>＋</button><button>−</button><button>⤢</button></div>
+
+<div class="легенда">
+  <div class="назва">Врожайність, кг/га</div>
+  <div class="смуга">
+    <i style="background:#8e3f2a"></i><i style="background:#c07a3e"></i>
+    <i style="background:#d9c88b"></i><i style="background:#8fbf55"></i>
+    <i style="background:#3f8f45"></i>
+  </div>
+  <div class="межі"><span>3 260</span><span>11 568</span><span>13 123</span><span>17 234</span></div>
+</div>
+
+<div class="картка">
+  <div class="картка-шапка">
+    <h3>Г-03</h3>
+    <div class="під">Зелена Поляна · кукурудза 2025 · залікова 14 %</div>
+  </div>
+  <div class="числа">
+    <div class="число"><b>177,8</b><span>гектарів</span></div>
+    <div class="число"><b>12 105</b><span>кг/га</span></div>
+    <div class="число"><b>2 152</b><span>тонн</span></div>
+  </div>
+  <div class="втрата">
+    <i class="знак-у">!</i>
+    <div>Умовно недобрано <b>27 т</b> на <b>14,9 га</b> — 4 ділянки,
+      де поле обіцяло більше</div>
+  </div>
+</div>
+
+</body>
+</html>

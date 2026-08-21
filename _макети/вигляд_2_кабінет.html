@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<title>FieldFactor · вигляд 2 «Кабінет»</title>
+<style>
+/* ═══════════════════════════════════════════════════════════════════════
+   ВИГЛЯД 2 · «КАБІНЕТ»
+   Рідня: LiteFarm, farmOS, Agworld.
+   Ідея: світлий робочий кабінет. Ліве меню з підписами, хлібні крихти,
+   вміст у картках із повітрям. Карта — велика картка серед інших, а не тло.
+   Спокійно читається годинами, добре друкується, легко нарощується.
+   ═══════════════════════════════════════════════════════════════════════ */
+:root{
+  --тло:#f4f6f2; --картка:#ffffff; --текст:#1e2a23; --тихий:#6b7d71;
+  --лінія:#e2e8de; --акцент:#2f7a3e; --акцент-тло:#eaf3ea;
+  --тривога:#b4472c; --тривога-тло:#fbeee9; --увага:#8a6d1f;
+  --радіус:14px; --тінь:0 1px 2px rgba(30,42,35,.05),0 6px 18px rgba(30,42,35,.05);
+  --шрифт:"Segoe UI",-apple-system,Roboto,Arial,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--тло);color:var(--текст);font:14.5px/1.5 var(--шрифт);
+     height:100vh;overflow:hidden;display:flex}
+
+/* ---- ліве меню ---- */
+.меню{width:232px;flex:none;background:var(--картка);
+  border-right:1px solid var(--лінія);display:flex;flex-direction:column;padding:16px 12px}
+.лого{display:flex;align-items:center;gap:10px;padding:4px 8px 18px}
+.лого .знак{width:34px;height:34px;border-radius:10px;flex:none;
+  background:var(--акцент);color:#fff;display:grid;place-items:center;
+  font-weight:800;font-size:16px}
+.лого b{font-size:16px;font-weight:700;letter-spacing:-.01em}
+.лого small{display:block;font-size:11px;color:var(--тихий);font-weight:400}
+.розділ{font-size:11px;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--тихий);padding:14px 10px 6px;font-weight:600}
+.пункт{display:flex;align-items:center;gap:11px;padding:9px 10px;border-radius:9px;
+  color:var(--текст);text-decoration:none;cursor:pointer;font-size:14px}
+.пункт:hover{background:#f2f5f0}
+.пункт.є{background:var(--акцент-тло);color:var(--акцент);font-weight:600}
+.пункт .ік{width:18px;text-align:center;opacity:.75}
+.пункт .лічильник{margin-left:auto;font-size:11.5px;color:var(--тихий);
+  font-variant-numeric:tabular-nums}
+
+/* ---- основна частина ---- */
+.основа{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.верх{background:var(--картка);border-bottom:1px solid var(--лінія);
+  padding:14px 26px;display:flex;align-items:center;gap:14px}
+.крихти{font-size:13px;color:var(--тихий)}
+.крихти b{color:var(--текст);font-weight:600}
+.крихти span{margin:0 7px;opacity:.5}
+.верх .відступ{flex:1}
+.чіп{font-size:12px;padding:4px 11px;border-radius:999px;background:var(--акцент-тло);
+  color:var(--акцент);font-weight:600}
+.кнопка{background:var(--акцент);color:#fff;border:0;border-radius:9px;
+  padding:9px 16px;font:600 13.5px var(--шрифт);cursor:pointer}
+.кнопка.тиха{background:var(--картка);color:var(--текст);border:1px solid var(--лінія)}
+
+.полотно{flex:1;overflow:auto;padding:22px 26px 30px}
+h1{font-size:24px;font-weight:700;letter-spacing:-.02em}
+.підзаголовок{color:var(--тихий);font-size:13.5px;margin-top:3px}
+
+/* ---- плитки чисел ---- */
+.плитки{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:20px 0}
+.плитка{background:var(--картка);border:1px solid var(--лінія);
+  border-radius:var(--радіус);padding:16px 18px;box-shadow:var(--тінь)}
+.плитка .шапка{font-size:12px;color:var(--тихий);text-transform:uppercase;
+  letter-spacing:.05em;font-weight:600}
+.плитка b{display:block;font-size:27px;font-weight:700;margin-top:8px;
+  letter-spacing:-.025em;font-variant-numeric:tabular-nums}
+.плитка .хвіст{font-size:12.5px;color:var(--тихий);margin-top:3px}
+.плитка.увага{border-color:#f0d9cf;background:var(--тривога-тло)}
+.плитка.увага b,.плитка.увага .шапка{color:var(--тривога)}
+
+/* ---- сітка вмісту ---- */
+.ряд{display:grid;grid-template-columns:1.65fr 1fr;gap:16px;align-items:start}
+.блок{background:var(--картка);border:1px solid var(--лінія);
+  border-radius:var(--радіус);box-shadow:var(--тінь);overflow:hidden}
+.блок-шапка{padding:14px 18px;border-bottom:1px solid var(--лінія);
+  display:flex;align-items:center;gap:10px}
+.блок-шапка h2{font-size:15px;font-weight:650}
+.блок-шапка .відступ{flex:1}
+.блок-тіло{padding:16px 18px}
+.мапа{padding:0;background:#eef2ec}
+.мапа svg{display:block;width:100%;height:330px}
+
+.вкладки{display:flex;gap:4px}
+.вкладка{font-size:12.5px;padding:5px 11px;border-radius:8px;color:var(--тихий);
+  cursor:pointer}
+.вкладка.є{background:var(--акцент-тло);color:var(--акцент);font-weight:600}
+
+/* ---- перелік шарів ---- */
+.шар{display:flex;align-items:center;gap:11px;padding:10px 0;
+  border-bottom:1px solid var(--лінія)}
+.шар:last-child{border-bottom:0}
+.шар .крапка{width:10px;height:10px;border-radius:3px;flex:none}
+.шар .імʼя{flex:1;font-size:13.5px}
+.шар .рік{font-size:12px;color:var(--тихий)}
+.перемикач{width:34px;height:19px;border-radius:999px;background:#dbe3d9;flex:none;
+  position:relative;cursor:pointer}
+.перемикач::after{content:"";position:absolute;top:2px;left:2px;width:15px;height:15px;
+  border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.перемикач.є{background:var(--акцент)}
+.перемикач.є::after{left:17px}
+
+/* ---- кроки ---- */
+.крок{display:flex;gap:12px;padding:11px 0;border-bottom:1px solid var(--лінія)}
+.крок:last-child{border-bottom:0}
+.мітка{width:24px;height:24px;border-radius:50%;flex:none;display:grid;
+  place-items:center;font-size:12px;font-weight:700;background:#eef2ec;
+  color:var(--тихий)}
+.крок.готово .мітка{background:var(--акцент);color:#fff}
+.крок.зараз .мітка{background:#fff;border:2px solid var(--акцент);color:var(--акцент)}
+.крок .текст{flex:1}
+.крок .текст b{font-size:13.5px;font-weight:600;display:block}
+.крок .текст small{color:var(--тихий);font-size:12px}
+.крок .дія{font-size:12.5px;color:var(--акцент);font-weight:600;cursor:pointer;
+  align-self:center}
+
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;
+  color:var(--тихий);font-weight:600;padding:0 0 8px}
+td{padding:8px 0;border-top:1px solid var(--лінія);font-variant-numeric:tabular-nums}
+td.втр{color:var(--тривога);font-weight:600}
+</style>
+</head>
+<body>
+
+<nav class="меню">
+  <div class="лого">
+    <div class="знак">F</div>
+    <div><b>FieldFactor</b><small>Data. Insight. Growth.</small></div>
+  </div>
+
+  <div class="розділ">Робота</div>
+  <a class="пункт є"><i class="ік">▦</i> Поля <span class="лічильник">9</span></a>
+  <a class="пункт"><i class="ік">▤</i> Замовлення <span class="лічильник">3</span></a>
+  <a class="пункт"><i class="ік">▣</i> Документи</a>
+
+  <div class="розділ">Кроки</div>
+  <a class="пункт"><i class="ік">◇</i> Нормалізація</a>
+  <a class="пункт"><i class="ік">◈</i> Зонування</a>
+  <a class="пункт"><i class="ік">◎</i> Відбір</a>
+  <a class="пункт"><i class="ік">⚗</i> Аналізи</a>
+  <a class="пункт"><i class="ік">▥</i> Карта внесення</a>
+
+  <div class="розділ">Довідники</div>
+  <a class="пункт"><i class="ік">◫</i> Продукти</a>
+  <a class="пункт"><i class="ік">☰</i> Метод</a>
+</nav>
+
+<div class="основа">
+  <div class="верх">
+    <div class="крихти"><b>Зелена Поляна</b><span>›</span><b>Г-03</b><span>›</span>2025</div>
+    <div class="чіп">кукурудза</div>
+    <div class="відступ"></div>
+    <button class="кнопка тиха">Звіт PDF</button>
+    <button class="кнопка">Продовжити роботу</button>
+  </div>
+
+  <div class="полотно">
+    <h1>Г-03</h1>
+    <div class="підзаголовок">177,80 га · кукурудза 2025 · залікова вологість 14 % ·
+      нормалізовано 21.08.2026</div>
+
+    <div class="плитки">
+      <div class="плитка"><div class="шапка">Середня врожайність</div>
+        <b>12 105</b><div class="хвіст">кг/га · вагова 12 128</div></div>
+      <div class="плитка"><div class="шапка">Валовий збір</div>
+        <b>2 152</b><div class="хвіст">тонн на базисі 14 %</div></div>
+      <div class="плитка"><div class="шапка">Різниця по полю</div>
+        <b>1,5×</b><div class="хвіст">гірша п'ятина проти кращої</div></div>
+      <div class="плитка увага"><div class="шапка">Умовно недобрано</div>
+        <b>27 т</b><div class="хвіст">на 14,9 га · 4 ділянки</div></div>
+    </div>
+
+    <div class="ряд">
+      <div class="блок">
+        <div class="блок-шапка">
+          <h2>Карта поля</h2>
+          <div class="відступ"></div>
+          <div class="вкладки">
+            <span class="вкладка є">Врожайність</span>
+            <span class="вкладка">Вегетація</span>
+            <span class="вкладка">Рельєф</span>
+            <span class="вкладка">Зони</span>
+          </div>
+        </div>
+        <div class="блок-тіло мапа">
+          <svg viewBox="0 0 900 480">
+            <defs><clipPath id="к2">
+              <path d="M180 60 L680 95 L760 250 L700 410 L410 455 L245 390 L165 220 Z"/>
+            </clipPath></defs>
+            <rect width="900" height="480" fill="#eef2ec"/>
+            <g clip-path="url(#к2)">
+              <rect x="150" y="40" width="640" height="440" fill="#8e3f2a"/>
+              <path d="M150 40 q160 66 320 18 t320 -9 v120 q-160 56 -320 18 t-320 9 z" fill="#c07a3e"/>
+              <path d="M150 160 q160 66 320 18 t320 -9 v110 q-160 56 -320 18 t-320 9 z" fill="#d9c88b"/>
+              <path d="M150 262 q160 66 320 18 t320 -9 v100 q-160 56 -320 18 t-320 9 z" fill="#8fbf55"/>
+              <path d="M150 355 q160 66 320 18 t320 -9 v150 q-160 56 -320 18 t-320 9 z" fill="#2f7a3e"/>
+              <ellipse cx="370" cy="215" rx="85" ry="55" fill="#8e3f2a" opacity=".85"/>
+              <ellipse cx="565" cy="320" rx="62" ry="40" fill="#c07a3e" opacity=".75"/>
+            </g>
+            <path d="M180 60 L680 95 L760 250 L700 410 L410 455 L245 390 L165 220 Z"
+                  fill="none" stroke="#1e2a23" stroke-width="2" opacity=".55"/>
+            <circle cx="370" cy="215" r="14" fill="#fff" stroke="#b4472c" stroke-width="2"/>
+            <text x="370" y="221" text-anchor="middle" fill="#b4472c"
+                  font-family="Segoe UI,Arial" font-size="14" font-weight="700">1</text>
+            <circle cx="565" cy="320" r="14" fill="#fff" stroke="#b4472c" stroke-width="2"/>
+            <text x="565" y="326" text-anchor="middle" fill="#b4472c"
+                  font-family="Segoe UI,Arial" font-size="14" font-weight="700">2</text>
+            <g transform="translate(600,430)">
+              <rect x="0" y="0" width="44" height="9" fill="#8e3f2a"/>
+              <rect x="44" y="0" width="44" height="9" fill="#c07a3e"/>
+              <rect x="88" y="0" width="44" height="9" fill="#d9c88b"/>
+              <rect x="132" y="0" width="44" height="9" fill="#8fbf55"/>
+              <rect x="176" y="0" width="44" height="9" fill="#2f7a3e"/>
+              <text x="0" y="24" font-family="Segoe UI,Arial" font-size="11" fill="#6b7d71">3 260</text>
+              <text x="220" y="24" text-anchor="end" font-family="Segoe UI,Arial"
+                    font-size="11" fill="#6b7d71">17 234 кг/га</text>
+            </g>
+          </svg>
+        </div>
+      </div>
+
+      <div style="display:grid;gap:16px">
+        <div class="блок">
+          <div class="блок-шапка"><h2>Шари поля</h2><div class="відступ"></div>
+            <span class="вкладка">＋ додати</span></div>
+          <div class="блок-тіло">
+            <div class="шар"><i class="крапка" style="background:#2f7a3e"></i>
+              <span class="імʼя">Врожайність</span><span class="рік">2025</span>
+              <i class="перемикач є"></i></div>
+            <div class="шар"><i class="крапка" style="background:#8fbf55"></i>
+              <span class="імʼя">Вегетація, 5 років</span><span class="рік">2021–25</span>
+              <i class="перемикач"></i></div>
+            <div class="шар"><i class="крапка" style="background:#8a6d1f"></i>
+              <span class="імʼя">Голий ґрунт</span><span class="рік">2024</span>
+              <i class="перемикач"></i></div>
+            <div class="шар"><i class="крапка" style="background:#7a6a4f"></i>
+              <span class="імʼя">Рельєф</span><span class="рік">—</span>
+              <i class="перемикач"></i></div>
+            <div class="шар"><i class="крапка" style="background:#b4472c"></i>
+              <span class="імʼя">Ділянки уваги</span><span class="рік">4</span>
+              <i class="перемикач є"></i></div>
+          </div>
+        </div>
+
+        <div class="блок">
+          <div class="блок-шапка"><h2>Що далі по полю</h2></div>
+          <div class="блок-тіло">
+            <div class="крок готово"><i class="мітка">✓</i>
+              <div class="текст"><b>Нормалізація</b><small>три файли віддано · 21.08</small></div>
+              <span class="дія">відкрити</span></div>
+            <div class="крок зараз"><i class="мітка">2</i>
+              <div class="текст"><b>Зонування</b><small>джерела обрано, зони не побудовані</small></div>
+              <span class="дія">продовжити</span></div>
+            <div class="крок"><i class="мітка">3</i>
+              <div class="текст"><b>Завдання на відбір</b><small>чекає на зони</small></div></div>
+            <div class="крок"><i class="мітка">4</i>
+              <div class="текст"><b>Аналізи</b><small>протоколу немає</small></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="блок" style="margin-top:16px">
+      <div class="блок-шапка"><h2>Ділянки, варті уваги</h2><div class="відступ"></div>
+        <span class="вкладка">у звіт</span></div>
+      <div class="блок-тіло">
+        <table>
+          <tr><th>№</th><th>Площа</th><th>Врожайність</th><th>Недобір</th>
+              <th>Тонн</th><th>Рослинність</th><th>Рельєф</th></tr>
+          <tr><td>1</td><td>5,1 га</td><td>10 617</td><td class="втр">−2 260</td>
+              <td>11,5</td><td>+0,59</td><td>−0,69</td></tr>
+          <tr><td>2</td><td>6,1 га</td><td>10 815</td><td class="втр">−1 673</td>
+              <td>10,2</td><td>−0,00</td><td>+1,22</td></tr>
+          <tr><td>3</td><td>1,9 га</td><td>10 014</td><td class="втр">−1 493</td>
+              <td>2,8</td><td>−0,63</td><td>+0,90</td></tr>
+          <tr><td>4</td><td>1,8 га</td><td>11 221</td><td class="втр">−1 505</td>
+              <td>2,6</td><td>+0,17</td><td>+0,82</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

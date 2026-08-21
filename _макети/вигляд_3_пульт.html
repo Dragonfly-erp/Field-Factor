@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<title>FieldFactor · вигляд 3 «Пульт»</title>
+<style>
+/* ═══════════════════════════════════════════════════════════════════════
+   ВИГЛЯД 3 · «ПУЛЬТ»
+   Рідня: xarvio Field Manager, Granular, професійні торгові термінали.
+   Ідея: густо й усе одразу. Темний графіт, вузькі відступи, дрібний
+   моноширинний шрифт на числах, статуси кольором. Один екран тримає багато
+   полів і багато чисел — для того, хто веде десятки замовлень і не хоче
+   клацати.
+   ═══════════════════════════════════════════════════════════════════════ */
+:root{
+  --тло:#15181c; --панель:#1b1f24; --панель2:#20252b; --край:#2b323a;
+  --текст:#dfe6ea; --тихий:#8b97a3; --акцент:#4ea8ff; --зелень:#57c96a;
+  --тривога:#ff7a59; --увага:#e3b341; --радіус:7px;
+  --шрифт:"Segoe UI",-apple-system,Roboto,Arial,sans-serif;
+  --числа:"Consolas","SF Mono",monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--тло);color:var(--текст);font:13px/1.4 var(--шрифт);
+     height:100vh;overflow:hidden;display:flex;flex-direction:column}
+
+/* ---- верхня смуга ---- */
+.смуга{height:44px;flex:none;background:var(--панель);
+  border-bottom:1px solid var(--край);display:flex;align-items:center;
+  padding:0 12px;gap:16px}
+.лого{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px}
+.лого i{width:24px;height:24px;border-radius:6px;background:var(--акцент);
+  color:#0f1216;display:grid;place-items:center;font-size:13px;font-style:normal;
+  font-weight:800}
+.вкладки{display:flex;height:100%;align-items:stretch}
+.вкладка{display:flex;align-items:center;padding:0 15px;color:var(--тихий);
+  cursor:pointer;border-bottom:2px solid transparent;font-size:13px}
+.вкладка:hover{color:var(--текст)}
+.вкладка.є{color:var(--текст);border-bottom-color:var(--акцент);font-weight:600}
+.смуга .відступ{flex:1}
+.пошук{background:var(--панель2);border:1px solid var(--край);border-radius:6px;
+  padding:5px 10px;color:var(--текст);font:12.5px var(--шрифт);width:200px}
+.дія{background:var(--акцент);border:0;border-radius:6px;padding:6px 13px;
+  color:#0f1216;font:600 12.5px var(--шрифт);cursor:pointer}
+
+/* ---- три колонки ---- */
+.тіло{flex:1;display:grid;grid-template-columns:246px 1fr 300px;overflow:hidden}
+.колонка{overflow:auto;border-right:1px solid var(--край)}
+.колонка:last-child{border-right:0;border-left:1px solid var(--край)}
+.заголовок{position:sticky;top:0;background:var(--панель);z-index:2;
+  padding:8px 12px;font-size:10.5px;letter-spacing:.10em;text-transform:uppercase;
+  color:var(--тихий);border-bottom:1px solid var(--край);font-weight:700;
+  display:flex;align-items:center;gap:8px}
+.заголовок .відступ{flex:1}
+.заголовок b{color:var(--текст);font-variant-numeric:tabular-nums}
+
+/* ---- перелік полів, щільний ---- */
+.гсп{padding:7px 12px 4px;font-size:11px;color:var(--тихий);
+  background:var(--панель2);border-bottom:1px solid var(--край);font-weight:600}
+.рядок{display:flex;align-items:center;gap:8px;padding:6px 12px;cursor:pointer;
+  border-bottom:1px solid rgba(43,50,58,.5)}
+.рядок:hover{background:var(--панель2)}
+.рядок.є{background:rgba(78,168,255,.12);
+  box-shadow:inset 2px 0 0 var(--акцент)}
+.рядок .імʼя{flex:1;font-size:12.5px}
+.рядок .га{font:11.5px var(--числа);color:var(--тихий)}
+.стан{width:7px;height:7px;border-radius:50%;flex:none}
+.с-готово{background:var(--зелень)} .с-робота{background:var(--увага)}
+.с-нема{background:#4a545e} .с-біда{background:var(--тривога)}
+
+/* ---- центр ---- */
+.центр{display:flex;flex-direction:column;overflow:hidden}
+.шапка-поля{padding:11px 14px;border-bottom:1px solid var(--край);
+  display:flex;align-items:baseline;gap:10px;background:var(--панель)}
+.шапка-поля h1{font-size:17px;font-weight:700}
+.шапка-поля .під{color:var(--тихий);font-size:12px}
+.шапка-поля .відступ{flex:1}
+.знак-стану{font-size:11px;padding:3px 9px;border-radius:5px;font-weight:600;
+  background:rgba(87,201,106,.16);color:var(--зелень)}
+
+.кпі{display:grid;grid-template-columns:repeat(6,1fr);border-bottom:1px solid var(--край)}
+.кпі div{padding:9px 12px;border-right:1px solid var(--край)}
+.кпі div:last-child{border-right:0}
+.кпі .і{font-size:10px;color:var(--тихий);text-transform:uppercase;
+  letter-spacing:.06em}
+.кпі b{display:block;font:600 17px var(--числа);margin-top:3px;letter-spacing:-.02em}
+.кпі .вниз b{color:var(--тривога)}
+.кпі .вгору b{color:var(--зелень)}
+
+.карта{flex:1;position:relative;background:#11151a;overflow:hidden}
+.карта svg{position:absolute;inset:0;width:100%;height:100%}
+.шари-стрічка{position:absolute;left:10px;top:10px;display:flex;gap:5px;z-index:2}
+.мітка{background:rgba(27,31,36,.92);border:1px solid var(--край);border-radius:5px;
+  padding:4px 10px;font-size:11.5px;cursor:pointer}
+.мітка.є{background:var(--акцент);color:#0f1216;border-color:var(--акцент);
+  font-weight:600}
+.шкала{position:absolute;left:10px;bottom:10px;background:rgba(27,31,36,.92);
+  border:1px solid var(--край);border-radius:6px;padding:7px 9px;z-index:2}
+.шкала .см{display:flex;width:190px;height:7px;border-radius:3px;overflow:hidden}
+.шкала .см i{flex:1}
+.шкала .цифри{display:flex;justify-content:space-between;margin-top:4px;
+  font:10px var(--числа);color:var(--тихий)}
+
+/* ---- права колонка ---- */
+.пункт{padding:8px 12px;border-bottom:1px solid rgba(43,50,58,.6);display:flex;
+  gap:9px;align-items:center}
+.пункт .т{flex:1;font-size:12.5px}
+.пункт .т small{display:block;color:var(--тихий);font-size:11px}
+.пункт .ч{font:12px var(--числа);color:var(--тихий)}
+.кнопка-тиха{background:var(--панель2);border:1px solid var(--край);border-radius:5px;
+  color:var(--текст);font:11.5px var(--шрифт);padding:3px 9px;cursor:pointer}
+.смужка{height:4px;border-radius:2px;background:var(--край);overflow:hidden;
+  margin-top:5px}
+.смужка i{display:block;height:100%;background:var(--зелень)}
+
+table{width:100%;border-collapse:collapse;font:11.5px var(--числа)}
+th{text-align:right;padding:5px 10px;color:var(--тихий);font:600 10px var(--шрифт);
+  text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--край)}
+th:first-child,td:first-child{text-align:left}
+td{text-align:right;padding:5px 10px;border-bottom:1px solid rgba(43,50,58,.5)}
+td.мінус{color:var(--тривога)}
+</style>
+</head>
+<body>
+
+<div class="смуга">
+  <div class="лого"><i>F</i>FieldFactor</div>
+  <nav class="вкладки">
+    <div class="вкладка є">Поля</div>
+    <div class="вкладка">Замовлення</div>
+    <div class="вкладка">Аналізи</div>
+    <div class="вкладка">Продукти</div>
+    <div class="вкладка">Документи</div>
+  </nav>
+  <div class="відступ"></div>
+  <input class="пошук" placeholder="Поле, господарство, замовлення…">
+  <button class="дія">Нова операція</button>
+</div>
+
+<div class="тіло">
+
+  <!-- ліва: щільний перелік -->
+  <div class="колонка">
+    <div class="заголовок">Поля <div class="відступ"></div><b>9</b></div>
+    <div class="гсп">ЗЕЛЕНА ПОЛЯНА · 6</div>
+    <div class="рядок є"><i class="стан с-готово"></i><span class="імʼя">Г-03</span>
+      <span class="га">177,80</span></div>
+    <div class="рядок"><i class="стан с-робота"></i><span class="імʼя">Г-05</span>
+      <span class="га">92,40</span></div>
+    <div class="рядок"><i class="стан с-нема"></i><span class="імʼя">Г-11</span>
+      <span class="га">143,15</span></div>
+    <div class="рядок"><i class="стан с-біда"></i><span class="імʼя">Г-14</span>
+      <span class="га">61,05</span></div>
+    <div class="рядок"><i class="стан с-нема"></i><span class="імʼя">Г-18</span>
+      <span class="га">88,70</span></div>
+    <div class="рядок"><i class="стан с-нема"></i><span class="імʼя">Г-22</span>
+      <span class="га">104,30</span></div>
+    <div class="гсп">УГРИНІВ · 2</div>
+    <div class="рядок"><i class="стан с-робота"></i><span class="імʼя">Гречка</span>
+      <span class="га">64,20</span></div>
+    <div class="рядок"><i class="стан с-нема"></i><span class="імʼя">За фермою</span>
+      <span class="га">38,90</span></div>
+    <div class="гсп">ДЕМО · 1</div>
+    <div class="рядок"><i class="стан с-готово"></i><span class="імʼя">Долинка 12</span>
+      <span class="га">120,00</span></div>
+  </div>
+
+  <!-- центр -->
+  <div class="центр">
+    <div class="шапка-поля">
+      <h1>Г-03</h1>
+      <span class="під">Зелена Поляна · кукурудза 2025 · базис 14 %</span>
+      <div class="відступ"></div>
+      <span class="знак-стану">нормалізовано 21.08</span>
+    </div>
+
+    <div class="кпі">
+      <div><div class="і">Площа</div><b>177,80</b></div>
+      <div><div class="і">Кг/га</div><b>12 105</b></div>
+      <div><div class="і">Тонн</div><b>2 152</b></div>
+      <div><div class="і">Проти вагової</div><b>−0,2 %</b></div>
+      <div class="вниз"><div class="і">Недобір</div><b>27 т</b></div>
+      <div class="вгору"><div class="і">Згода з веге</div><b>0,743</b></div>
+    </div>
+
+    <div class="карта">
+      <div class="шари-стрічка">
+        <span class="мітка є">Врожайність</span>
+        <span class="мітка">Вегетація</span>
+        <span class="мітка">Рельєф</span>
+        <span class="мітка">Ґрунт</span>
+        <span class="мітка">Зони</span>
+        <span class="мітка">Модель</span>
+      </div>
+      <svg viewBox="0 0 900 470" preserveAspectRatio="xMidYMid slice">
+        <defs><clipPath id="к3">
+          <path d="M190 55 L690 90 L770 245 L710 405 L420 450 L255 385 L175 215 Z"/>
+        </clipPath></defs>
+        <g opacity=".3" stroke="#2b323a" stroke-width="1" fill="none">
+          <path d="M0 0 h900 M0 60 h900 M0 120 h900 M0 180 h900 M0 240 h900
+                   M0 300 h900 M0 360 h900 M0 420 h900"/>
+          <path d="M0 0 v470 M75 0 v470 M150 0 v470 M225 0 v470 M300 0 v470
+                   M375 0 v470 M450 0 v470 M525 0 v470 M600 0 v470 M675 0 v470
+                   M750 0 v470 M825 0 v470"/>
+        </g>
+        <g clip-path="url(#к3)">
+          <rect x="160" y="35" width="640" height="440" fill="#8e3f2a"/>
+          <path d="M160 35 q160 66 320 18 t320 -9 v120 q-160 56 -320 18 t-320 9 z" fill="#c07a3e"/>
+          <path d="M160 155 q160 66 320 18 t320 -9 v110 q-160 56 -320 18 t-320 9 z" fill="#d9c88b"/>
+          <path d="M160 257 q160 66 320 18 t320 -9 v100 q-160 56 -320 18 t-320 9 z" fill="#8fbf55"/>
+          <path d="M160 350 q160 66 320 18 t320 -9 v150 q-160 56 -320 18 t-320 9 z" fill="#3f8f45"/>
+          <ellipse cx="380" cy="210" rx="85" ry="55" fill="#8e3f2a" opacity=".85"/>
+          <ellipse cx="575" cy="315" rx="62" ry="40" fill="#c07a3e" opacity=".75"/>
+        </g>
+        <path d="M190 55 L690 90 L770 245 L710 405 L420 450 L255 385 L175 215 Z"
+              fill="none" stroke="#4ea8ff" stroke-width="1.5" opacity=".9"/>
+        <circle cx="380" cy="210" r="13" fill="#15181c" stroke="#ff7a59" stroke-width="1.5"/>
+        <text x="380" y="215" text-anchor="middle" fill="#ff7a59"
+              font-family="Consolas,monospace" font-size="13" font-weight="700">1</text>
+        <circle cx="575" cy="315" r="13" fill="#15181c" stroke="#ff7a59" stroke-width="1.5"/>
+        <text x="575" y="320" text-anchor="middle" fill="#ff7a59"
+              font-family="Consolas,monospace" font-size="13" font-weight="700">2</text>
+      </svg>
+      <div class="шкала">
+        <div class="см"><i style="background:#8e3f2a"></i><i style="background:#c07a3e"></i>
+          <i style="background:#d9c88b"></i><i style="background:#8fbf55"></i>
+          <i style="background:#3f8f45"></i></div>
+        <div class="цифри"><span>3 260</span><span>12 403</span><span>17 234</span></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="заголовок">Ділянки уваги <div class="відступ"></div>
+        <b>4</b> · 14,9 га · 27 т</div>
+      <table>
+        <tr><th>№</th><th>га</th><th>кг/га</th><th>недобір</th><th>т</th>
+            <th>веге</th><th>рельєф</th></tr>
+        <tr><td>1</td><td>5,1</td><td>10 617</td><td class="мінус">−2 260</td>
+            <td>11,5</td><td>+0,59</td><td>−0,69</td></tr>
+        <tr><td>2</td><td>6,1</td><td>10 815</td><td class="мінус">−1 673</td>
+            <td>10,2</td><td>−0,00</td><td>+1,22</td></tr>
+        <tr><td>3</td><td>1,9</td><td>10 014</td><td class="мінус">−1 493</td>
+            <td>2,8</td><td>−0,63</td><td>+0,90</td></tr>
+        <tr><td>4</td><td>1,8</td><td>11 221</td><td class="мінус">−1 505</td>
+            <td>2,6</td><td>+0,17</td><td>+0,82</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- права -->
+  <div class="колонка">
+    <div class="заголовок">Кроки по полю</div>
+    <div class="пункт"><i class="стан с-готово"></i>
+      <div class="т">Нормалізація<small>три файли · 21.08.2026</small></div>
+      <button class="кнопка-тиха">файли</button></div>
+    <div class="пункт"><i class="стан с-робота"></i>
+      <div class="т">Зонування<small>джерела обрано, зон немає</small>
+        <div class="смужка"><i style="width:40%"></i></div></div>
+      <button class="кнопка-тиха">далі</button></div>
+    <div class="пункт"><i class="стан с-нема"></i>
+      <div class="т">Відбір<small>чекає на зони</small></div></div>
+    <div class="пункт"><i class="стан с-нема"></i>
+      <div class="т">Аналізи<small>протоколу немає</small></div></div>
+    <div class="пункт"><i class="стан с-нема"></i>
+      <div class="т">Карта внесення<small>чекає на аналізи</small></div></div>
+
+    <div class="заголовок">Свідки поля</div>
+    <div class="пункт"><div class="т">Вегетація сезону</div><span class="ч">+0,669</span></div>
+    <div class="пункт"><div class="т">Вегетація 5 років</div><span class="ч">+0,461</span></div>
+    <div class="пункт"><div class="т">Рельєф</div><span class="ч">+0,280</span></div>
+    <div class="пункт"><div class="т">Голий ґрунт</div><span class="ч">+0,041</span></div>
+    <div class="пункт"><div class="т"><b>Разом пояснюють</b></div><span class="ч">48 %</span></div>
+
+    <div class="заголовок">Файли віддачі</div>
+    <div class="пункт"><div class="т">shapefile<small>32 атрибути · 17 102 комірки</small></div>
+      <span class="ч">3,6 МБ</span></div>
+    <div class="пункт"><div class="т">Звіт нормалізації<small>3 сторінки</small></div>
+      <span class="ч">294 КБ</span></div>
+    <div class="пункт"><div class="т">SMS import guide<small>7 атрибутів</small></div>
+      <span class="ч">6,8 КБ</span></div>
+  </div>
+
+</div>
+</body>
+</html>
