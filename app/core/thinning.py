@@ -114,8 +114,8 @@ def оцінити(площа_га, крок_м):
 
 # Як зводити кожну колонку. Те, чого тут немає, береться від першого запису
 # в комірці — це стосується підписів на кшталт назви методу.
-СЕРЕДНІ = ("YLD_KGHA", "YLD_LHA", "YLD_RAW", "MOIST_RAW", "ELEV_M",
-           "HDR_W_M", "SPD_KMH", "VEG_IDX")
+СЕРЕДНІ = ("YLD_KGHA", "YLD_LHA", "YLD_RAW", "MOIST", "ELEV_M",
+           "WORK_W_M", "SPD_KMH", "VEG_IDX")
 НАЙЧАСТІШІ = ("SRC_TYPE", "COMB_ID", "QC_FLAG", "METHOD", "CONF", "GAP_CLASS")
 
 
@@ -159,8 +159,8 @@ def звести_на_сітку(точки, крок_м, журнал=None):
     # Вага запису — скільки землі він накрив. Запис на повільному ході й
     # запис на повному не рівні між собою: перший описує метр, другий — три.
     вага = np.ones(len(точки))
-    if "HDR_W_M" in таблиця.columns:
-        ш = pd.to_numeric(таблиця["HDR_W_M"], errors="coerce").to_numpy()
+    if "WORK_W_M" in таблиця.columns:
+        ш = pd.to_numeric(таблиця["WORK_W_M"], errors="coerce").to_numpy()
         добрі = np.isfinite(ш) & (ш > 0)
         if добрі.any():
             вага = np.where(добрі, ш, np.nanmedian(ш[добрі]))
