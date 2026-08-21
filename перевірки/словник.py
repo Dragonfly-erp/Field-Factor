@@ -204,6 +204,14 @@ from app.core import export_points
 # MOIST_RAW -> MOIST і HDR_W_M -> WORK_W_M мовчки викинуло обидві колонки
 # з віддачі: модуль просто не знайшов їх і пропустив.
 from app.core import thinning
+from app.core import sms_map
+розходження = sms_map.перевірити()
+каже(not розходження,
+     "мапа атрибутів SMS сходиться з віддачею"
+     + ("" if not розходження else ": " + "; ".join(розходження)))
+print("      рядків, де назву атрибута SMS ще треба звірити з Власником: %d"
+      % len(sms_map.незакриті()))
+
 чужі_у_сітці = [і for і in thinning.СЕРЕДНІ if і not in export_points.ПОРЯДОК]
 каже(not чужі_у_сітці,
      "зведення на сітку не знає колонок, яких немає у віддачі"

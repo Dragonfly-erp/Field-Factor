@@ -13,8 +13,9 @@ from datetime import datetime
 
 import numpy as np
 
-from app.core import (export_points, gaps, leveling, machines, modeling, moisture, passes,
-                      qc, reading, satellite, thinning, util, validation)
+from app.core import (export_points, gaps, leveling, machines, modeling, moisture,
+                      passes, qc, reading, satellite, sms_map, thinning, util,
+                      validation)
 
 
 # Нижче цього перекриття поправку не робимо: крайовий ефект самого виміру
@@ -518,6 +519,13 @@ def _віддати(сеанс, точки, повна, контур, геоме
     імʼя_точок = "{}_yield_normalized_points".format(основа)
     файли += export_points.записати_шейп(точки, os.path.join(тека, імʼя_точок + ".shp"))
     файли.append(export_points.словник_полів(os.path.join(тека, "field_dictionary.csv")))
+    # Інструкція для імпорту в SMS іде поруч із shape. Без неї клієнт не
+    # призначить ширину й відстань, і SMS покаже нульову площу й нульову вагу,
+    # а середню врожайність — правильну. Саме так помилку й не помічають.
+    файли.append(sms_map.записати(
+        os.path.join(тека, "SMS_import_guide.txt"), сеанс.паспорт,
+        імʼя_shp=імʼя_точок + ".shp",
+        крок_м=float((звіт_густини or {}).get("крок_м") or 10.0)))
 
     відкинуті = повна[повна["QC"] != "OK"]
     if len(відкинуті):
