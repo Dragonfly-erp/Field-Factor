@@ -431,7 +431,8 @@ body.робоче-місце .шапка { padding: 0 12px; }
 .порожня-карта .дрібно { max-width: 320px; line-height: 1.7; }
 
 /* --- смуга чисел під шапкою поля --- */
-.кпі { display: grid; border-bottom: 1px solid var(--лінія); background: var(--картка); }
+.кпі { display: grid; grid-template-columns: repeat(auto-fit, minmax(122px, 1fr));
+  border-bottom: 1px solid var(--лінія); background: var(--картка); }
 .кпі > div { padding: 7px 12px; border-right: 1px solid var(--лінія); }
 .кпі > div:last-child { border-right: none; }
 .кпі .і { font-size: 10px; color: var(--тихий); text-transform: uppercase; letter-spacing: .07em; }

@@ -1,0 +1,571 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FieldFactor · гроші</title>
+<link rel="stylesheet" href="/web/стиль.css">
+<link rel="stylesheet" href="/web/сторінка.css">
+<style>
+/* Екран «Гроші». Вигляд «Пульт» — своїх кольорів не заводимо, усе токенами. */
+.вкладки-грошей { display:flex; gap:2px; border-bottom:1px solid var(--лінія);
+  margin: 0 0 16px; }
+.вкладки-грошей a { padding:8px 14px; color:var(--тихий); cursor:pointer;
+  font-size:13px; border-bottom:2px solid transparent; margin-bottom:-1px; }
+.вкладки-грошей a:hover { color:var(--текст); }
+.вкладки-грошей a.тут { color:var(--текст); border-bottom-color:var(--акцент);
+  font-weight:650; }
+.сцена { display:none } .сцена.тут { display:block }
+
+/* Підтаби довідників. Кожен довідник має свої колонки: у добрива діюча
+   речовина, у насіння посівна одиниця, у робіт пальне. Зліплені докупи
+   вони перетворюються на кашу з порожніх клітинок. */
+.підтаби { display:flex; gap:2px; border-bottom:1px solid var(--лінія);
+  margin-bottom:12px; flex-wrap:wrap; }
+.підтаби a { padding:7px 13px; color:var(--тихий); cursor:pointer; font-size:13px;
+  border-bottom:2px solid transparent; margin-bottom:-1px; }
+.підтаби a:hover { color:var(--текст) }
+.підтаби a.тут { color:var(--текст); border-bottom-color:var(--акцент); font-weight:650 }
+.підтаби .лічильник { font-family:var(--числа); font-size:11px; color:var(--тихий);
+  margin-left:6px }
+.довідник { display:none } .довідник.тут { display:block }
+
+/* Ряд дій переноситься, а не зсуває сторінку: на ноутбуці 1280 з двома
+   відкритими панелями місця лишається менше, ніж здається. */
+.дії-рядок { display:flex; align-items:center; gap:8px; margin-bottom:10px;
+  flex-wrap:wrap; }
+.дії-рядок .відступ { flex:1 }
+.дії-рядок select, .дії-рядок input { width:auto; margin:0; }
+
+tr.своє td:first-child { box-shadow: inset 2px 0 0 var(--акцент); }
+.рядок-дій { white-space:nowrap; text-align:right; }
+.рядок-дій button { font-size:11.5px; padding:2px 8px; margin-left:4px; }
+
+.форма { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+  gap:10px 14px; }
+.форма label { display:block; font-size:11.5px; color:var(--тихий); font-weight:600 }
+.форма .широке { grid-column:1 / -1 }
+.форма .чому { font-weight:400; font-size:11px; color:var(--тихий); margin-top:2px;
+  display:block }
+
+/* Шість плиток на широкому екрані, менше — на вузькому. Жорсткі шість
+   колонок зсували вбік усю сторінку на ноутбуці. */
+.кпі { display:grid; grid-template-columns:repeat(auto-fit,minmax(122px,1fr));
+  border:1px solid var(--лінія);
+  border-radius:var(--радіус); overflow:hidden; background:var(--картка);
+  margin-bottom:14px; }
+.кпі > div { padding:9px 13px; border-right:1px solid var(--лінія) }
+.кпі > div:last-child { border-right:0 }
+.кпі .і { font-size:10px; color:var(--тихий); text-transform:uppercase;
+  letter-spacing:.07em }
+.кпі b { display:block; font:650 17px var(--числа); margin-top:3px;
+  letter-spacing:-.02em }
+.кпі .вниз b { color:var(--тривога) } .кпі .вгору b { color:var(--зелень) }
+.кпі .х { font-size:11px; color:var(--тихий); font-family:var(--числа) }
+
+tr.підсумок td { border-top:1px solid var(--лінія); border-bottom:1px solid var(--лінія);
+  font-weight:700; background:var(--картка) }
+tr.головний td { font-size:14px; font-weight:700; background:var(--акцент-світлий) }
+td.плюс { color:var(--зелень) } td.мінус { color:var(--тривога) }
+
+.два { display:grid; grid-template-columns:1.2fr 1fr; gap:14px; align-items:start }
+.блок { background:var(--картка); border:1px solid var(--лінія);
+  border-radius:var(--радіус); overflow:hidden; margin-bottom:14px }
+.блок-шапка { padding:8px 13px; border-bottom:1px solid var(--лінія);
+  background:var(--картка2); font:700 10.5px var(--шрифт); letter-spacing:.09em;
+  text-transform:uppercase; color:var(--тихий); display:flex; align-items:center; gap:8px }
+.блок-шапка .відступ { flex:1 }
+.блок-тіло { padding:11px 13px }
+</style>
+</head>
+<body>
+
+<header class="шапка">
+  <div class="шапка-ряд">
+    <div class="назва"><b>Field</b>Factor</div>
+    <div class="шапка-права" id="меню"></div>
+  </div>
+</header>
+
+<main class="сторінка">
+  <h1>Гроші</h1>
+  <p class="вступ" id="де-ми">Довідники, витрати господарства і бюджет поля.</p>
+
+  <div class="дії-рядок">
+    <label style="margin:0">Господарство
+      <select id="вибір-господарства" style="margin-top:3px;min-width:200px"></select></label>
+    <div class="відступ"></div>
+    <span class="тиха" id="про-господарство"></span>
+  </div>
+
+  <nav class="вкладки-грошей">
+    <a data-с="довідники" class="тут">Довідники</a>
+    <a data-с="бюджет">Бюджет поля</a>
+    <a data-с="господарство">Господарство</a>
+  </nav>
+
+  <!-- ══════════════════════════════════════════ ДОВІДНИКИ -->
+  <section class="сцена тут" id="сцена-довідники">
+    <nav class="підтаби" id="підтаби"></nav>
+    <div class="дії-рядок">
+      <button class="головна" id="додати">+ додати</button>
+      <div class="відступ"></div>
+      <span class="тиха" id="про-розділ"></span>
+    </div>
+    <div id="форма-місце"></div>
+    <div class="прокрутка" id="таблиця-місце"></div>
+  </section>
+
+  <!-- ══════════════════════════════════════════ БЮДЖЕТ ПОЛЯ -->
+  <section class="сцена" id="сцена-бюджет">
+    <div class="дії-рядок">
+      <label style="margin:0">Поле
+        <select id="вибір-поля" style="margin-top:3px"></select></label>
+      <label style="margin:0">Рік
+        <input id="вибір-року" type="number" min="2000" max="2100"
+               style="margin-top:3px;width:90px"></label>
+      <label style="margin:0">Культура
+        <input id="вибір-культури" style="margin-top:3px;width:150px"></label>
+      <div class="відступ"></div>
+      <button id="зберегти-план" class="головна">Зберегти план</button>
+    </div>
+    <div id="бюджет-місце"></div>
+  </section>
+
+  <!-- ══════════════════════════════════════════ ГОСПОДАРСТВО -->
+  <section class="сцена" id="сцена-господарство">
+    <div id="господарство-місце"></div>
+  </section>
+</main>
+
+<script src="/web/меню.js"></script>
+<script>
+"use strict";
+const $ = с => document.querySelector(с);
+const тег = (я, к, т) => { const е = document.createElement(я);
+  if (к) е.className = к; if (т !== undefined) е.textContent = т; return е; };
+const екран = т => String(т === null || т === undefined ? "" : т);
+
+// Число для показу: пробіл між тисячами, кома як роздільник. Порожнє
+// лишається порожнім — нуль замість «невідомо» це брехня, яка виглядає
+// як безкоштовно.
+function ч(х, знаків) {
+  if (х === null || х === undefined || х === "" || !isFinite(х)) return "—";
+  const н = Number(х).toFixed(знаків === undefined ? 0 : знаків);
+  const [ц, др] = н.split(".");
+  const з_пробілами = ц.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+  return др ? з_пробілами + "," + др : з_пробілами;
+}
+
+const РОЗДІЛИ = [
+  {ключ: "матеріали", підпис: "Добрива", вид: "добриво",
+   колонки: ["назва", "діюча", "одиниця", "ціна", "норма", "дата_ціни", "джерело_ціни"]},
+  {ключ: "матеріали", підпис: "Насіння", вид: "насіння", ід: "насіння",
+   колонки: ["назва", "діюча", "одиниця", "ціна", "норма", "дата_ціни", "джерело_ціни"]},
+  {ключ: "матеріали", підпис: "Засоби захисту", вид: "ЗЗР", ід: "ззр",
+   колонки: ["назва", "діюча", "одиниця", "ціна", "норма", "дата_ціни", "джерело_ціни"]},
+  {ключ: "роботи", підпис: "Роботи й техніка",
+   колонки: ["назва", "агрегат", "пальне_л_га", "виробіток_га_год", "ставка_грн_га"]},
+  {ключ: "витрати", підпис: "Витрати господарства",
+   колонки: ["назва", "група", "сума_рік", "ставка_га", "розкид"]},
+  {ключ: "ціни_продукції", підпис: "Ціни продукції",
+   колонки: ["культура", "ціна_т", "базис", "якість", "дата", "джерело"]},
+];
+const ЧИСЛОВІ_КОЛОНКИ = new Set(["ціна", "норма", "пальне_л_га", "виробіток_га_год",
+  "ставка_грн_га", "сума_рік", "ставка_га", "ціна_т"]);
+
+let СТАН = {д: null, розділ: 0, господарство: null, поле: null, рік: null};
+
+// ───────────────────────────────────────────────────────── читання
+async function перечитати() {
+  const п = new URLSearchParams();
+  if (СТАН.господарство) п.set("господарство", СТАН.господарство);
+  if (СТАН.поле) п.set("поле", СТАН.поле);
+  if (СТАН.рік) п.set("рік", СТАН.рік);
+  const в = await fetch("/api/гроші?" + п.toString());
+  СТАН.д = await в.json();
+  намалювати();
+}
+
+function намалювати() {
+  намалювати_підтаби();
+  намалювати_довідник();
+  намалювати_бюджет();
+  намалювати_господарство();
+}
+
+// ───────────────────────────────────────────────────────── довідники
+function записи(р) {
+  const усі = (СТАН.д.довідники || {})[р.ключ] || [];
+  return р.вид ? усі.filter(з => з.вид === р.вид) : усі;
+}
+
+function намалювати_підтаби() {
+  const н = $("#підтаби"); н.textContent = "";
+  РОЗДІЛИ.forEach((р, і) => {
+    const а = тег("a", і === СТАН.розділ ? "тут" : "", р.підпис);
+    а.appendChild(тег("span", "лічильник", записи(р).length));
+    а.onclick = () => { СТАН.розділ = і; $("#форма-місце").textContent = "";
+                        намалювати_підтаби(); намалювати_довідник(); };
+    н.appendChild(а);
+  });
+}
+
+function підпис_поля(розділ, ключ) {
+  const картки = (СТАН.д.картки || {})[розділ] || [];
+  const к = картки.find(п => п.ключ === ключ);
+  return к ? к.підпис : ключ;
+}
+
+function намалювати_довідник() {
+  const р = РОЗДІЛИ[СТАН.розділ];
+  const місце = $("#таблиця-місце"); місце.textContent = "";
+  $("#про-розділ").textContent = р.ключ === "витрати"
+    ? "Заповнюється або річна сума, або ставка на гектар — щось одне"
+    : (р.ключ === "матеріали"
+       ? "Ціна — у тій одиниці, у якій цей товар купують"
+       : "");
+
+  const т = document.createElement("table");
+  const шапка = т.insertRow();
+  р.колонки.forEach(к => {
+    const th = document.createElement("th");
+    th.textContent = підпис_поля(р.ключ, к);
+    if (ЧИСЛОВІ_КОЛОНКИ.has(к)) th.className = "ч";
+    шапка.appendChild(th);
+  });
+  шапка.appendChild(document.createElement("th"));
+
+  const список = записи(р);
+  if (!список.length) {
+    const тіло = т.insertRow().insertCell();
+    тіло.colSpan = р.колонки.length + 1;
+    тіло.className = "тиха";
+    тіло.textContent = "Порожньо. Натисніть «додати».";
+  }
+  список.forEach(з => {
+    const рядок = т.insertRow();
+    if (з.своє) рядок.className = "своє";
+    р.колонки.forEach(к => {
+      const td = рядок.insertCell();
+      if (ЧИСЛОВІ_КОЛОНКИ.has(к)) { td.className = "ч"; td.textContent = ч(з[к], 2); }
+      else td.textContent = екран(з[к]);
+    });
+    const дії = рядок.insertCell(); дії.className = "рядок-дій";
+    const правити = тег("button", "", "правити");
+    правити.onclick = () => показати_форму(р, з);
+    const прибрати = тег("button", "", "×");
+    прибрати.onclick = () => видалити(р, з);
+    дії.appendChild(правити); дії.appendChild(прибрати);
+  });
+  місце.appendChild(т);
+}
+
+function показати_форму(р, запис) {
+  const місце = $("#форма-місце"); місце.textContent = "";
+  const картки = (СТАН.д.картки || {})[р.ключ] || [];
+  const блок = тег("div", "блок");
+  const шапка = тег("div", "блок-шапка", запис ? "Правка" : "Новий запис");
+  блок.appendChild(шапка);
+  const тіло = тег("div", "блок-тіло");
+  const форма = тег("div", "форма");
+  const поля = {};
+
+  картки.forEach(п => {
+    const обгортка = тег("label", п.вид === "текст" && п.ключ === "примітка" ? "широке" : "");
+    обгортка.appendChild(document.createTextNode(
+      п.підпис + (п.обовʼязкове ? " *" : "") + (п.одиниця ? ", " + п.одиниця : "")));
+    let поле;
+    if (п.вид === "вибір") {
+      поле = document.createElement("select");
+      поле.appendChild(new Option("—", ""));
+      (п.варіанти || []).forEach(([з, підпис]) => поле.appendChild(new Option(підпис, з)));
+    } else if (п.вид === "прапорець") {
+      поле = document.createElement("input"); поле.type = "checkbox";
+      поле.style.width = "auto"; поле.style.marginTop = "6px";
+    } else {
+      поле = document.createElement("input");
+      поле.type = п.вид === "число" ? "number" : (п.вид === "дата" ? "date" : "text");
+      if (п.вид === "число") поле.step = "any";
+    }
+    if (запис) {
+      if (п.вид === "прапорець") поле.checked = !!запис[п.ключ];
+      else if (запис[п.ключ] !== undefined && запис[п.ключ] !== null)
+        поле.value = запис[п.ключ];
+    } else if (п.ключ === "з_ПДВ") {
+      поле.checked = true;   // рішення Власника: ціни заводимо як у накладній
+    } else if (п.ключ === "вид" && р.вид) {
+      поле.value = р.вид;
+    }
+    обгортка.appendChild(поле);
+    if (п.пояснення) обгортка.appendChild(тег("span", "чому", п.пояснення));
+    поля[п.ключ] = {поле: поле, опис: п};
+    форма.appendChild(обгортка);
+  });
+
+  тіло.appendChild(форма);
+  const дії = тег("div", "кнопки");
+  const зберегти = тег("button", "", "Зберегти");
+  зберегти.onclick = () => записати(р, поля, тіло);
+  const скасувати = тег("button", "назад", "Скасувати");
+  скасувати.onclick = () => { місце.textContent = ""; };
+  дії.appendChild(зберегти); дії.appendChild(скасувати);
+  тіло.appendChild(дії);
+  блок.appendChild(тіло);
+  місце.appendChild(блок);
+  блок.scrollIntoView({block: "nearest"});
+}
+
+function зібрати(поля) {
+  const з = {};
+  Object.keys(поля).forEach(к => {
+    const {поле, опис} = поля[к];
+    if (опис.вид === "прапорець") з[к] = поле.checked;
+    else if (опис.вид === "число") з[к] = поле.value === "" ? null : Number(поле.value);
+    else з[к] = поле.value;
+  });
+  return з;
+}
+
+async function записати(р, поля, куди) {
+  const в = await fetch("/api/гроші-запис", {
+    method: "POST", headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({розділ: р.ключ, запис: зібрати(поля),
+                          господарство: СТАН.господарство})});
+  const д = await в.json();
+  куди.querySelectorAll(".смуга").forEach(е => е.remove());
+  if (!д.гаразд) {
+    // Зауваги показуємо всі одразу й списком: людина має бачити, що саме
+    // ворота вважають незаповненим, а не гадати по одному рядку.
+    const с = тег("div", "смуга тривога");
+    с.appendChild(тег("b", "", "Не збережено"));
+    const сп = document.createElement("ul");
+    (д.зауваги || [д.повідомлення || "невідома причина"]).forEach(з =>
+      сп.appendChild(тег("li", "", з)));
+    с.appendChild(сп);
+    куди.appendChild(с);
+    return;
+  }
+  СТАН.д.довідники = д.довідники;
+  $("#форма-місце").textContent = "";
+  намалювати_підтаби(); намалювати_довідник();
+  перечитати();
+}
+
+async function видалити(р, з) {
+  const імʼя = з.культура || з.назва;
+  if (!confirm("Прибрати «" + імʼя + "» з довідника?")) return;
+  await fetch("/api/гроші-видалити", {
+    method: "POST", headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({розділ: р.ключ, ключ: імʼя, господарство: СТАН.господарство})});
+  перечитати();
+}
+
+// ───────────────────────────────────────────────────────── бюджет
+function намалювати_бюджет() {
+  const місце = $("#бюджет-місце"); місце.textContent = "";
+  const б = СТАН.д.бюджет;
+  if (!б) {
+    місце.appendChild(тег("div", "смуга жовта",
+      "Оберіть поле, рік і культуру — бюджет складеться сам із довідників і плану поля."));
+    return;
+  }
+
+  // Чого бракує — окремою смугою й ЗАВЖДИ. Мовчазний нуль у бюджеті
+  // виглядає як «безкоштовно», і це найдорожча брехня в цьому екрані.
+  if ((б.бракує || []).length) {
+    const с = тег("div", "смуга тривога");
+    с.appendChild(тег("b", "", "Бюджет неповний — ці числа рахувати нема з чого"));
+    const сп = document.createElement("ul");
+    б.бракує.forEach(з => сп.appendChild(тег("li", "", з)));
+    с.appendChild(сп);
+    місце.appendChild(с);
+  }
+
+  const кпі = тег("div", "кпі");
+  const плитка = (підпис, значення, хвіст, клас) => {
+    const д = тег("div", клас || "");
+    д.appendChild(тег("div", "і", підпис));
+    д.appendChild(тег("b", "", ч(значення)));
+    д.appendChild(тег("div", "х", хвіст));
+    return д;
+  };
+  кпі.appendChild(плитка("Виручка", б.дохід.разом, "грн/га"));
+  кпі.appendChild(плитка("Змінні", б.змінні.разом, "грн/га"));
+  кпі.appendChild(плитка("Маржинальний", б.маржинальний, "грн/га",
+                         б.маржинальний >= 0 ? "вгору" : "вниз"));
+  кпі.appendChild(плитка("Постійні", б.постійні.разом, "грн/га"));
+  кпі.appendChild(плитка("Чистий", б.чистий, "грн/га",
+                         б.чистий >= 0 ? "вгору" : "вниз"));
+  кпі.appendChild(плитка("Беззбиткова ціна", б.беззбитковість.ціна_т, "грн/т"));
+  місце.appendChild(кпі);
+
+  const блок = тег("div", "блок");
+  блок.appendChild(тег("div", "блок-шапка", "Бюджет підприємства, грн/га"));
+  const тіло = тег("div", "блок-тіло");
+  const т = document.createElement("table");
+  const ш = т.insertRow();
+  ["Стаття", "Грн/га", "На поле", "Звідки"].forEach((н, і) => {
+    const th = document.createElement("th");
+    th.textContent = н; if (і === 1 || і === 2) th.className = "ч";
+    ш.appendChild(th);
+  });
+
+  const рядок = (назва, грн_га, звідки, клас) => {
+    const р = т.insertRow(); if (клас) р.className = клас;
+    р.insertCell().textContent = назва;
+    const а = р.insertCell(); а.className = "ч"; а.textContent = ч(грн_га);
+    const б2 = р.insertCell(); б2.className = "ч";
+    б2.textContent = ч((грн_га || 0) * (СТАН.д.бюджет.площа_га || 0));
+    р.insertCell().className = "тиха";
+    р.cells[3].textContent = звідки || "";
+    return р;
+  };
+
+  рядок("ДОХІД", б.дохід.разом, "", "підсумок");
+  рядок("Зерно", б.дохід.зерно, "врожайність × ціна");
+  if (б.дохід.дотація) рядок("Дотація", б.дохід.дотація, "");
+
+  рядок("ЗМІННІ ВИТРАТИ", б.змінні.разом, "", "підсумок");
+  б.змінні.рядки.forEach(р => { if (р.грн_га) рядок(р.підпис, р.грн_га, ""); });
+
+  рядок("МАРЖИНАЛЬНИЙ ДОХІД", б.маржинальний, "дохід − змінні", "головний");
+
+  рядок("ПОСТІЙНІ ВИТРАТИ", б.постійні.разом, "", "підсумок");
+  б.постійні.рядки.forEach(р => рядок(р.назва, р.грн_га, р.чому || ""));
+
+  рядок("ЧИСТИЙ РЕЗУЛЬТАТ", б.чистий, "маржинальний − постійні", "головний");
+  тіло.appendChild(т);
+  блок.appendChild(тіло);
+  місце.appendChild(блок);
+
+  // точка беззбитковості
+  const бз = тег("div", "блок");
+  бз.appendChild(тег("div", "блок-шапка", "Точка беззбитковості"));
+  const бт = тег("div", "блок-тіло");
+  const т2 = document.createElement("table");
+  const пара = (н, з) => { const р = т2.insertRow();
+    р.insertCell().textContent = н;
+    const к = р.insertCell(); к.className = "ч"; к.textContent = з; };
+  пара("Повні витрати на гектар", ч(б.повні_витрати) + " грн");
+  пара("Собівартість тонни", ч(б.собівартість_т) + " грн");
+  пара("Беззбиткова врожайність", ч(б.беззбитковість.врожайність_т_га, 2) + " т/га");
+  пара("Беззбиткова ціна", ч(б.беззбитковість.ціна_т) + " грн/т");
+  пара("Запас міцності за врожайністю", ч(б.беззбитковість.запас_врожайності) + " %");
+  бт.appendChild(т2); бз.appendChild(бт); місце.appendChild(бз);
+}
+
+// ───────────────────────────────────────────────────────── господарство
+function намалювати_господарство() {
+  const місце = $("#господарство-місце"); місце.textContent = "";
+  const поля = СТАН.д.поля || [];
+  const блок = тег("div", "блок");
+  блок.appendChild(тег("div", "блок-шапка",
+    "Поля господарства · " + ч(СТАН.д.площа_господарства_га, 2) + " га в обробітку"));
+  const тіло = тег("div", "блок-тіло");
+  const т = document.createElement("table");
+  const ш = т.insertRow();
+  ["Поле", "Площа, га", "Бюджет"].forEach((н, і) => {
+    const th = document.createElement("th"); th.textContent = н;
+    if (і === 1) th.className = "ч"; ш.appendChild(th);
+  });
+  поля.forEach(п => {
+    const р = т.insertRow();
+    р.insertCell().textContent = п.назва || п.ключ;
+    const а = р.insertCell(); а.className = "ч"; а.textContent = ч(п.площа_га, 2);
+    const к = р.insertCell();
+    const б = тег("button", "", "скласти бюджет");
+    б.onclick = () => { СТАН.поле = п.ключ; $("#вибір-поля").value = п.ключ;
+                        перейти("бюджет"); перечитати(); };
+    к.appendChild(б);
+  });
+  тіло.appendChild(т);
+  тіло.appendChild(тег("p", "тиха",
+    "Зведення по культурах і по господарству складеться, коли бюджети полів "
+    + "будуть заповнені: воно складає гривні, а не усереднює грн/га."));
+  блок.appendChild(тіло); місце.appendChild(блок);
+}
+
+// ───────────────────────────────────────────────────────── вкладки
+function перейти(ім) {
+  document.querySelectorAll(".вкладки-грошей a").forEach(а =>
+    а.classList.toggle("тут", а.dataset.с === ім));
+  document.querySelectorAll(".сцена").forEach(с =>
+    с.classList.toggle("тут", с.id === "сцена-" + ім));
+}
+document.querySelectorAll(".вкладки-грошей a").forEach(а =>
+  а.onclick = () => перейти(а.dataset.с));
+
+$("#додати").onclick = () => показати_форму(РОЗДІЛИ[СТАН.розділ], null);
+
+$("#зберегти-план").onclick = async () => {
+  if (!СТАН.поле) { alert("Спершу оберіть поле"); return; }
+  СТАН.рік = $("#вибір-року").value;
+  const план = Object.assign({}, СТАН.д.план || {},
+    {культура: $("#вибір-культури").value});
+  await fetch("/api/гроші-план", {
+    method: "POST", headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({господарство: СТАН.господарство, поле: СТАН.поле,
+                          рік: СТАН.рік, план: план})});
+  перечитати();
+};
+
+$("#вибір-поля").onchange = () => { СТАН.поле = $("#вибір-поля").value; перечитати(); };
+$("#вибір-року").onchange = () => { СТАН.рік = $("#вибір-року").value; перечитати(); };
+
+// ───────────────────────────────────────────────────────── старт
+function наповнити_поля() {
+  const с = $("#вибір-поля");
+  с.textContent = "";
+  (СТАН.д.поля || []).forEach(п =>
+    с.appendChild(new Option((п.назва || п.ключ) + " · " + ч(п.площа_га, 2) + " га", п.ключ)));
+  if (СТАН.поле) с.value = СТАН.поле;
+  else if (с.options.length) { СТАН.поле = с.value; }
+  if (СТАН.д.план && СТАН.д.план.культура) $("#вибір-культури").value = СТАН.д.план.культура;
+  $("#про-господарство").textContent = "У обробітку "
+    + ч(СТАН.д.площа_господарства_га, 2) + " га · "
+    + (СТАН.д.поля || []).length + " полів";
+}
+
+$("#вибір-господарства").onchange = async () => {
+  // Гроші належать господарству: оренда, зарплата, ціна пального в кожного
+  // свої. Тому вибір господарства тут свій, а не позичений у робочого місця.
+  СТАН.господарство = $("#вибір-господарства").value;
+  sessionStorage.setItem("гроші-господарство", СТАН.господарство);
+  СТАН.поле = null;
+  await перечитати();
+  наповнити_поля();
+  await перечитати();
+};
+
+намалювати_меню("#меню");
+Promise.all([
+  fetch("/api/стан").then(в => в.json()),
+  fetch("/api/картотека").then(в => в.json()),
+]).then(([с, к]) => {
+  const вибір = с.вибір || {};
+  const господарства = к.господарства || к || [];
+  const сг = $("#вибір-господарства");
+  (Array.isArray(господарства) ? господарства : []).forEach(г =>
+    сг.appendChild(new Option(г.назва || г.ключ, г.ключ)));
+  СТАН.господарство = вибір.господарство
+    || (sessionStorage.getItem("гроші-господарство"))
+    || (сг.options.length ? сг.options[0].value : null);
+  if (СТАН.господарство) сг.value = СТАН.господарство;
+  СТАН.поле = вибір.поле || null;
+  СТАН.рік = String(new Date().getFullYear());
+  $("#вибір-року").value = СТАН.рік;
+  $("#де-ми").textContent = СТАН.господарство
+    ? "Довідники, витрати господарства і бюджет поля. Ціни належать господарству."
+    : "Жодного господарства ще не заведено — почніть із робочого місця.";
+  return перечитати();
+}).then(() => {
+  наповнити_поля();
+  if (СТАН.поле) return перечитати();
+}).catch(п => {
+  document.querySelector("main").appendChild(
+    тег("div", "смуга тривога", "Не вдалось прочитати гроші: " + п));
+});
+</script>
+</body>
+</html>
