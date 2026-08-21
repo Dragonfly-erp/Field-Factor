@@ -1,0 +1,538 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<title>FieldFactor · система грошей</title>
+<style>
+/* Токени — ті самі, що в app/web/стиль.css. Прототип не заводить своїх
+   кольорів: він має виглядати рівно так, як виглядатиме продукт. */
+:root{
+  --тло:#15181c; --картка:#1b1f24; --картка2:#20252b; --лінія:#2b323a;
+  --лінія-тиха:rgba(43,50,58,.55); --текст:#dfe6ea; --тихий:#8b97a3;
+  --акцент:#4ea8ff; --акцент-світлий:rgba(78,168,255,.13); --на-акценті:#0f1216;
+  --зелень:#57c96a; --увага:#e3b341; --тривога:#ff7a59; --ґрунт:#b9946a;
+  --радіус:7px; --радіус-дрібний:5px;
+  --шрифт:"Segoe UI",system-ui,-apple-system,sans-serif;
+  --числа:"Cascadia Mono",Consolas,"SF Mono",monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--тло);color:var(--текст);font:13.5px/1.45 var(--шрифт);
+  height:100vh;display:flex;flex-direction:column;overflow:hidden}
+
+.шапка{background:var(--картка);border-bottom:1px solid var(--лінія);padding:0 12px;flex:none}
+.шапка-ряд{display:flex;align-items:center;gap:14px;height:44px}
+.лого{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px}
+.лого i{width:24px;height:24px;border-radius:6px;background:var(--акцент);
+  color:var(--на-акценті);display:grid;place-items:center;font-size:13px;
+  font-style:normal;font-weight:800}
+.вкл{display:flex;height:44px;margin-left:8px}
+.вкл a{display:flex;align-items:center;padding:0 13px;color:var(--тихий);
+  text-decoration:none;border-bottom:2px solid transparent;cursor:pointer;font-size:13px}
+.вкл a:hover{color:var(--текст);background:var(--картка2)}
+.вкл a.тут{color:var(--текст);border-bottom-color:var(--акцент);font-weight:650}
+.шапка .відступ{flex:1}
+.де-я{font-size:12px;font-weight:600;color:var(--акцент);background:var(--акцент-світлий);
+  padding:4px 11px;border-radius:var(--радіус-дрібний)}
+
+.полотно{flex:1;overflow:auto;padding:16px 18px 40px}
+.сцена{display:none} .сцена.тут{display:block}
+
+h1{font-size:19px;font-weight:700;letter-spacing:-.015em;margin-bottom:3px}
+.під{color:var(--тихий);font-size:12.5px;margin-bottom:14px}
+h2{font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--тихий);
+  font-weight:700;margin:22px 0 8px;border-bottom:1px solid var(--лінія);padding-bottom:5px}
+
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th{text-align:left;font:700 10.5px var(--шрифт);color:var(--тихий);text-transform:uppercase;
+  letter-spacing:.07em;padding:0 10px 6px 0;border-bottom:1px solid var(--лінія);white-space:nowrap}
+td{padding:5px 10px 5px 0;border-bottom:1px solid var(--лінія-тиха)}
+th.ч,td.ч{text-align:right;font-family:var(--числа);white-space:nowrap}
+tbody tr:hover{background:var(--картка)}
+tr.підсумок td{border-top:1px solid var(--лінія);border-bottom:1px solid var(--лінія);
+  font-weight:700;background:var(--картка)}
+tr.головний td{font-size:14px;font-weight:700;background:var(--акцент-світлий)}
+td.плюс{color:var(--зелень)} td.мінус{color:var(--тривога)}
+.мітка{display:inline-block;font-size:10.5px;font-weight:700;padding:1px 7px;
+  border-radius:var(--радіус-дрібний);white-space:nowrap}
+.м-добре{background:rgba(87,201,106,.16);color:var(--зелень)}
+.м-увага{background:rgba(227,179,65,.16);color:var(--увага)}
+.м-стоп{background:rgba(255,122,89,.16);color:var(--тривога)}
+.м-сіра{background:var(--картка2);color:var(--тихий)}
+
+.кпі{display:grid;grid-template-columns:repeat(6,1fr);border:1px solid var(--лінія);
+  border-radius:var(--радіус);overflow:hidden;background:var(--картка);margin-bottom:16px}
+.кпі>div{padding:9px 13px;border-right:1px solid var(--лінія)}
+.кпі>div:last-child{border-right:0}
+.кпі .і{font-size:10px;color:var(--тихий);text-transform:uppercase;letter-spacing:.07em}
+.кпі b{display:block;font:650 17px var(--числа);margin-top:3px;letter-spacing:-.02em}
+.кпі .вниз b{color:var(--тривога)} .кпі .вгору b{color:var(--зелень)}
+.кпі .х{font-size:11px;color:var(--тихий);font-family:var(--числа)}
+
+.два{display:grid;grid-template-columns:1.25fr 1fr;gap:16px;align-items:start}
+.блок{background:var(--картка);border:1px solid var(--лінія);border-radius:var(--радіус);overflow:hidden}
+.блок-шапка{padding:8px 13px;border-bottom:1px solid var(--лінія);background:var(--картка2);
+  font:700 10.5px var(--шрифт);letter-spacing:.09em;text-transform:uppercase;color:var(--тихий);
+  display:flex;align-items:center;gap:8px}
+.блок-шапка .відступ{flex:1}
+.блок-тіло{padding:11px 13px}
+.блок-тіло table th:first-child,.блок-тіло table td:first-child{padding-left:0}
+
+.смуга{border:1px solid var(--лінія);border-left:2px solid var(--акцент);background:var(--картка);
+  border-radius:var(--радіус);padding:9px 13px;margin-bottom:10px;font-size:13px}
+.смуга.жовта{border-left-color:var(--увага)}
+.смуга .чому{color:var(--тихий);font-size:12px;margin-top:3px}
+
+button{font:600 12px var(--шрифт);padding:3px 9px;border-radius:var(--радіус-дрібний);
+  cursor:pointer;background:var(--картка2);color:var(--текст);border:1px solid var(--лінія)}
+button.є{background:var(--акцент);color:var(--на-акценті);border-color:var(--акцент)}
+.перемикач{display:flex;gap:2px}
+
+/* Підтаби довідників. Кожен довідник — свій список із власними колонками:
+   у добрива діюча речовина, у насіння посівна одиниця, у робіт пальне.
+   Зліплені докупи вони перетворюються на кашу з порожніх клітинок. */
+.підтаби{display:flex;gap:2px;border-bottom:1px solid var(--лінія);margin-bottom:14px}
+.підтаби a{padding:7px 13px;color:var(--тихий);cursor:pointer;font-size:13px;
+  border-bottom:2px solid transparent;margin-bottom:-1px}
+.підтаби a:hover{color:var(--текст)}
+.підтаби a.тут{color:var(--текст);border-bottom-color:var(--акцент);font-weight:650}
+.підтаби .лічильник{font-family:var(--числа);font-size:11px;color:var(--тихий);margin-left:6px}
+.довідник{display:none} .довідник.тут{display:block}
+.дії-довідника{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.дії-довідника .відступ{flex:1}
+
+.дерево-грошей{font-family:var(--числа);font-size:12.5px}
+.дерево-грошей .р{display:flex;align-items:center;gap:8px;padding:5px 0;
+  border-bottom:1px solid var(--лінія-тиха)}
+.дерево-грошей .н{flex:1;font-family:var(--шрифт)}
+.дерево-грошей .в1{padding-left:0} .дерево-грошей .в2{padding-left:18px}
+.дерево-грошей .в3{padding-left:36px;color:var(--тихий)}
+.смужка-маржі{height:5px;border-radius:3px;background:var(--картка2);overflow:hidden;
+  width:110px;flex:none}
+.смужка-маржі i{display:block;height:100%;background:var(--зелень)}
+.смужка-маржі i.мало{background:var(--увага)} .смужка-маржі i.зле{background:var(--тривога)}
+</style>
+</head>
+<body>
+
+<div class="шапка">
+  <div class="шапка-ряд">
+    <div class="лого"><i>F</i>FieldFactor</div>
+    <nav class="вкл">
+      <a data-с="довідники" class="тут">довідники</a>
+      <a data-с="бюджет">бюджет поля</a>
+      <a data-с="маржа">карта маржі</a>
+      <a data-с="господарство">господарство</a>
+    </nav>
+    <div class="відступ"></div>
+    <span class="де-я">Зелена Поляна · 2025</span>
+  </div>
+</div>
+
+<div class="полотно">
+
+<!-- ══════════════════════════════════════════════════ ДОВІДНИКИ -->
+<section class="сцена тут" id="довідники">
+  <h1>Довідники</h1>
+  <div class="під">Усе, що коштує грошей. Ціна стоїть у тій одиниці, у якій цей
+    товар купують: добриво — за тонну, насіння — за посівну одиницю, ЗЗР — за літр.</div>
+
+  <div class="смуга жовта"><b>Числа тут — для показу.</b>
+    <div class="чому">Це прототип структури, а не прайс. Реальні ціни заводить
+      господарство, і кожна має дату: ціна без дати нічого не варта.</div></div>
+
+  <nav class="підтаби">
+    <a data-д="добрива" class="тут">Добрива <span class="лічильник">4</span></a>
+    <a data-д="насіння">Насіння <span class="лічильник">2</span></a>
+    <a data-д="ззр">Засоби захисту <span class="лічильник">3</span></a>
+    <a data-д="роботи">Роботи й техніка <span class="лічильник">5</span></a>
+    <a data-д="витрати">Витрати господарства <span class="лічильник">8</span></a>
+    <a data-д="ціни">Ціни продукції <span class="лічильник">3</span></a>
+  </nav>
+
+  <div class="довідник тут" id="добрива">
+  <div class="дії-довідника"><button class="є">+ додати добриво</button>
+    <div class="відступ"></div><button>оновити ціни</button><button>вивантажити</button></div>
+  <table>
+    <tr><th>Назва</th><th>Діюча речовина</th><th>Одиниця</th><th class="ч">Ціна за од.</th>
+        <th class="ч">Норма, од./га</th><th class="ч">Грн/га</th><th>Ціна від</th><th>Статус</th></tr>
+    <tr><td>Селітра аміачна</td><td>N 34,4 %</td><td>т</td><td class="ч">21 400</td>
+        <td class="ч">0,20</td><td class="ч">4 280</td><td>12.02.2026</td>
+        <td><span class="мітка м-добре">накладна</span></td></tr>
+    <tr><td>Карбамід</td><td>N 46 %</td><td>т</td><td class="ч">23 800</td>
+        <td class="ч">0,15</td><td class="ч">3 570</td><td>12.02.2026</td>
+        <td><span class="мітка м-добре">накладна</span></td></tr>
+    <tr><td>НПК 8-19-29</td><td>N-P-K</td><td>т</td><td class="ч">32 500</td>
+        <td class="ч">0,30</td><td class="ч">9 750</td><td>28.01.2026</td>
+        <td><span class="мітка м-добре">накладна</span></td></tr>
+    <tr><td>Дефекат</td><td>CaO 42 %</td><td>т</td><td class="ч">450</td>
+        <td class="ч">4,00</td><td class="ч">1 800</td><td>05.03.2026</td>
+        <td><span class="мітка м-увага">оцінка</span></td></tr>
+  </table>
+
+  </div>
+
+  <div class="довідник" id="насіння">
+  <div class="дії-довідника"><button class="є">+ додати гібрид</button><div class="відступ"></div><button>оновити ціни</button><button>вивантажити</button></div>
+  <table>
+    <tr><th>Гібрид</th><th>Культура</th><th>Одиниця</th><th class="ч">Ціна за од.</th>
+        <th class="ч">Норма, од./га</th><th class="ч">Грн/га</th><th>Ціна від</th><th>Статус</th></tr>
+    <tr><td>ДКС 4014</td><td>кукурудза</td><td>п.о. 80 тис.</td><td class="ч">4 950</td>
+        <td class="ч">1,00</td><td class="ч">4 950</td><td>20.12.2025</td>
+        <td><span class="мітка м-добре">договір</span></td></tr>
+    <tr><td>П8521</td><td>кукурудза</td><td>п.о. 80 тис.</td><td class="ч">5 400</td>
+        <td class="ч">1,00</td><td class="ч">5 400</td><td>20.12.2025</td>
+        <td><span class="мітка м-добре">договір</span></td></tr>
+  </table>
+
+  </div>
+
+  <div class="довідник" id="ззр">
+  <div class="дії-довідника"><button class="є">+ додати препарат</button><div class="відступ"></div><button>оновити ціни</button><button>вивантажити</button></div>
+  <table>
+    <tr><th>Назва</th><th>Призначення</th><th>Одиниця</th><th class="ч">Ціна за од.</th>
+        <th class="ч">Норма, од./га</th><th class="ч">Грн/га</th><th>Ціна від</th><th>Статус</th></tr>
+    <tr><td>Гербіцид ґрунтовий</td><td>до сходів</td><td>л</td><td class="ч">1 280</td>
+        <td class="ч">1,50</td><td class="ч">1 920</td><td>15.02.2026</td>
+        <td><span class="мітка м-добре">накладна</span></td></tr>
+    <tr><td>Гербіцид страховий</td><td>по вегетації</td><td>л</td><td class="ч">2 150</td>
+        <td class="ч">0,50</td><td class="ч">1 075</td><td>15.02.2026</td>
+        <td><span class="мітка м-добре">накладна</span></td></tr>
+    <tr><td>Інсектицид</td><td>совка</td><td>л</td><td class="ч">1 640</td>
+        <td class="ч">0,20</td><td class="ч">328</td><td>15.02.2026</td>
+        <td><span class="мітка м-увага">оцінка</span></td></tr>
+  </table>
+
+  </div>
+
+  <div class="довідник" id="роботи">
+  <div class="дії-довідника"><button class="є">+ додати операцію</button><div class="відступ"></div><button>оновити ціни</button><button>вивантажити</button></div>
+  <table>
+    <tr><th>Операція</th><th>Агрегат</th><th class="ч">Пальне, л/га</th>
+        <th class="ч">Виробіток, га/год</th><th class="ч">Ставка, грн/га</th>
+        <th class="ч">Разом, грн/га</th></tr>
+    <tr><td>Дискування</td><td>Джон Дір 8320 + БДТ</td><td class="ч">12,0</td>
+        <td class="ч">4,5</td><td class="ч">180</td><td class="ч">840</td></tr>
+    <tr><td>Внесення добрив</td><td>МТЗ + РУМ</td><td class="ч">4,5</td>
+        <td class="ч">8,0</td><td class="ч">90</td><td class="ч">338</td></tr>
+    <tr><td>Сівба</td><td>Джон Дір 8320 + сівалка 12 р.</td><td class="ч">9,0</td>
+        <td class="ч">3,2</td><td class="ч">260</td><td class="ч">755</td></tr>
+    <tr><td>Обприскування</td><td>самохідний</td><td class="ч">3,0</td>
+        <td class="ч">12,0</td><td class="ч">75</td><td class="ч">240</td></tr>
+    <tr><td>Збирання</td><td>комбайн + жатка 6 м</td><td class="ч">26,0</td>
+        <td class="ч">1,8</td><td class="ч">520</td><td class="ч">1 950</td></tr>
+  </table>
+
+  </div>
+
+  <div class="довідник" id="витрати">
+  <div class="дії-довідника"><button class="є">+ додати статтю</button><div class="відступ"></div><button>оновити ціни</button><button>вивантажити</button></div>
+  <table>
+    <tr><th>Стаття</th><th>Група</th><th>Як рахується</th><th class="ч">Сума за рік</th>
+        <th class="ч">Грн/га</th><th>Розкид</th></tr>
+    <tr><td>Оренда паїв</td><td>земля</td><td>ставка на гектар</td><td class="ч">7 452 000</td>
+        <td class="ч">8 200</td><td>прямо на поле</td></tr>
+    <tr><td>Земельний податок</td><td>земля</td><td>ставка на гектар</td><td class="ч">327 600</td>
+        <td class="ч">360</td><td>прямо на поле</td></tr>
+    <tr><td>Зарплата з нарахуваннями</td><td>люди</td><td>річний фонд</td><td class="ч">3 640 000</td>
+        <td class="ч">4 004</td><td>за площею</td></tr>
+    <tr><td>Амортизація техніки</td><td>техніка</td><td>річна</td><td class="ч">4 095 000</td>
+        <td class="ч">4 505</td><td>за годинами роботи</td></tr>
+    <tr><td>Ремонти й ТО</td><td>техніка</td><td>факт</td><td class="ч">1 820 000</td>
+        <td class="ч">2 002</td><td>за годинами роботи</td></tr>
+    <tr><td>Страхування майна</td><td>техніка</td><td>поліс</td><td class="ч">364 000</td>
+        <td class="ч">400</td><td>за площею</td></tr>
+    <tr><td>Адміністративні</td><td>адмін</td><td>річні</td><td class="ч">2 730 000</td>
+        <td class="ч">3 003</td><td>за площею</td></tr>
+    <tr><td>Відсотки за кредит</td><td>фінанси</td><td>ставка × залишок</td><td class="ч">1 456 000</td>
+        <td class="ч">1 602</td><td>за площею</td></tr>
+    <tr class="підсумок"><td>Разом постійні</td><td></td><td></td><td class="ч">21 884 600</td>
+        <td class="ч">24 076</td><td></td></tr>
+  </table>
+
+  </div>
+
+  <div class="довідник" id="ціни">
+  <div class="дії-довідника"><button class="є">+ додати ціну</button><div class="відступ"></div><button>оновити ціни</button><button>вивантажити</button></div>
+  <table>
+    <tr><th>Культура</th><th>Базис</th><th>Якість</th><th class="ч">Ціна, грн/т</th>
+        <th>Дата</th><th>Джерело</th></tr>
+    <tr><td>Кукурудза</td><td>EXW господарство</td><td>волога 14 %</td><td class="ч">8 450</td>
+        <td>18.08.2026</td><td><span class="мітка м-добре">контракт</span></td></tr>
+    <tr><td>Пшениця озима</td><td>EXW господарство</td><td>2 клас</td><td class="ч">9 100</td>
+        <td>18.08.2026</td><td><span class="мітка м-увага">котирування</span></td></tr>
+    <tr><td>Соняшник</td><td>CPT завод</td><td>олійність 44 %</td><td class="ч">21 300</td>
+        <td>18.08.2026</td><td><span class="мітка м-увага">котирування</span></td></tr>
+  </table>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════ БЮДЖЕТ ПОЛЯ -->
+<section class="сцена" id="бюджет">
+  <h1>Бюджет поля Г-03 · кукурудза 2025</h1>
+  <div class="під">177,80 га · форма бюджету підприємства: дохід → змінні → маржинальний
+    дохід → постійні → чистий результат → точка беззбитковості</div>
+
+  <div class="кпі">
+    <div><div class="і">Виручка</div><b>102 245</b><div class="х">грн/га</div></div>
+    <div><div class="і">Змінні</div><b>38 546</b><div class="х">грн/га</div></div>
+    <div class="вгору"><div class="і">Маржинальний</div><b>63 699</b><div class="х">грн/га</div></div>
+    <div><div class="і">Постійні</div><b>24 076</b><div class="х">грн/га</div></div>
+    <div class="вгору"><div class="і">Чистий</div><b>39 623</b><div class="х">грн/га</div></div>
+    <div><div class="і">Беззбиткова ціна</div><b>5 175</b><div class="х">грн/т при 12,1 т</div></div>
+  </div>
+
+  <div class="блок">
+    <div class="блок-шапка">Бюджет на гектар
+      <div class="відступ"></div>
+      <div class="перемикач">
+        <button class="є">план</button><button>факт</button><button>прогноз</button>
+        <button>усі три</button>
+      </div>
+    </div>
+    <div class="блок-тіло">
+      <table>
+        <tr><th>Стаття</th><th class="ч">План</th><th class="ч">Факт</th>
+            <th class="ч">Прогноз</th><th class="ч">Відхилення</th><th>Звідки число</th></tr>
+
+        <tr class="підсумок"><td>ДОХІД</td><td class="ч">96 175</td><td class="ч">102 245</td>
+            <td class="ч">102 245</td><td class="ч плюс">+6 070</td><td></td></tr>
+        <tr><td>Зерно · 12,105 т/га × 8 450 грн</td><td class="ч">96 175</td>
+            <td class="ч">102 287</td><td class="ч">102 287</td><td class="ч плюс">+6 112</td>
+            <td class="тиха">врожайність — наша карта</td></tr>
+        <tr><td>Дотація на гектар</td><td class="ч">0</td><td class="ч">0</td>
+            <td class="ч">0</td><td class="ч">0</td><td class="тиха">—</td></tr>
+
+        <tr class="підсумок"><td>ЗМІННІ ВИТРАТИ</td><td class="ч">37 180</td><td class="ч">38 546</td>
+            <td class="ч">38 546</td><td class="ч мінус">−1 366</td><td></td></tr>
+        <tr><td>Насіння</td><td class="ч">4 950</td><td class="ч">4 950</td><td class="ч">4 950</td>
+            <td class="ч">0</td><td class="тиха">довідник насіння</td></tr>
+        <tr><td>Добрива</td><td class="ч">17 600</td><td class="ч">19 400</td><td class="ч">19 400</td>
+            <td class="ч мінус">−1 800</td><td class="тиха">карта внесення × ціна</td></tr>
+        <tr><td>Засоби захисту</td><td class="ч">3 323</td><td class="ч">3 323</td><td class="ч">3 323</td>
+            <td class="ч">0</td><td class="тиха">довідник ЗЗР</td></tr>
+        <tr><td>Пальне · 54,5 л/га</td><td class="ч">2 998</td><td class="ч">3 105</td>
+            <td class="ч">3 105</td><td class="ч мінус">−107</td><td class="тиха">операції × норма</td></tr>
+        <tr><td>Роботи й техніка</td><td class="ч">4 123</td><td class="ч">4 123</td>
+            <td class="ч">4 123</td><td class="ч">0</td><td class="тиха">довідник робіт</td></tr>
+        <tr><td>Сушіння · 27,6 % → 14 %</td><td class="ч">3 186</td><td class="ч">2 645</td>
+            <td class="ч">2 645</td><td class="ч плюс">+541</td>
+            <td class="тиха">вологість — з монітора</td></tr>
+        <tr><td>Перевезення</td><td class="ч">1 000</td><td class="ч">1 000</td><td class="ч">1 000</td>
+            <td class="ч">0</td><td class="тиха">тонни × тариф</td></tr>
+        <tr><td>Відсотки на оборотні</td><td class="ч">0</td><td class="ч">0</td><td class="ч">0</td>
+            <td class="ч">0</td><td class="тиха">—</td></tr>
+
+        <tr class="головний"><td>МАРЖИНАЛЬНИЙ ДОХІД</td><td class="ч">58 995</td>
+            <td class="ч">63 699</td><td class="ч">63 699</td><td class="ч плюс">+4 704</td>
+            <td class="тиха">дохід − змінні</td></tr>
+
+        <tr class="підсумок"><td>ПОСТІЙНІ ВИТРАТИ</td><td class="ч">24 076</td>
+            <td class="ч">24 076</td><td class="ч">24 076</td><td class="ч">0</td><td></td></tr>
+        <tr><td>Оренда паїв</td><td class="ч">8 200</td><td class="ч">8 200</td><td class="ч">8 200</td>
+            <td class="ч">0</td><td class="тиха">земля, на гектар</td></tr>
+        <tr><td>Земельний податок</td><td class="ч">360</td><td class="ч">360</td><td class="ч">360</td>
+            <td class="ч">0</td><td class="тиха">земля</td></tr>
+        <tr><td>Зарплата з нарахуваннями</td><td class="ч">4 004</td><td class="ч">4 004</td>
+            <td class="ч">4 004</td><td class="ч">0</td><td class="тиха">люди, за площею</td></tr>
+        <tr><td>Амортизація техніки</td><td class="ч">4 505</td><td class="ч">4 505</td>
+            <td class="ч">4 505</td><td class="ч">0</td><td class="тиха">техніка, за годинами</td></tr>
+        <tr><td>Ремонти й ТО</td><td class="ч">2 002</td><td class="ч">2 002</td><td class="ч">2 002</td>
+            <td class="ч">0</td><td class="тиха">техніка</td></tr>
+        <tr><td>Страхування майна</td><td class="ч">400</td><td class="ч">400</td><td class="ч">400</td>
+            <td class="ч">0</td><td class="тиха">техніка</td></tr>
+        <tr><td>Адміністративні</td><td class="ч">3 003</td><td class="ч">3 003</td><td class="ч">3 003</td>
+            <td class="ч">0</td><td class="тиха">адмін, за площею</td></tr>
+        <tr><td>Відсотки за кредит</td><td class="ч">1 602</td><td class="ч">1 602</td>
+            <td class="ч">1 602</td><td class="ч">0</td><td class="тиха">фінанси</td></tr>
+
+        <tr class="головний"><td>ЧИСТИЙ РЕЗУЛЬТАТ</td><td class="ч">34 919</td>
+            <td class="ч">39 623</td><td class="ч">39 623</td><td class="ч плюс">+4 704</td>
+            <td class="тиха">маржинальний − постійні</td></tr>
+        <tr class="підсумок"><td>На все поле, 177,80 га</td><td class="ч">6 208 600</td>
+            <td class="ч">7 044 970</td><td class="ч">7 044 970</td>
+            <td class="ч плюс">+836 370</td><td></td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="два" style="margin-top:16px">
+    <div class="блок">
+      <div class="блок-шапка">Точка беззбитковості</div>
+      <div class="блок-тіло">
+        <table>
+          <tr><td>Повні витрати на гектар</td><td class="ч">62 622 грн</td></tr>
+          <tr><td>Беззбиткова врожайність при 8 450 грн/т</td><td class="ч">7,41 т/га</td></tr>
+          <tr><td>Беззбиткова ціна при 12,105 т/га</td><td class="ч">5 175 грн/т</td></tr>
+          <tr><td>Запас міцності за врожайністю</td><td class="ч плюс">+63 %</td></tr>
+          <tr><td>Запас міцності за ціною</td><td class="ч плюс">+63 %</td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="блок">
+      <div class="блок-шапка">Що це дає нашому клієнту</div>
+      <div class="блок-тіло" style="font-size:13px;line-height:1.6">
+        <p>Умовно недобрано <b>27 т</b> на 14,9 га. У гривнях це
+          <b style="color:var(--тривога)">228 150 грн</b> — і саме це число
+          господарство розуміє без пояснень.</p>
+        <p style="margin-top:8px;color:var(--тихий)">Витрати на цих 14,9 га були
+          такі самі, як на решті поля: <b style="color:var(--текст)">933 067 грн</b>.
+          Отже на цих гектарах маржа нижча за середню на 24 %.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════ КАРТА МАРЖІ -->
+<section class="сцена" id="маржа">
+  <h1>Карта маржі · Г-03</h1>
+  <div class="під">Витрати розкидані по комірках, дохід узятий із карти врожайності.
+    Кожна комірка знає, скільки вона принесла й скільки з'їла.</div>
+
+  <div class="смуга"><b>Це те, чого немає у звичайних систем.</b>
+    <div class="чому">Вони рахують гроші на поле цілком, бо іншого в них немає.
+      У нас є врожайність по комірках — значить є і маржа по комірках.</div></div>
+
+  <div class="два">
+    <div class="блок">
+      <div class="блок-шапка">Чистий результат, грн/га</div>
+      <div class="блок-тіло" style="padding:0;background:#11151a">
+        <svg viewBox="0 0 700 420" style="display:block;width:100%;height:340px">
+          <defs><clipPath id="к"><path d="M150 45 L540 75 L600 195 L555 320 L330 355 L200 305 L140 170 Z"/></clipPath></defs>
+          <g clip-path="url(#к)">
+            <rect x="120" y="30" width="500" height="340" fill="#7a2f1e"/>
+            <path d="M120 30 q125 52 250 14 t250 -7 v95 q-125 44 -250 14 t-250 7 z" fill="#b4472c"/>
+            <path d="M120 125 q125 52 250 14 t250 -7 v85 q-125 44 -250 14 t-250 7 z" fill="#d9c88b"/>
+            <path d="M120 205 q125 52 250 14 t250 -7 v78 q-125 44 -250 14 t-250 7 z" fill="#8fbf55"/>
+            <path d="M120 278 q125 52 250 14 t250 -7 v115 q-125 44 -250 14 t-250 7 z" fill="#3f8f45"/>
+            <ellipse cx="300" cy="170" rx="68" ry="44" fill="#7a2f1e" opacity=".9"/>
+            <ellipse cx="450" cy="250" rx="50" ry="32" fill="#b4472c" opacity=".8"/>
+          </g>
+          <path d="M150 45 L540 75 L600 195 L555 320 L330 355 L200 305 L140 170 Z"
+                fill="none" stroke="#4ea8ff" stroke-width="1.5"/>
+          <circle cx="300" cy="170" r="12" fill="#15181c" stroke="#ff7a59" stroke-width="1.5"/>
+          <text x="300" y="175" text-anchor="middle" fill="#ff7a59"
+                font-family="Consolas,monospace" font-size="12" font-weight="700">1</text>
+          <g transform="translate(400,388)">
+            <rect x="0" y="0" width="40" height="8" fill="#7a2f1e"/>
+            <rect x="40" y="0" width="40" height="8" fill="#b4472c"/>
+            <rect x="80" y="0" width="40" height="8" fill="#d9c88b"/>
+            <rect x="120" y="0" width="40" height="8" fill="#8fbf55"/>
+            <rect x="160" y="0" width="40" height="8" fill="#3f8f45"/>
+            <text x="0" y="22" font-family="Consolas,monospace" font-size="10" fill="#8b97a3">12 400</text>
+            <text x="200" y="22" text-anchor="end" font-family="Consolas,monospace"
+                  font-size="10" fill="#8b97a3">61 800 грн/га</text>
+          </g>
+        </svg>
+      </div>
+    </div>
+
+    <div class="блок">
+      <div class="блок-шапка">Де гроші</div>
+      <div class="блок-тіло">
+        <table>
+          <tr><th>Ділянка</th><th class="ч">га</th><th class="ч">т/га</th>
+              <th class="ч">Маржа, грн/га</th><th class="ч">Разом</th></tr>
+          <tr><td>Найкраща п'ятина</td><td class="ч">35,6</td><td class="ч">14,8</td>
+              <td class="ч плюс">61 800</td><td class="ч плюс">2 200 080</td></tr>
+          <tr><td>Середина поля</td><td class="ч">106,7</td><td class="ч">12,1</td>
+              <td class="ч">39 400</td><td class="ч">4 203 980</td></tr>
+          <tr><td>Ділянка 1</td><td class="ч">5,1</td><td class="ч">10,6</td>
+              <td class="ч мінус">26 900</td><td class="ч">137 190</td></tr>
+          <tr><td>Ділянка 2</td><td class="ч">6,1</td><td class="ч">10,8</td>
+              <td class="ч мінус">28 500</td><td class="ч">173 850</td></tr>
+          <tr><td>Розворотна смуга</td><td class="ч">16,9</td><td class="ч">10,7</td>
+              <td class="ч мінус">27 600</td><td class="ч">466 440</td></tr>
+          <tr class="підсумок"><td>Поле</td><td class="ч">177,8</td><td class="ч">12,1</td>
+              <td class="ч">39 623</td><td class="ч">7 044 970</td></tr>
+        </table>
+        <div style="margin-top:12px;font-size:12.5px;color:var(--тихий);line-height:1.6">
+          Розворотна смуга дає маржу на <b style="color:var(--тривога)">30 % нижчу</b>
+          за середню по полю. Це 16,9 га, які щороку віддають на
+          <b style="color:var(--текст)">203 000 грн</b> менше, ніж могли б —
+          і це не аргумент їх кинути, а привід порахувати іншу схему руху.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════ ГОСПОДАРСТВО -->
+<section class="сцена" id="господарство">
+  <h1>Матрьошка · Зелена Поляна 2025</h1>
+  <div class="під">Поле → культура → господарство. Одні й ті самі гроші, зібрані
+    знизу вгору: жодне число тут не введене руками — усі складені з полів.</div>
+
+  <div class="кпі">
+    <div><div class="і">Площа в обробітку</div><b>909</b><div class="х">га</div></div>
+    <div><div class="і">Виручка</div><b>78,4</b><div class="х">млн грн</div></div>
+    <div><div class="і">Змінні</div><b>32,1</b><div class="х">млн грн</div></div>
+    <div class="вгору"><div class="і">Маржинальний</div><b>46,3</b><div class="х">млн грн</div></div>
+    <div><div class="і">Постійні</div><b>21,9</b><div class="х">млн грн</div></div>
+    <div class="вгору"><div class="і">Чистий</div><b>24,4</b><div class="х">млн грн</div></div>
+  </div>
+
+  <div class="блок">
+    <div class="блок-шапка">Звідки складається
+      <div class="відступ"></div>
+      <div class="перемикач"><button class="є">по культурах</button><button>по полях</button></div>
+    </div>
+    <div class="блок-тіло">
+      <div class="дерево-грошей">
+        <div class="р в1"><span class="н"><b>ГОСПОДАРСТВО · 909 га</b></span>
+          <span class="смужка-маржі"><i style="width:100%"></i></span>
+          <b>24 439 000</b></div>
+
+        <div class="р в2"><span class="н">Кукурудза · 414 га</span>
+          <span class="смужка-маржі"><i style="width:96%"></i></span>
+          <b>15 926 000</b></div>
+        <div class="р в3"><span class="н">Г-03 · 177,8 га · 39 623 грн/га</span>
+          <span class="смужка-маржі"><i style="width:100%"></i></span><span>7 044 970</span></div>
+        <div class="р в3"><span class="н">Г-11 · 143,2 га · 37 100 грн/га</span>
+          <span class="смужка-маржі"><i style="width:94%"></i></span><span>5 312 720</span></div>
+        <div class="р в3"><span class="н">Г-22 · 93,0 га · 38 050 грн/га</span>
+          <span class="смужка-маржі"><i style="width:96%"></i></span><span>3 538 650</span></div>
+
+        <div class="р в2"><span class="н">Пшениця озима · 288 га</span>
+          <span class="смужка-маржі"><i class="мало" style="width:52%"></i></span>
+          <b>6 134 000</b></div>
+        <div class="р в3"><span class="н">Г-05 · 92,4 га · 22 400 грн/га</span>
+          <span class="смужка-маржі"><i class="мало" style="width:57%"></i></span><span>2 069 760</span></div>
+        <div class="р в3"><span class="н">Г-18 · 88,7 га · 21 100 грн/га</span>
+          <span class="смужка-маржі"><i class="мало" style="width:53%"></i></span><span>1 871 570</span></div>
+        <div class="р в3"><span class="н">Г-14 · 61,1 га · 19 850 грн/га</span>
+          <span class="смужка-маржі"><i class="мало" style="width:50%"></i></span><span>1 212 835</span></div>
+
+        <div class="р в2"><span class="н">Соняшник · 207 га</span>
+          <span class="смужка-маржі"><i style="width:70%"></i></span>
+          <b>5 812 000</b></div>
+        <div class="р в3"><span class="н">Угринів · За фермою · 38,9 га</span>
+          <span class="смужка-маржі"><i class="зле" style="width:18%"></i></span>
+          <span style="color:var(--тривога)">−284 300</span></div>
+      </div>
+      <div style="margin-top:12px;font-size:12.5px;color:var(--тихий);line-height:1.6">
+        <b style="color:var(--тривога)">Одне поле в мінусі.</b> «За фермою», 38,9 га
+        соняшника: маржа мінус 7 300 грн/га. Це видно тільки тоді, коли витрати
+        рознесені по полях, а не по господарству цілком.
+      </div>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<script>
+document.querySelectorAll('.підтаби a').forEach(a => a.onclick = () => {
+  document.querySelectorAll('.підтаби a').forEach(x => x.classList.remove('тут'));
+  document.querySelectorAll('.довідник').forEach(x => x.classList.remove('тут'));
+  a.classList.add('тут');
+  document.getElementById(a.dataset.д).classList.add('тут');
+});
+document.querySelectorAll('.вкл a').forEach(a => a.onclick = () => {
+  document.querySelectorAll('.вкл a').forEach(x => x.classList.remove('тут'));
+  document.querySelectorAll('.сцена').forEach(x => x.classList.remove('тут'));
+  a.classList.add('тут');
+  document.getElementById(a.dataset.с).classList.add('тут');
+});
+</script>
+</body>
+</html>
