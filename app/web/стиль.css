@@ -353,6 +353,16 @@ body.робоче-місце .шапка { padding: 0 12px; }
   padding: 6px 12px 5px; background: var(--картка2);
   border-bottom: 1px solid var(--лінія); border-top: 1px solid var(--лінія);
 }
+/* Ферма (відділок, бригада) — проміжна група в дереві. Тонша за господарство:
+   це не окремий клієнт, а його підрозділ, і плутати рівні не можна. */
+.ферма-шапка {
+  display: flex; align-items: center; justify-content: space-between; gap: 6px;
+  padding: 5px 12px 4px 14px;
+  font-size: 11px; font-weight: 600; color: var(--тихий);
+  border-bottom: 1px solid var(--лінія-тиха);
+}
+.лист.у-фермі { padding-left: 22px; }
+
 .гілка-назва {
   font-weight: 700; font-size: 10.5px; letter-spacing: .09em;
   text-transform: uppercase; color: var(--тихий);
@@ -414,6 +424,17 @@ body.робоче-місце .шапка { padding: 0 12px; }
 .операція-назва { font-size: 12.5px; font-weight: 600; }
 .операція-опис { font-size: 11px; color: var(--тихий); }
 .операція.скоро { opacity: .45; }
+
+/* Підпис джерела тла. Обовʼязковий: і OSM, і Esri дозволяють показ своїх
+   плиток лише з підписом. Тому він не ховається й не гаситься прозорістю. */
+.підпис-джерела {
+  position: absolute; right: 12px; bottom: 28px;
+  font: 10.5px var(--шрифт); color: var(--текст);
+  background: color-mix(in srgb, var(--тло) 72%, transparent);
+  border: 1px solid var(--лінія-тиха); border-radius: var(--радіус-дрібний);
+  padding: 2px 7px; backdrop-filter: blur(2px);
+}
+.підпис-джерела[hidden] { display: none; }
 
 .масштаб {
   position: absolute; right: 12px; bottom: 12px;
