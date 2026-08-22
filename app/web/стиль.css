@@ -415,6 +415,68 @@ body.робоче-місце .шапка { padding: 0 12px; }
 .контекст-таблиця tbody tr:hover { background: var(--картка2); }
 .контекст-таблиця .нема { color: var(--тихий); }
 
+/* ═══════════════════════════════════════════ КАРТКА ПОЛЯ
+   Поле — головна сутність продукту. Картка збирає все, що про нього
+   відомо, і кожен розділ бере число там, де воно живе. */
+
+.картка-поля { flex: 1; min-height: 0; overflow-y: auto; background: var(--тло); }
+.картка-поля[hidden] { display: none; }
+.карта-обгортка[hidden] { display: none; }
+
+.картка-шапка {
+  padding: 12px 16px 0; background: var(--картка);
+  border-bottom: 1px solid var(--лінія); position: sticky; top: 0; z-index: 3;
+}
+.стежка-картки { font-size: 11px; color: var(--тихий); margin-bottom: 4px; }
+.імʼя-ряд { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.імʼя-ряд h2 { margin: 0; font-size: 18px; font-weight: 700; letter-spacing: -.015em; }
+.мітка {
+  font-size: 11px; padding: 2px 8px; border-radius: 20px; border: 1px solid var(--лінія);
+  color: var(--тихий); background: var(--картка2); white-space: nowrap;
+}
+.мітка.жива { color: var(--зелень); border-color: rgba(87, 201, 106, .4); }
+.мітка.увага { color: var(--увага); border-color: rgba(227, 179, 65, .4); }
+
+.кпі-картки {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(122px, 1fr));
+  border: 1px solid var(--лінія); border-radius: var(--радіус);
+  background: var(--картка2); margin: 10px 0 0;
+}
+.кпі-картки > div { padding: 6px 11px; border-right: 1px solid var(--лінія); }
+.кпі-картки > div:last-child { border-right: none; }
+.кпі-картки .і { font-size: 9.5px; color: var(--тихий); text-transform: uppercase;
+  letter-spacing: .07em; }
+.кпі-картки b { display: block; font: 650 15px var(--числа); margin-top: 2px; letter-spacing: -.02em; }
+.кпі-картки small { font: 400 10.5px var(--числа); color: var(--тихий); }
+.кпі-картки .вгору b { color: var(--зелень); }
+.кпі-картки .вниз b { color: var(--тривога); }
+
+.картка-тіло {
+  padding: 12px 16px 20px;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(292px, 1fr));
+  gap: 10px; align-items: start;
+}
+.карт-блок { background: var(--картка); border: 1px solid var(--лінія); border-radius: var(--радіус); }
+.карт-блок h3 {
+  font-size: 10px; text-transform: uppercase; letter-spacing: .07em; color: var(--тихий);
+  font-weight: 700; padding: 7px 11px; border-bottom: 1px solid var(--лінія); margin: 0;
+}
+.карт-блок .влас-блоку { padding: 8px 11px; }
+.карт-блок .порожньо-блок { padding: 10px 11px; font-size: 12px; color: var(--тихий); line-height: 1.55; }
+.карт-блок .дрібна { margin: 0 11px 10px; }
+.карт-блок .бракує-рядок {
+  margin: 0; padding: 7px 11px; font-size: 11.5px; color: var(--тривога);
+  border-top: 1px solid var(--лінія-тиха);
+}
+.контекст-таблиця.мала th { font-size: 9.5px; padding: 5px 11px; }
+.контекст-таблиця.мала td { padding: 4px 11px; font-size: 12px; }
+.стовпчик {
+  display: inline-block; height: 7px; background: var(--акцент); border-radius: 2px;
+  opacity: .7; vertical-align: middle; margin-right: 6px;
+}
+.картка-порожня { padding: 40px 20px; text-align: center; color: var(--тихий); }
+.картка-порожня p:first-child { font-size: 15px; color: var(--текст); margin-bottom: 6px; }
+
 /* ── Історія поля. Ліворуч усі роки, праворуч обраний рік блоками.
    Дві колонки, кожна гортається сама: сезонів буває двадцять, а блоків
    у сезоні сім, і спільна прокрутка ховала б то одне, то інше. */
