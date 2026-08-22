@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<title>Простір 5 · Книга років (історія як хребет)</title>
+<style>
+/* ═══════════════════════════════════════════════════════════════════════
+   ПРОСТІР 5 · «КНИГА РОКІВ»
+   Родина: часові стрічки в медичних картках і в бухгалтерських системах,
+   Gantt-подібні смуги сезонів, Timeline у Bloomberg.
+
+   Тут перевернуто головне: центром простору стає НЕ карта, а РІК. Знизу
+   лежить стрічка років, яку гортають ліворуч-праворуч; обраний рік
+   розкривається картками груп — живлення, захист, обробіток, загрози.
+   Карта стає одним із свідків року, а не самоціллю.
+
+   Навіщо: історія поля — це те, що накопичується. Коли рік стає одиницею
+   руху, сівозміна, carryover і «що ми робили торік» читаються без зусиль,
+   а не збираються з таблиці на 61 колонку.
+
+   Групи історії стоять ВЕРТИКАЛЬНИМИ вкладками праворуч від змісту:
+   так їх видно всі одразу, і жодна не ховається у переповненому рядку.
+   ═══════════════════════════════════════════════════════════════════════ */
+:root{
+  --тло:#15181c; --картка:#1b1f24; --картка2:#20252b; --лінія:#2b323a;
+  --лінія-тиха:rgba(43,50,58,.55);
+  --текст:#dfe6ea; --тихий:#8b97a3;
+  --акцент:#4ea8ff; --акцент-світлий:rgba(78,168,255,.13); --на-акценті:#0f1216;
+  --зелень:#57c96a; --увага:#e3b341; --тривога:#ff7a59; --ґрунт:#b9946a;
+  --радіус:7px; --радіус-дрібний:5px;
+  --шрифт:"Segoe UI",system-ui,-apple-system,sans-serif;
+  --числа:"Cascadia Mono",Consolas,"SF Mono",monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--тло);color:var(--текст);font:13px/1.4 var(--шрифт);
+     height:100vh;overflow:hidden;display:flex;flex-direction:column}
+.ч{font-family:var(--числа)}
+
+.верх{height:42px;flex:none;background:var(--картка);border-bottom:1px solid var(--лінія);
+  display:flex;align-items:stretch;padding:0 12px;gap:14px}
+.лого{display:flex;align-items:center;gap:7px;font-weight:700;font-size:13.5px}
+.лого i{width:23px;height:23px;border-radius:6px;background:var(--акцент);color:var(--на-акценті);
+  display:grid;place-items:center;font-style:normal;font-weight:800;font-size:11px}
+.меню{display:flex;align-items:stretch}
+.м{display:flex;align-items:center;padding:0 13px;font-size:12.5px;color:var(--тихий);cursor:pointer;
+  border-bottom:2px solid transparent}
+.м:hover{color:var(--текст)}
+.м.є{color:var(--текст);font-weight:650;border-bottom-color:var(--акцент)}
+.розпір{flex:1}
+.де-я{display:flex;align-items:center;font:11.5px var(--числа);color:var(--акцент)}
+
+.тіло{flex:1;min-height:0;display:grid;grid-template-columns:222px 1fr}
+.ліва{background:var(--картка);border-right:1px solid var(--лінія);display:flex;flex-direction:column;
+  min-height:0;overflow:hidden}
+.панель-шапка{height:26px;flex:none;display:flex;align-items:center;justify-content:space-between;
+  padding:0 10px;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--тихий);
+  font-weight:700;background:var(--картка2);border-bottom:1px solid var(--лінія)}
+.вміст{overflow-y:auto;flex:1;min-height:0}
+.вузол{display:flex;align-items:center;gap:6px;padding:4px 10px;cursor:pointer;font-size:12px}
+.вузол:hover{background:var(--картка2)}
+.вузол.є{background:var(--акцент-світлий);color:var(--акцент);font-weight:600}
+.вузол .др{margin-left:auto;font:10.5px var(--числа);color:var(--тихий)}
+.вузол.гр{color:var(--тихий);font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;
+  font-weight:700;padding-top:9px}
+.в2{padding-left:20px}.в3{padding-left:32px}
+
+/* центр: зміст + вертикальні вкладки груп */
+.центр{display:grid;grid-template-columns:1fr 132px;min-height:0}
+.зміст{min-height:0;overflow:auto;padding:12px 14px 16px;display:flex;flex-direction:column;gap:11px}
+.групи{background:var(--картка);border-left:1px solid var(--лінія);display:flex;flex-direction:column;
+  padding-top:8px}
+.гв{padding:9px 11px;font-size:12px;color:var(--тихий);cursor:pointer;border-left:2px solid transparent;
+  display:flex;flex-direction:column;gap:2px}
+.гв small{font:10px var(--числа);color:var(--лінія)}
+.гв:hover{color:var(--текст);background:var(--картка2)}
+.гв.є{color:var(--акцент);background:var(--акцент-світлий);border-left-color:var(--акцент);font-weight:650}
+.гв.є small{color:var(--акцент)}
+
+.шапка-року{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.рік-велике{font:700 26px/1 var(--числа);letter-spacing:-.02em}
+.культура{font-size:16px;font-weight:650}
+.мітка{font-size:11px;padding:2px 8px;border-radius:20px;border:1px solid var(--лінія);
+  color:var(--тихий);background:var(--картка2)}
+
+.кпі{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));
+  border:1px solid var(--лінія);border-radius:var(--радіус);background:var(--картка2)}
+.кпі>div{padding:7px 11px;border-right:1px solid var(--лінія)}
+.кпі>div:last-child{border-right:none}
+.кпі .і{font-size:9.5px;color:var(--тихий);text-transform:uppercase;letter-spacing:.07em}
+.кпі b{display:block;font:650 15px var(--числа);margin-top:2px}
+.кпі .вгору b{color:var(--зелень)}.кпі .вниз b{color:var(--тривога)}
+
+.дві{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.блок{background:var(--картка);border:1px solid var(--лінія);border-radius:var(--радіус)}
+.блок h3{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--тихий);
+  font-weight:700;padding:7px 11px;border-bottom:1px solid var(--лінія)}
+dl{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;padding:8px 11px;font-size:12px}
+dt{color:var(--тихий)} dd{font-family:var(--числа);text-align:right;font-weight:500}
+dd.порожньо{color:var(--тихий);font-family:var(--шрифт);font-style:italic}
+.перелік{padding:8px 11px;display:flex;flex-direction:column;gap:7px;font-size:12px}
+.речовина{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.речовина small{display:block;color:var(--тихий);font-weight:400;font-size:11px}
+.речовина span{font:11px var(--числа);color:var(--тихий);text-align:right;white-space:nowrap}
+.оцінка{font-family:var(--числа);letter-spacing:1px}
+.о4,.о5{color:var(--тривога)}.о3{color:var(--увага)}.о1,.о2{color:var(--тихий)}
+
+/* стрічка років унизу — хребет простору */
+.стрічка{flex:none;height:126px;background:var(--картка);border-top:1px solid var(--лінія);
+  display:flex;flex-direction:column}
+.стрічка-шапка{height:25px;flex:none;display:flex;align-items:center;gap:10px;padding:0 12px;
+  font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--тихий);font-weight:700;
+  border-bottom:1px solid var(--лінія);background:var(--картка2)}
+.стрічка-шапка .ч{font-size:10.5px;letter-spacing:0;color:var(--текст)}
+.роки{flex:1;min-height:0;display:flex;gap:0;overflow-x:auto;align-items:stretch}
+.рік{flex:0 0 152px;border-right:1px solid var(--лінія-тиха);padding:7px 10px;cursor:pointer;
+  display:flex;flex-direction:column;gap:3px}
+.рік:hover{background:var(--картка2)}
+.рік.є{background:var(--акцент-світлий);box-shadow:inset 0 2px 0 var(--акцент)}
+.рік .р{font:700 14px var(--числа)}
+.рік .к{font-size:11.5px;font-weight:600}
+.рік .у{font:11px var(--числа);color:var(--тихий)}
+.смужка{height:22px;display:flex;align-items:flex-end;gap:2px;margin-top:auto}
+.смужка i{display:block;flex:1;background:var(--акцент);opacity:.55;border-radius:1px}
+.рік.є .смужка i{opacity:.95}
+.підпис-грн{font:10.5px var(--числа);color:var(--тихий)}
+</style>
+</head>
+<body>
+
+<div class="верх">
+  <div class="лого"><i>F</i>FieldFactor</div>
+  <nav class="меню">
+    <div class="м">Робоче місце</div>
+    <div class="м є">Поле</div>
+    <div class="м">Врожайність</div>
+    <div class="м">Зони</div>
+    <div class="м">Норми</div>
+    <div class="м">Гроші</div>
+    <div class="м">Видача</div>
+  </nav>
+  <div class="розпір"></div>
+  <div class="де-я">КОМАГРО · Поле Центральне · 207,0 га</div>
+</div>
+
+<div class="тіло">
+  <aside class="ліва">
+    <div class="панель-шапка"><span>Картотека</span><span class="ч">36</span></div>
+    <div class="вміст">
+      <div class="вузол гр">КОМАГРО · 2 375 га</div>
+      <div class="вузол в2">Бригада 1 Степанівка<span class="др">13</span></div>
+      <div class="вузол в3 є">Поле Центральне<span class="др">207,0</span></div>
+      <div class="вузол в3">Поле Південне<span class="др">154,0</span></div>
+      <div class="вузол в3">Поле Західне<span class="др">131,8</span></div>
+      <div class="вузол в3">Поле Верхнє<span class="др">120,3</span></div>
+      <div class="вузол в2">Бригада 2 Семенівка<span class="др">8</span></div>
+      <div class="вузол в3">Поле Соняшникове<span class="др">198,7</span></div>
+      <div class="вузол в3">Поле Степове<span class="др">165,4</span></div>
+      <div class="вузол гр">Зелена Поляна</div>
+      <div class="вузол в2">Г_03<span class="др">177,8</span></div>
+      <div class="вузол в2">Ж_03<span class="др">126,8</span></div>
+    </div>
+  </aside>
+
+  <section class="центр">
+    <div class="зміст">
+      <div class="шапка-року">
+        <div class="рік-велике">2025</div>
+        <div class="культура">Ріпак озимий · ES Hydromel</div>
+        <span class="мітка">попередник: ячмінь ярий</span>
+        <span class="мітка">посів 23.08 · збір 06.07</span>
+        <span class="мітка">Бригада 1 Степанівка</span>
+      </div>
+
+      <div class="кпі">
+        <div class="вгору"><div class="і">Урожай</div><b>3,50</b></div>
+        <div><div class="і">Середній 8 років</div><b>5,05</b></div>
+        <div><div class="і">N внесено</div><b>191</b></div>
+        <div><div class="і">Вапнування</div><b>2,5</b></div>
+        <div class="вниз"><div class="і">Витрати</div><b>323 $</b></div>
+        <div><div class="і">Carryover</div><b>сер.</b></div>
+      </div>
+
+      <div class="дві">
+        <div class="блок"><h3>Живлення · внесено за сезон</h3>
+          <dl><dt>N</dt><dd>191 кг/га</dd><dt>P₂O₅</dt><dd>62 кг/га</dd>
+            <dt>K₂O</dt><dd>76 кг/га</dd><dt>MgO</dt><dd>19 кг/га</dd><dt>S</dt><dd>41 кг/га</dd></dl></div>
+        <div class="блок"><h3>Меліорація й обробіток</h3>
+          <dl><dt>Вапнування</dt><dd>2,5 т/га</dd><dt>Гіпсування</dt><dd class="порожньо">не вносилось</dd>
+            <dt>Основний</dt><dd>Чизель 22 см</dd><dt>Передпосівний</dt><dd>Прикочування</dd></dl></div>
+      </div>
+
+      <div class="дві">
+        <div class="блок"><h3>Захист · діючі речовини й механізм</h3>
+          <div class="перелік">
+            <div class="речовина"><b>Бутізан Стар<small>метазахлор + квінмерак</small></b><span>K3+O</span></div>
+            <div class="речовина"><b>Фокстрот<small>феноксапроп-П-етил</small></b><span>ACCase A</span></div>
+            <div class="речовина"><b>Прозаро<small>протіоконазол + тебуконазол</small></b><span>DMI G1</span></div>
+            <div class="речовина"><b>Децис Профі ×2<small>дельтаметрин</small></b><span>Піретроїд 3A</span></div>
+          </div></div>
+        <div class="блок"><h3>Загрози · оцінка 0–5</h3>
+          <dl><dt>Підмаренник</dt><dd class="оцінка о2">●●○○○</dd>
+            <dt>Злакові бурʼяни</dt><dd class="оцінка о1">●○○○○</dd>
+            <dt>Фомоз</dt><dd class="оцінка о3">●●●○○</dd>
+            <dt>Циліндроспоріоз</dt><dd class="оцінка о2">●●○○○</dd>
+            <dt>Попелиці</dt><dd class="оцінка о4">●●●●○</dd>
+            <dt>Ріпаковий пильщик</dt><dd class="оцінка о1">●○○○○</dd></dl></div>
+      </div>
+    </div>
+
+    <!-- групи історії — вертикальними вкладками -->
+    <nav class="групи">
+      <div class="гв">Паспорт<small>безрічне</small></div>
+      <div class="гв є">Сезон<small>усе за рік</small></div>
+      <div class="гв">Живлення<small>N P K Mg S</small></div>
+      <div class="гв">Захист<small>4 входи</small></div>
+      <div class="гв">Загрози<small>6</small></div>
+      <div class="гв">Обробіток<small>2</small></div>
+      <div class="гв">Операції<small>журнал</small></div>
+      <div class="гв">Аналізи<small>24 проби</small></div>
+      <div class="гв">Карти<small>3 шари</small></div>
+      <div class="гв">Гроші<small>бюджет</small></div>
+    </nav>
+  </section>
+</div>
+
+<!-- ХРЕБЕТ: стрічка років -->
+<div class="стрічка">
+  <div class="стрічка-шапка"><span>Історія поля</span>
+    <span class="ч">2018 — 2025 · 8 сезонів</span>
+    <span class="підпис-грн">висота смужки — урожай, повний рядок — витрати $/га</span></div>
+  <div class="роки">
+    <div class="рік є"><div class="р">2025</div><div class="к">Ріпак озимий</div>
+      <div class="у">3,50 т/га · 323 $</div>
+      <div class="смужка"><i style="height:30%"></i><i style="height:26%"></i><i style="height:32%"></i></div></div>
+    <div class="рік"><div class="р">2024</div><div class="к">Кукурудза</div>
+      <div class="у">7,60 т/га · 446 $</div>
+      <div class="смужка"><i style="height:72%"></i><i style="height:80%"></i><i style="height:76%"></i></div></div>
+    <div class="рік"><div class="р">2023</div><div class="к">Соняшник</div>
+      <div class="у">3,20 т/га · 304 $</div>
+      <div class="смужка"><i style="height:28%"></i><i style="height:24%"></i><i style="height:30%"></i></div></div>
+    <div class="рік"><div class="р">2022</div><div class="к">Пшениця озима</div>
+      <div class="у">5,20 т/га · 295 $</div>
+      <div class="смужка"><i style="height:48%"></i><i style="height:52%"></i><i style="height:46%"></i></div></div>
+    <div class="рік"><div class="р">2021</div><div class="к">Ріпак озимий</div>
+      <div class="у">3,90 т/га · 399 $</div>
+      <div class="смужка"><i style="height:36%"></i><i style="height:33%"></i><i style="height:38%"></i></div></div>
+    <div class="рік"><div class="р">2020</div><div class="к">Кукурудза</div>
+      <div class="у">9,00 т/га · 383 $</div>
+      <div class="смужка"><i style="height:88%"></i><i style="height:95%"></i><i style="height:90%"></i></div></div>
+    <div class="рік"><div class="р">2019</div><div class="к">Соняшник</div>
+      <div class="у">2,10 т/га · 334 $</div>
+      <div class="смужка"><i style="height:18%"></i><i style="height:21%"></i><i style="height:17%"></i></div></div>
+    <div class="рік"><div class="р">2018</div><div class="к">Пшениця озима</div>
+      <div class="у">5,90 т/га · 251 $</div>
+      <div class="смужка"><i style="height:56%"></i><i style="height:59%"></i><i style="height:54%"></i></div></div>
+  </div>
+</div>
+
+<script>
+document.querySelectorAll('.рік').forEach(р=>р.onclick=()=>{
+  document.querySelectorAll('.рік').forEach(x=>x.classList.remove('є'));р.classList.add('є');
+  document.querySelector('.рік-велике').textContent=р.querySelector('.р').textContent;
+  document.querySelector('.культура').textContent=р.querySelector('.к').textContent;});
+document.querySelectorAll('.гв').forEach(т=>т.onclick=()=>{
+  document.querySelectorAll('.гв').forEach(x=>x.classList.remove('є'));т.classList.add('є');});
+document.querySelectorAll('.м').forEach(т=>т.onclick=()=>{
+  document.querySelectorAll('.м').forEach(x=>x.classList.remove('є'));т.classList.add('є');});
+</script>
+</body>
+</html>

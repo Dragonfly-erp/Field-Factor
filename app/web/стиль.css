@@ -323,6 +323,108 @@ code { font: 12px var(--числа); background: var(--картка2); padding: 
 body.робоче-місце { height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 body.робоче-місце .шапка { padding: 0 12px; }
 
+/* ═══════════════════════════════════════════ КАРКАС «ТЕРМІНАЛ»
+   Обрано Власником 22.08.2026 з пʼяти варіантів у `_макети/простір_*.html`.
+
+   Три роди вкладок, і кожен відповідає за своє. Плутати їх не можна —
+   саме на цьому розсипаються складні екрани:
+
+     ПАЙПЛАЙН (у шапці)   ДЕ ми в роботі: прийом → … → видача
+     ФУНКЦІЇ (ряд нижче)   ЧИМ працюємо в межах цього етапу
+     КОНТЕКСТ (унизу)      ЩО відомо про обране В ДЕРЕВІ, незалежно від етапу
+
+   Права колонка теж поділена навпіл за змістом: зверху інструменти над
+   тим, що зараз на екрані, знизу — дії, які готують наступний крок. */
+
+.пайплайн { display: flex; align-items: stretch; gap: 1px; margin-left: 6px; }
+.етап {
+  display: flex; align-items: center; gap: 7px; padding: 0 11px; height: 44px;
+  color: var(--тихий); text-decoration: none; white-space: nowrap;
+  border-bottom: 2px solid transparent; font-size: 12.5px;
+}
+.етап:hover { color: var(--текст); background: var(--картка2); }
+.етап.тут { color: var(--текст); border-bottom-color: var(--акцент); font-weight: 650; }
+.етап i {
+  width: 20px; height: 20px; border-radius: 5px; background: var(--картка2);
+  display: grid; place-items: center; font-style: normal;
+  font: 700 10.5px var(--числа); color: var(--тихий); flex: none;
+}
+.етап.тут i { background: var(--акцент); color: var(--на-акценті); }
+.етап.зроблено i { background: rgba(87, 201, 106, .2); color: var(--зелень); }
+.пайплайн-стрілка { display: flex; align-items: center; color: var(--лінія); font-size: 10px; }
+
+.функції {
+  flex: none; height: 32px; display: flex; align-items: stretch; padding: 0 10px;
+  background: var(--тло); border-bottom: 1px solid var(--лінія);
+}
+.функція {
+  display: flex; align-items: center; padding: 0 13px; font-size: 12.5px;
+  color: var(--тихий); text-decoration: none; cursor: pointer;
+  border-bottom: 2px solid transparent; white-space: nowrap;
+}
+.функція:hover { color: var(--текст); }
+.функція.тут { color: var(--текст); border-bottom-color: var(--акцент); font-weight: 650; }
+
+.центр-колонка { display: flex; flex-direction: column; min-height: 0; min-width: 0; }
+.центр-колонка .карта-обгортка { flex: 1; min-height: 0; }
+
+.контекст {
+  flex: none; height: 226px; display: flex; flex-direction: column;
+  background: var(--картка); border-top: 1px solid var(--лінія);
+}
+.контекст.згорнутий { height: 30px; }
+.контекст.згорнутий .контекст-тіло { display: none; }
+.контекст-таби {
+  flex: none; height: 30px; display: flex; align-items: stretch;
+  background: var(--картка2); border-bottom: 1px solid var(--лінія); overflow-x: auto;
+}
+.контекст-таб {
+  display: flex; align-items: center; gap: 6px; padding: 0 12px; font-size: 12px;
+  color: var(--тихий); cursor: pointer; border-right: 1px solid var(--лінія);
+  white-space: nowrap;
+}
+.контекст-таб:hover { color: var(--текст); }
+.контекст-таб.тут {
+  background: var(--картка); color: var(--текст); font-weight: 650;
+  box-shadow: inset 0 2px 0 var(--акцент);
+}
+.контекст-таб small { font: 400 10.5px var(--числа); color: var(--тихий); }
+.контекст-таби .відступ { flex: 1; border: none; }
+.контекст-тіло { flex: 1; min-height: 0; overflow: auto; }
+.контекст-тіло .порожньо { padding: 16px; color: var(--тихий); font-size: 12.5px; max-width: 720px;
+  line-height: 1.6; }
+.контекст-влас {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 0; padding: 6px 0; margin: 0;
+}
+.контекст-влас dt { padding: 4px 12px; color: var(--тихий); font-size: 12.5px; }
+.контекст-влас dd {
+  margin: 0; padding: 4px 12px; font: 500 12.5px var(--числа); text-align: right;
+  border-bottom: 1px solid var(--лінія-тиха);
+}
+.контекст-влас dt { border-bottom: 1px solid var(--лінія-тиха); }
+.контекст-таблиця { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.контекст-таблиця th {
+  position: sticky; top: 0; background: var(--картка); text-align: left; padding: 6px 12px;
+  font-size: 10px; text-transform: uppercase; letter-spacing: .06em; color: var(--тихий);
+  font-weight: 650; border-bottom: 1px solid var(--лінія); white-space: nowrap;
+}
+.контекст-таблиця td { padding: 5px 12px; border-bottom: 1px solid var(--лінія-тиха); }
+.контекст-таблиця td.ч { font-family: var(--числа); text-align: right; }
+.контекст-таблиця td.тиха { color: var(--тихий); }
+.контекст-таблиця tbody tr:hover { background: var(--картка2); }
+
+/* Права колонка. Дії відрізані від інструментів рискою й притиснуті донизу:
+   інструменти змінюють показ, дії змінюють дані — це різні за наслідками
+   речі, і поруч вони стояти не мають. */
+.права-колонка { border-right: none; border-left: 1px solid var(--лінія); }
+.права-колонка .панель-курсора { flex: 0 1 auto; }
+.права-колонка .список-шарів { flex: none; max-height: 24vh; }
+.дії-шапка { margin-top: auto; border-top: 1px solid var(--лінія); }
+/* Дії гортаються самі: їх стає більше з кожним новим видом зонування, і
+   коли вони починають виштовхувати панелі вгорі, права колонка ламається. */
+.права-колонка .операції { flex: 0 1 auto; overflow-y: auto; min-height: 0; }
+
 .сітка { flex: 1; min-height: 0; display: grid; grid-template-columns: 246px 1fr 300px; }
 
 .колонка {

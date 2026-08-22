@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<title>Простір 2 · Студія (смуга іконок + вкладки документів)</title>
+<style>
+/* ═══════════════════════════════════════════════════════════════════════
+   ПРОСТІР 2 · «СТУДІЯ»
+   Родина: VS Code, QGIS із доками, Blender.
+
+   Відмінність від «Термінала»: пайплайн стоїть НЕ вгорі, а вузькою смугою
+   іконок ліворуч, і кожна іконка міняє вміст дерева. Центр тримає
+   ВІДКРИТІ ДОКУМЕНТИ вкладками — можна тримати три поля поруч і клацати
+   між ними, не шукаючи їх у дереві щоразу. Нижня панель — та сама
+   контекстна, але згортається до смуги одним рухом.
+
+   Чому це може бути краще: консультант веде десятки полів і постійно
+   вертається до тих самих трьох-чотирьох. Дерево на 36 полів — це пошук,
+   вкладки — це память.
+   ═══════════════════════════════════════════════════════════════════════ */
+:root{
+  --тло:#15181c; --картка:#1b1f24; --картка2:#20252b; --лінія:#2b323a;
+  --лінія-тиха:rgba(43,50,58,.55); --смуга:#12151a;
+  --текст:#dfe6ea; --тихий:#8b97a3;
+  --акцент:#4ea8ff; --акцент-світлий:rgba(78,168,255,.13); --на-акценті:#0f1216;
+  --зелень:#57c96a; --увага:#e3b341; --тривога:#ff7a59;
+  --радіус:7px; --радіус-дрібний:5px;
+  --шрифт:"Segoe UI",system-ui,-apple-system,sans-serif;
+  --числа:"Cascadia Mono",Consolas,"SF Mono",monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--тло);color:var(--текст);font:13px/1.4 var(--шрифт);
+     height:100vh;overflow:hidden;display:flex;flex-direction:column}
+.ч{font-family:var(--числа)}
+
+.все{flex:1;min-height:0;display:flex}
+
+/* ─── смуга іконок = пайплайн */
+.смуга-іконок{width:52px;flex:none;background:var(--смуга);border-right:1px solid var(--лінія);
+  display:flex;flex-direction:column;align-items:center;padding-top:6px;gap:2px}
+.і{width:40px;height:40px;border-radius:var(--радіус-дрібний);display:grid;place-items:center;
+  color:var(--тихий);cursor:pointer;position:relative;font-size:17px}
+.і:hover{color:var(--текст);background:var(--картка2)}
+.і.є{color:var(--акцент);background:var(--акцент-світлий)}
+.і.є::before{content:"";position:absolute;left:-6px;top:8px;bottom:8px;width:2px;background:var(--акцент)}
+.і small{position:absolute;bottom:2px;right:5px;font:9px var(--числа);color:var(--зелень)}
+.і-розпір{flex:1}
+
+/* ─── дерево */
+.дерево-док{width:230px;flex:none;background:var(--картка);border-right:1px solid var(--лінія);
+  display:flex;flex-direction:column;min-height:0}
+.док-шапка{height:28px;flex:none;display:flex;align-items:center;justify-content:space-between;
+  padding:0 10px;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--тихий);
+  font-weight:700}
+.док-шапка span.ч{font-size:10.5px;letter-spacing:0}
+.пошук{margin:0 8px 6px;flex:none}
+.пошук input{width:100%;background:var(--картка2);border:1px solid var(--лінія);
+  border-radius:var(--радіус-дрібний);color:var(--текст);padding:5px 8px;font:12px var(--шрифт)}
+.вміст{overflow-y:auto;flex:1;min-height:0}
+.вузол{display:flex;align-items:center;gap:6px;padding:4px 10px;cursor:pointer;font-size:12px}
+.вузол:hover{background:var(--картка2)}
+.вузол.є{background:var(--акцент-світлий);color:var(--акцент);font-weight:600}
+.вузол .др{margin-left:auto;font:10.5px var(--числа);color:var(--тихий)}
+.вузол.гр{color:var(--тихий);font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;
+  font-weight:700;padding-top:9px}
+.в2{padding-left:20px}.в3{padding-left:32px}
+.крапка{width:6px;height:6px;border-radius:50%;background:var(--лінія);flex:none}
+.крапка.є{background:var(--зелень)}.крапка.у{background:var(--увага)}
+
+/* ─── центр із вкладками документів */
+.центр{flex:1;min-width:0;display:flex;flex-direction:column;background:var(--тло)}
+.вкладки-док{height:32px;flex:none;display:flex;align-items:stretch;background:var(--смуга);
+  border-bottom:1px solid var(--лінія);overflow-x:auto}
+.вк{display:flex;align-items:center;gap:8px;padding:0 12px;font-size:12px;color:var(--тихий);
+  border-right:1px solid var(--лінія);cursor:pointer;white-space:nowrap}
+.вк:hover{color:var(--текст)}
+.вк.є{background:var(--тло);color:var(--текст);box-shadow:inset 0 2px 0 var(--акцент);font-weight:600}
+.вк b{font-weight:inherit}
+.вк .х{color:var(--тихий);font-size:14px;line-height:1}
+.вк .мітка{font:10px var(--числа);color:var(--акцент)}
+
+.робоче{flex:1;min-height:0;display:flex;flex-direction:column}
+.полотно{flex:1;min-height:0;position:relative;overflow:hidden;
+  background:repeating-linear-gradient(0deg,#181c21 0 24px,#1a1f25 24px 48px)}
+.поле-фігура{position:absolute;inset:8% 14% 12% 12%}
+.плашка{position:absolute;left:12px;top:10px;background:rgba(21,24,28,.82);
+  border:1px solid var(--лінія);border-radius:var(--радіус-дрібний);padding:6px 10px;font-size:11.5px}
+.плашка b{display:block;font-size:13px;margin-bottom:2px}
+
+/* ─── нижня панель */
+.низ{flex:none;height:200px;border-top:1px solid var(--лінія);background:var(--картка);
+  display:flex;flex-direction:column}
+.низ.згорнута{height:31px}
+.низ-таби{height:31px;flex:none;display:flex;align-items:center;gap:0;background:var(--картка);
+  border-bottom:1px solid var(--лінія);padding-right:8px}
+.нт{padding:0 12px;height:31px;display:flex;align-items:center;font-size:11.5px;
+  text-transform:uppercase;letter-spacing:.05em;color:var(--тихий);cursor:pointer;font-weight:650}
+.нт:hover{color:var(--текст)}
+.нт.є{color:var(--текст);box-shadow:inset 0 -2px 0 var(--акцент)}
+.низ .розпір{flex:1}
+.згорнути{background:none;border:none;color:var(--тихий);cursor:pointer;font-size:14px;padding:0 6px}
+.низ-тіло{flex:1;min-height:0;overflow:auto}
+.низ.згорнута .низ-тіло{display:none}
+
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{position:sticky;top:0;background:var(--картка);text-align:left;padding:6px 9px;font-size:10px;
+  text-transform:uppercase;letter-spacing:.06em;color:var(--тихий);font-weight:650;
+  border-bottom:1px solid var(--лінія);white-space:nowrap}
+td{padding:5px 9px;border-bottom:1px solid var(--лінія-тиха);white-space:nowrap}
+td.ч{font-family:var(--числа);text-align:right}
+tbody tr:hover{background:var(--картка2)}
+tr.цей td{background:var(--акцент-світлий)}
+.нема{color:var(--тихий)}
+
+/* ─── правий інспектор */
+.інспектор{width:268px;flex:none;background:var(--картка);border-left:1px solid var(--лінія);
+  display:flex;flex-direction:column;min-height:0}
+.секція{border-bottom:1px solid var(--лінія);display:flex;flex-direction:column;min-height:0}
+.секція.росте{flex:1}
+.секція>.вміст{padding:2px 0}
+.рядок-влас{display:flex;justify-content:space-between;gap:10px;padding:3px 10px;font-size:12px}
+.рядок-влас span:first-child{color:var(--тихий)}
+.рядок-влас span:last-child{font-family:var(--числа);font-weight:600}
+.дія{display:block;width:calc(100% - 16px);margin:5px 8px;text-align:left;padding:7px 10px;
+  background:var(--картка2);border:1px solid var(--лінія);border-radius:var(--радіус-дрібний);
+  color:var(--текст);font:600 12px var(--шрифт);cursor:pointer}
+.дія small{display:block;font-weight:400;font-size:10.5px;color:var(--тихий);margin-top:2px}
+.дія:hover{border-color:var(--акцент)}
+.дія.головна{background:var(--акцент);color:var(--на-акценті);border-color:var(--акцент)}
+.дія.головна small{color:rgba(15,18,22,.72)}
+
+/* ─── смуга стану */
+.стан{height:22px;flex:none;background:var(--акцент);color:var(--на-акценті);display:flex;
+  align-items:center;gap:16px;padding:0 10px;font:11px var(--числа)}
+.стан .розпір{flex:1}
+</style>
+</head>
+<body>
+
+<div class="все">
+
+  <!-- пайплайн смугою іконок -->
+  <nav class="смуга-іконок">
+    <div class="і" title="Прийом даних">⬓<small>✓</small></div>
+    <div class="і" title="Аналізи">⌗<small>✓</small></div>
+    <div class="і є" title="Врожайність">▦</div>
+    <div class="і" title="Зони">◈</div>
+    <div class="і" title="Норми й карта внесення">≡</div>
+    <div class="і" title="Гроші">₴</div>
+    <div class="і" title="Видача">↥</div>
+    <div class="і-розпір"></div>
+    <div class="і" title="Метод">☰</div>
+    <div class="і" title="Налаштування">⚙</div>
+  </nav>
+
+  <!-- дерево -->
+  <aside class="дерево-док">
+    <div class="док-шапка"><span>Картотека</span><span class="ч">36 · 3 515 га</span></div>
+    <div class="пошук"><input placeholder="Поле, культура, рік…"></div>
+    <div class="вміст">
+      <div class="вузол гр">КОМАГРО</div>
+      <div class="вузол в2">Бригада 1 Степанівка<span class="др">13</span></div>
+      <div class="вузол в3 є"><span class="крапка є"></span>Поле Центральне<span class="др">207,0</span></div>
+      <div class="вузол в3"><span class="крапка є"></span>Поле Південне<span class="др">154,0</span></div>
+      <div class="вузол в3"><span class="крапка у"></span>Поле Західне<span class="др">131,8</span></div>
+      <div class="вузол в2">Бригада 2 Семенівка<span class="др">8</span></div>
+      <div class="вузол в3"><span class="крапка є"></span>Поле Соняшникове<span class="др">198,7</span></div>
+      <div class="вузол в3"><span class="крапка"></span>Поле Степове<span class="др">165,4</span></div>
+      <div class="вузол гр">Зелена Поляна</div>
+      <div class="вузол в2"><span class="крапка є"></span>Г_03<span class="др">177,8</span></div>
+      <div class="вузол в2"><span class="крапка"></span>Ж_03<span class="др">126,8</span></div>
+      <div class="вузол гр">АгроінвестЗерно</div>
+      <div class="вузол в2"><span class="крапка"></span>KM_02_229<span class="др">44,5</span></div>
+      <div class="вузол в2"><span class="крапка"></span>KM_02_315<span class="др">125,8</span></div>
+    </div>
+  </aside>
+
+  <!-- центр -->
+  <section class="центр">
+    <div class="вкладки-док">
+      <div class="вк є"><b>Поле Центральне</b><span class="мітка">врожайність 2025</span><span class="х">×</span></div>
+      <div class="вк"><b>Г_03</b><span class="мітка">зони</span><span class="х">×</span></div>
+      <div class="вк"><b>Поле Степове</b><span class="мітка">аналізи</span><span class="х">×</span></div>
+      <div class="вк"><b>КОМАГРО</b><span class="мітка">бюджет</span><span class="х">×</span></div>
+    </div>
+
+    <div class="робоче">
+      <div class="полотно">
+        <svg class="поле-фігура" viewBox="0 0 600 380" preserveAspectRatio="none">
+          <defs><linearGradient id="г" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#7a2f1e"/><stop offset=".35" stop-color="#d9c88b"/>
+            <stop offset=".7" stop-color="#8fbf55"/><stop offset="1" stop-color="#2f7a3a"/></linearGradient>
+            <clipPath id="к"><path d="M50 40 L530 25 L570 210 L500 350 L180 355 L45 240 Z"/></clipPath></defs>
+          <g clip-path="url(#к)"><rect width="600" height="380" fill="url(#г)"/>
+            <ellipse cx="250" cy="140" rx="72" ry="42" fill="#7a2f1e" opacity=".7"/></g>
+          <path d="M50 40 L530 25 L570 210 L500 350 L180 355 L45 240 Z" fill="none"
+                stroke="#4ea8ff" stroke-width="2"/>
+        </svg>
+        <div class="плашка"><b>Врожайність 2025 · нормалізована</b>
+          <span class="ч" style="color:var(--тихий)">17 102 комірки · 4,90 м робоча ширина</span></div>
+      </div>
+
+      <div class="низ" id="низ">
+        <div class="низ-таби">
+          <div class="нт">Паспорт</div>
+          <div class="нт є">Історія</div>
+          <div class="нт">Живлення</div>
+          <div class="нт">Захист</div>
+          <div class="нт">Аналізи</div>
+          <div class="нт">Операції</div>
+          <div class="нт">Журнал прогону</div>
+          <div class="розпір"></div>
+          <button class="згорнути" onclick="document.getElementById('низ').classList.toggle('згорнута')">▾</button>
+        </div>
+        <div class="низ-тіло">
+          <table>
+            <thead><tr><th>Рік</th><th>Культура</th><th>Урожай т/га</th><th>N</th><th>P₂O₅</th>
+              <th>K₂O</th><th>S</th><th>Вапно</th><th>Обробіток</th><th>Витрати $/га</th><th>Carryover</th></tr></thead>
+            <tbody>
+              <tr class="цей"><td class="ч">2025</td><td>Ріпак озимий</td><td class="ч">3,50</td>
+                <td class="ч">191</td><td class="ч">62</td><td class="ч">76</td><td class="ч">41</td>
+                <td class="ч">2,5</td><td>Чизель 22</td><td class="ч">323</td><td>Середній</td></tr>
+              <tr><td class="ч">2024</td><td>Кукурудза</td><td class="ч">7,60</td><td class="ч">164</td>
+                <td class="ч">68</td><td class="ч">90</td><td class="ч">19</td><td class="ч нема">—</td>
+                <td>Диск 12</td><td class="ч">446</td><td>Низький</td></tr>
+              <tr><td class="ч">2023</td><td>Соняшник</td><td class="ч">3,20</td><td class="ч">78</td>
+                <td class="ч">34</td><td class="ч">64</td><td class="ч">13</td><td class="ч нема">—</td>
+                <td>Диск 14</td><td class="ч">304</td><td>Низький</td></tr>
+              <tr><td class="ч">2022</td><td>Пшениця озима</td><td class="ч">5,20</td><td class="ч">151</td>
+                <td class="ч">50</td><td class="ч">44</td><td class="ч">18</td><td class="ч нема">—</td>
+                <td>Чизель 25</td><td class="ч">295</td><td>Високий</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- інспектор -->
+  <aside class="інспектор">
+    <div class="секція">
+      <div class="док-шапка"><span>Що обрано</span></div>
+      <div class="вміст">
+        <div class="рядок-влас"><span>Поле</span><span>Центральне</span></div>
+        <div class="рядок-влас"><span>Бригада</span><span>1 Степанівка</span></div>
+        <div class="рядок-влас"><span>Площа з контуру</span><span>207,01 га</span></div>
+        <div class="рядок-влас"><span>Культура 2025</span><span>Ріпак озимий</span></div>
+        <div class="рядок-влас"><span>Урожай</span><span>3,50 т/га</span></div>
+        <div class="рядок-влас"><span>Років історії</span><span>8</span></div>
+      </div>
+    </div>
+    <div class="секція росте">
+      <div class="док-шапка"><span>Шари документа</span></div>
+      <div class="вміст">
+        <div class="рядок-влас"><span>Контур 2025</span><span>показано</span></div>
+        <div class="рядок-влас"><span>Врожайність</span><span>показано</span></div>
+        <div class="рядок-влас"><span>Зони</span><span>сховано</span></div>
+        <div class="рядок-влас"><span>Проби · 24</span><span>сховано</span></div>
+        <div class="рядок-влас"><span>Супутник</span><span>сховано</span></div>
+      </div>
+    </div>
+    <div class="секція">
+      <div class="док-шапка"><span>Дії</span></div>
+      <div class="вміст">
+        <button class="дія головна">Побудувати зони<small>з цієї карти</small></button>
+        <button class="дія">Точки відбору</button>
+        <button class="дія">Бюджет поля</button>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<div class="стан">
+  <span>КОМАГРО · Поле Центральне · 2025</span>
+  <span>ширина 4,90 м · перекриття 18 %</span>
+  <span>смугастість 10 %</span>
+  <span class="розпір"></span>
+  <span>перевірки: 12/12 чисті</span>
+</div>
+
+<script>
+document.querySelectorAll('.нт').forEach(т=>т.onclick=()=>{
+  document.querySelectorAll('.нт').forEach(x=>x.classList.remove('є'));т.classList.add('є');});
+document.querySelectorAll('.вк').forEach(т=>т.onclick=()=>{
+  document.querySelectorAll('.вк').forEach(x=>x.classList.remove('є'));т.classList.add('є');});
+document.querySelectorAll('.і').forEach(т=>т.onclick=()=>{
+  document.querySelectorAll('.і').forEach(x=>x.classList.remove('є'));т.classList.add('є');});
+</script>
+</body>
+</html>

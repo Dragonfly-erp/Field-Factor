@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<title>Простір 1 · Термінал (за ескізом Власника)</title>
+<style>
+/* ═══════════════════════════════════════════════════════════════════════
+   ПРОСТІР 1 · «ТЕРМІНАЛ» — ескіз Власника один в один.
+   Родина: торгові термінали, ArcGIS Pro, професійні пульти.
+
+   Три роди вкладок, і кожен відповідає за своє:
+     ПАЙПЛАЙН (іконки вгорі)   де ми в роботі: прийом → аналіз → зони → видача
+     ФУНКЦІЇ (верхні таби)     чим працюємо в цьому етапі
+     КОНТЕКСТ (нижні таби)     що показано про обране в дереві
+   Праворуч дві смуги: зверху інструменти над активним екраном,
+   знизу — дії, які готують наступний крок.
+   ═══════════════════════════════════════════════════════════════════════ */
+:root{
+  --тло:#15181c; --картка:#1b1f24; --картка2:#20252b; --лінія:#2b323a;
+  --лінія-тиха:rgba(43,50,58,.55);
+  --текст:#dfe6ea; --тихий:#8b97a3;
+  --акцент:#4ea8ff; --акцент-світлий:rgba(78,168,255,.13); --на-акценті:#0f1216;
+  --зелень:#57c96a; --увага:#e3b341; --тривога:#ff7a59;
+  --радіус:7px; --радіус-дрібний:5px;
+  --шрифт:"Segoe UI",system-ui,-apple-system,sans-serif;
+  --числа:"Cascadia Mono",Consolas,"SF Mono",monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--тло);color:var(--текст);font:13px/1.4 var(--шрифт);
+     height:100vh;overflow:hidden;display:flex;flex-direction:column}
+.ч{font-family:var(--числа)}
+
+/* ─── 1. ПАЙПЛАЙН: де ми в роботі */
+.пайплайн{height:46px;flex:none;background:var(--картка);
+  border-bottom:1px solid var(--лінія);display:flex;align-items:center;padding:0 10px;gap:2px}
+.лого{display:flex;align-items:center;gap:7px;font-weight:700;font-size:13.5px;margin-right:14px}
+.лого i{width:24px;height:24px;border-radius:6px;background:var(--акцент);color:var(--на-акценті);
+  display:grid;place-items:center;font-style:normal;font-weight:800;font-size:12px}
+.крок{display:flex;align-items:center;gap:7px;padding:6px 11px;border-radius:var(--радіус-дрібний);
+  color:var(--тихий);cursor:pointer;white-space:nowrap}
+.крок b{font-weight:600;font-size:12.5px}
+.крок i{width:20px;height:20px;border-radius:5px;background:var(--картка2);display:grid;
+  place-items:center;font-style:normal;font-size:11px;font-family:var(--числа)}
+.крок:hover{background:var(--картка2);color:var(--текст)}
+.крок.є{background:var(--акцент-світлий);color:var(--акцент)}
+.крок.є i{background:var(--акцент);color:var(--на-акценті)}
+.крок.зроблено i{background:rgba(87,201,106,.2);color:var(--зелень)}
+.стрілка{color:var(--лінія);font-size:11px}
+.розпір{flex:1}
+.де-я{font:11.5px var(--числа);color:var(--акцент);background:var(--акцент-світлий);
+  padding:4px 10px;border-radius:var(--радіус-дрібний)}
+
+/* ─── 2. ФУНКЦІЇ: чим працюємо */
+.функції{height:33px;flex:none;background:var(--тло);border-bottom:1px solid var(--лінія);
+  display:flex;align-items:stretch;padding:0 10px}
+.ф{display:flex;align-items:center;padding:0 13px;font-size:12.5px;color:var(--тихий);
+  cursor:pointer;border-bottom:2px solid transparent}
+.ф:hover{color:var(--текст)}
+.ф.є{color:var(--текст);border-bottom-color:var(--акцент);font-weight:650}
+
+/* ─── тіло: дерево | центр | права смуга */
+.тіло{flex:1;min-height:0;display:grid;grid-template-columns:236px 1fr 262px}
+.колонка{background:var(--картка);display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.ліва{border-right:1px solid var(--лінія)}
+.права{border-left:1px solid var(--лінія)}
+.шапка-панелі{height:27px;flex:none;display:flex;align-items:center;justify-content:space-between;
+  padding:0 10px;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--тихий);
+  font-weight:650;background:var(--картка2);border-bottom:1px solid var(--лінія)}
+.вміст{overflow-y:auto;flex:1;min-height:0}
+
+/* дерево */
+.гілка{font-size:12px}
+.вузол{display:flex;align-items:center;gap:6px;padding:4px 10px;cursor:pointer;color:var(--текст)}
+.вузол:hover{background:var(--картка2)}
+.вузол.є{background:var(--акцент-світлий);color:var(--акцент);font-weight:600}
+.вузол .др{margin-left:auto;font:10.5px var(--числа);color:var(--тихий)}
+.вузол.гр{color:var(--тихий);font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;
+  font-weight:700;padding-top:8px}
+.в2{padding-left:22px} .в3{padding-left:34px}
+.кулька{width:6px;height:6px;border-radius:50%;background:var(--лінія);flex:none}
+.кулька.є{background:var(--зелень)} .кулька.у{background:var(--увага)}
+
+/* центр */
+.центр{background:var(--тло);display:flex;flex-direction:column;min-height:0}
+.полотно{flex:1;min-height:0;position:relative;background:
+  repeating-linear-gradient(0deg,#181c21 0 24px,#1a1f25 24px 48px),var(--тло);overflow:hidden}
+.поле-фігура{position:absolute;inset:9% 12% 14% 10%}
+.підпис-карти{position:absolute;left:12px;top:10px;background:rgba(21,24,28,.8);
+  border:1px solid var(--лінія);border-radius:var(--радіус-дрібний);padding:5px 9px;font-size:11.5px}
+.підпис-карти b{display:block;font-size:13px}
+.шкала{position:absolute;right:12px;bottom:12px;display:flex;gap:0;align-items:center;
+  background:rgba(21,24,28,.8);border:1px solid var(--лінія);border-radius:var(--радіус-дрібний);
+  padding:4px 7px;font:10.5px var(--числа);color:var(--тихий);gap:6px}
+.шкала span{width:22px;height:8px;display:inline-block;border-radius:2px}
+
+/* ─── 3. КОНТЕКСТ: нижні таби про обране в дереві */
+.низ{flex:none;height:218px;border-top:1px solid var(--лінія);background:var(--картка);
+  display:flex;flex-direction:column}
+.низ-таби{height:30px;flex:none;display:flex;align-items:stretch;border-bottom:1px solid var(--лінія);
+  background:var(--картка2)}
+.нт{display:flex;align-items:center;padding:0 12px;font-size:12px;color:var(--тихий);cursor:pointer;
+  border-right:1px solid var(--лінія)}
+.нт:hover{color:var(--текст)}
+.нт.є{background:var(--картка);color:var(--текст);font-weight:650;
+  box-shadow:inset 0 2px 0 var(--акцент)}
+.низ-тіло{flex:1;min-height:0;overflow:auto;padding:0}
+
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{position:sticky;top:0;background:var(--картка);text-align:left;padding:6px 9px;
+  font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--тихий);font-weight:650;
+  border-bottom:1px solid var(--лінія);white-space:nowrap}
+td{padding:5px 9px;border-bottom:1px solid var(--лінія-тиха);white-space:nowrap}
+td.ч{font-family:var(--числа);text-align:right}
+tbody tr:hover{background:var(--картка2)}
+tr.цей td{background:var(--акцент-світлий)}
+.нема{color:var(--тихий)}
+
+/* права смуга: інструменти зверху, дії знизу */
+.інструмент{display:flex;align-items:center;gap:8px;padding:6px 10px;cursor:pointer;font-size:12.5px}
+.інструмент:hover{background:var(--картка2)}
+.інструмент input{accent-color:var(--акцент);margin:0}
+.інструмент .др{margin-left:auto;font:10.5px var(--числа);color:var(--тихий)}
+.повзунок{padding:7px 10px}
+.повзунок label{font-size:11px;color:var(--тихий);display:block;margin-bottom:4px}
+.повзунок input{width:100%;accent-color:var(--акцент)}
+.дія{display:block;width:calc(100% - 16px);margin:6px 8px;text-align:left;padding:8px 10px;
+  background:var(--картка2);border:1px solid var(--лінія);border-radius:var(--радіус-дрібний);
+  color:var(--текст);font:600 12.5px var(--шрифт);cursor:pointer}
+.дія small{display:block;font-weight:400;font-size:11px;color:var(--тихий);margin-top:2px}
+.дія:hover{border-color:var(--акцент)}
+.дія.головна{background:var(--акцент);color:var(--на-акценті);border-color:var(--акцент)}
+.дія.головна small{color:rgba(15,18,22,.7)}
+.права .вміст:first-of-type{flex:0 0 47%;border-bottom:1px solid var(--лінія)}
+</style>
+</head>
+<body>
+
+<!-- ПАЙПЛАЙН -->
+<div class="пайплайн">
+  <div class="лого"><i>F</i>FieldFactor</div>
+  <div class="крок зроблено"><i>1</i><b>Прийом</b></div><span class="стрілка">→</span>
+  <div class="крок зроблено"><i>2</i><b>Аналізи</b></div><span class="стрілка">→</span>
+  <div class="крок є"><i>3</i><b>Врожайність</b></div><span class="стрілка">→</span>
+  <div class="крок"><i>4</i><b>Зони</b></div><span class="стрілка">→</span>
+  <div class="крок"><i>5</i><b>Норми</b></div><span class="стрілка">→</span>
+  <div class="крок"><i>6</i><b>Гроші</b></div><span class="стрілка">→</span>
+  <div class="крок"><i>7</i><b>Видача</b></div>
+  <div class="розпір"></div>
+  <span class="де-я">КОМАГРО · Поле Центральне · 2025</span>
+</div>
+
+<!-- ФУНКЦІЇ поточного етапу -->
+<div class="функції">
+  <div class="ф є">Карта</div>
+  <div class="ф">Нормалізація</div>
+  <div class="ф">Проходи</div>
+  <div class="ф">Пропуски</div>
+  <div class="ф">Свідки</div>
+  <div class="ф">Звіт кроку</div>
+</div>
+
+<div class="тіло">
+
+  <!-- ЛІВОРУЧ: дерево -->
+  <aside class="колонка ліва">
+    <div class="шапка-панелі"><span>Картотека</span><span class="ч">36 полів</span></div>
+    <div class="вміст гілка">
+      <div class="вузол гр">КОМАГРО · 2 375 га</div>
+      <div class="вузол в2">Бригада 1 Степанівка<span class="др">13</span></div>
+      <div class="вузол в3 є"><span class="кулька є"></span>Поле Центральне<span class="др">207,0</span></div>
+      <div class="вузол в3"><span class="кулька є"></span>Поле Південне<span class="др">154,0</span></div>
+      <div class="вузол в3"><span class="кулька у"></span>Поле Західне<span class="др">131,8</span></div>
+      <div class="вузол в3"><span class="кулька"></span>Поле Верхнє<span class="др">120,3</span></div>
+      <div class="вузол в2">Бригада 2 Семенівка<span class="др">8</span></div>
+      <div class="вузол в3"><span class="кулька є"></span>Поле Соняшникове<span class="др">198,7</span></div>
+      <div class="вузол в3"><span class="кулька"></span>Поле Степове<span class="др">165,4</span></div>
+
+      <div class="вузол гр">Шари обраного поля</div>
+      <div class="вузол в2">Контур 2025</div>
+      <div class="вузол в2">Врожайність 2025</div>
+      <div class="вузол в2">Зони врожайності</div>
+      <div class="вузол в2">Аналізи · 24 проби</div>
+      <div class="вузол в2">Рельєф</div>
+
+      <div class="вузол гр">Зелена Поляна · 328 га</div>
+      <div class="вузол в2"><span class="кулька є"></span>Г_03<span class="др">177,8</span></div>
+      <div class="вузол в2"><span class="кулька"></span>Ж_03<span class="др">126,8</span></div>
+    </div>
+  </aside>
+
+  <!-- ЦЕНТР -->
+  <section class="центр">
+    <div class="полотно">
+      <svg class="поле-фігура" viewBox="0 0 600 380" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="г" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#7a2f1e"/><stop offset=".35" stop-color="#d9c88b"/>
+            <stop offset=".7" stop-color="#8fbf55"/><stop offset="1" stop-color="#2f7a3a"/>
+          </linearGradient>
+          <clipPath id="к"><path d="M40 30 L520 60 L575 200 L520 340 L200 360 L60 250 Z"/></clipPath>
+        </defs>
+        <g clip-path="url(#к)"><rect width="600" height="380" fill="url(#г)"/>
+          <ellipse cx="230" cy="150" rx="70" ry="46" fill="#7a2f1e" opacity=".75"/>
+          <ellipse cx="420" cy="250" rx="55" ry="34" fill="#b4472c" opacity=".6"/></g>
+        <path d="M40 30 L520 60 L575 200 L520 340 L200 360 L60 250 Z" fill="none"
+              stroke="#4ea8ff" stroke-width="2"/>
+      </svg>
+      <div class="підпис-карти"><b>Врожайність 2025 · нормалізована</b>
+        <span class="ч" style="color:var(--тихий)">17 102 комірки · 12 050 т</span></div>
+      <div class="шкала"><span style="background:#7a2f1e"></span><span style="background:#d9c88b"></span>
+        <span style="background:#8fbf55"></span><span style="background:#2f7a3a"></span>
+        <span>3,1 — 14,8 т/га</span></div>
+    </div>
+
+    <!-- КОНТЕКСТ: нижні таби про обране -->
+    <div class="низ">
+      <div class="низ-таби">
+        <div class="нт">Паспорт</div>
+        <div class="нт є">Історія · 8 років</div>
+        <div class="нт">Живлення</div>
+        <div class="нт">Захист</div>
+        <div class="нт">Обробіток</div>
+        <div class="нт">Аналізи</div>
+        <div class="нт">Бюджет</div>
+        <div class="нт">Операції</div>
+      </div>
+      <div class="низ-тіло">
+        <table>
+          <thead><tr><th>Рік</th><th>Культура</th><th>Гібрид</th><th>Попередник</th>
+            <th>Урожай т/га</th><th>N</th><th>P₂O₅</th><th>K₂O</th><th>S</th>
+            <th>Вапно</th><th>Обробіток</th><th>Витрати $/га</th></tr></thead>
+          <tbody>
+            <tr class="цей"><td class="ч">2025</td><td>Ріпак озимий</td><td>ES Hydromel</td><td>Ячмінь ярий</td>
+              <td class="ч">3,50</td><td class="ч">191</td><td class="ч">62</td><td class="ч">76</td>
+              <td class="ч">41</td><td class="ч">2,5</td><td>Чизель 22</td><td class="ч">323</td></tr>
+            <tr><td class="ч">2024</td><td>Кукурудза</td><td>DKC 3511</td><td>Ріпак озимий</td>
+              <td class="ч">7,60</td><td class="ч">164</td><td class="ч">68</td><td class="ч">90</td>
+              <td class="ч">19</td><td class="ч нема">—</td><td>Диск 12</td><td class="ч">446</td></tr>
+            <tr><td class="ч">2023</td><td>Соняшник</td><td>P64LE25</td><td>Ячмінь ярий</td>
+              <td class="ч">3,20</td><td class="ч">78</td><td class="ч">34</td><td class="ч">64</td>
+              <td class="ч">13</td><td class="ч нема">—</td><td>Диск 14</td><td class="ч">304</td></tr>
+            <tr><td class="ч">2022</td><td>Пшениця озима</td><td>Шестопалівка</td><td>Кукурудза</td>
+              <td class="ч">5,20</td><td class="ч">151</td><td class="ч">50</td><td class="ч">44</td>
+              <td class="ч">18</td><td class="ч нема">—</td><td>Чизель 25</td><td class="ч">295</td></tr>
+            <tr><td class="ч">2021</td><td>Ріпак озимий</td><td>ES Hydromel</td><td>Ячмінь ярий</td>
+              <td class="ч">3,90</td><td class="ч">143</td><td class="ч">66</td><td class="ч">60</td>
+              <td class="ч">33</td><td class="ч нема">—</td><td>Чизель 22</td><td class="ч">399</td></tr>
+            <tr><td class="ч">2020</td><td>Кукурудза</td><td>DKC 3511</td><td>Ріпак озимий</td>
+              <td class="ч">9,00</td><td class="ч">177</td><td class="ч">52</td><td class="ч">74</td>
+              <td class="ч">15</td><td class="ч нема">—</td><td>Оранка 25</td><td class="ч">383</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ПРАВОРУЧ: інструменти зверху, дії знизу -->
+  <aside class="колонка права">
+    <div class="шапка-панелі"><span>Інструменти показу</span></div>
+    <div class="вміст">
+      <div class="інструмент"><input type="checkbox" checked>Контур поля<span class="др">2025</span></div>
+      <div class="інструмент"><input type="checkbox" checked>Врожайність<span class="др">17 102</span></div>
+      <div class="інструмент"><input type="checkbox">Зони врожайності<span class="др">4</span></div>
+      <div class="інструмент"><input type="checkbox">Точки відбору<span class="др">24</span></div>
+      <div class="інструмент"><input type="checkbox">Пропуски<span class="др">14,9 га</span></div>
+      <div class="інструмент"><input type="checkbox">Супутник тлом</div>
+      <div class="повзунок"><label>Прозорість шару · 85 %</label><input type="range" value="85"></div>
+      <div class="повзунок"><label>Класів у легенді · 5</label><input type="range" value="50"></div>
+    </div>
+
+    <div class="шапка-панелі"><span>Дії · наступний крок</span></div>
+    <div class="вміст">
+      <button class="дія головна">Побудувати зони<small>з нормалізованої карти цього поля</small></button>
+      <button class="дія">Точки відбору<small>сітка або оптимізоване дослідження</small></button>
+      <button class="дія">Карта внесення<small>норми по зонах → shape для термінала</small></button>
+      <button class="дія">Бюджет поля<small>план × довідники → грн/га</small></button>
+      <button class="дія">Звіт господарству<small>PDF · три сторінки</small></button>
+    </div>
+  </aside>
+</div>
+
+<script>
+document.querySelectorAll('.нт').forEach(т => т.onclick = () => {
+  document.querySelectorAll('.нт').forEach(x => x.classList.remove('є')); т.classList.add('є');
+});
+document.querySelectorAll('.ф').forEach(т => т.onclick = () => {
+  document.querySelectorAll('.ф').forEach(x => x.classList.remove('є')); т.classList.add('є');
+});
+document.querySelectorAll('.крок').forEach(т => т.onclick = () => {
+  document.querySelectorAll('.крок').forEach(x => x.classList.remove('є')); т.classList.add('є');
+});
+</script>
+</body>
+</html>

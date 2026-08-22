@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<title>Простір 4 · Ящик (карта на весь екран, контекст висувається знизу)</title>
+<style>
+/* ═══════════════════════════════════════════════════════════════════════
+   ПРОСТІР 4 · «ЯЩИК»
+   Родина: Agworld, xarvio, John Deere Operations Center, картографічні
+   застосунки з висувною шухлядою.
+
+   Ідея протилежна «Стрічці»: постійних панелей майже немає. Карта займає
+   весь екран, а контекст живе в ЯЩИКУ, який висувається знизу на три
+   висоти — смуга, половина, на весь екран. Інструменти плавають над
+   картою і зникають, коли не потрібні.
+
+   Кому це підходить: коли головне — карта, а числа дивляться приступами.
+   Чим ризикуємо: те, чого не видно, забувають. Тому ящик у смузі завжди
+   показує головні числа поля, навіть згорнутий.
+   ═══════════════════════════════════════════════════════════════════════ */
+:root{
+  --тло:#15181c; --картка:#1b1f24; --картка2:#20252b; --лінія:#2b323a;
+  --лінія-тиха:rgba(43,50,58,.55);
+  --текст:#dfe6ea; --тихий:#8b97a3;
+  --акцент:#4ea8ff; --акцент-світлий:rgba(78,168,255,.13); --на-акценті:#0f1216;
+  --зелень:#57c96a; --увага:#e3b341; --тривога:#ff7a59;
+  --радіус:9px; --радіус-дрібний:6px;
+  --шрифт:"Segoe UI",system-ui,-apple-system,sans-serif;
+  --числа:"Cascadia Mono",Consolas,"SF Mono",monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--тло);color:var(--текст);font:13px/1.4 var(--шрифт);
+     height:100vh;overflow:hidden;display:flex;flex-direction:column}
+.ч{font-family:var(--числа)}
+
+/* ─── тонка верхня смуга: пайплайн кроками */
+.верх{height:42px;flex:none;background:var(--картка);border-bottom:1px solid var(--лінія);
+  display:flex;align-items:center;padding:0 12px;gap:14px}
+.лого{display:flex;align-items:center;gap:7px;font-weight:700;font-size:13.5px}
+.лого i{width:23px;height:23px;border-radius:6px;background:var(--акцент);color:var(--на-акценті);
+  display:grid;place-items:center;font-style:normal;font-weight:800;font-size:11px}
+.кроки{display:flex;align-items:center;gap:0}
+.к{display:flex;align-items:center;gap:6px;padding:5px 10px;font-size:12px;color:var(--тихий);
+  cursor:pointer;border-radius:20px}
+.к:hover{color:var(--текст)}
+.к.є{background:var(--акцент-світлий);color:var(--акцент);font-weight:650}
+.к b{width:16px;height:16px;border-radius:50%;background:var(--картка2);font:9.5px/16px var(--числа);
+  text-align:center;font-weight:700}
+.к.є b{background:var(--акцент);color:var(--на-акценті)}
+.к.готово b{background:rgba(87,201,106,.22);color:var(--зелень)}
+.розпір{flex:1}
+.поле-вибір{display:flex;align-items:center;gap:8px;background:var(--картка2);border:1px solid var(--лінія);
+  border-radius:var(--радіус-дрібний);padding:5px 11px;font-size:12.5px;cursor:pointer}
+.поле-вибір b{font-weight:650}
+.поле-вибір span{font:11px var(--числа);color:var(--тихий)}
+
+/* ─── карта на весь екран */
+.сцена{flex:1;min-height:0;position:relative;overflow:hidden;
+  background:repeating-linear-gradient(0deg,#181c21 0 26px,#1a1f25 26px 52px)}
+.поле-фігура{position:absolute;inset:6% 22% 26% 8%}
+
+/* плаваючі панелі */
+.плавуча{position:absolute;background:rgba(27,31,36,.93);border:1px solid var(--лінія);
+  border-radius:var(--радіус);backdrop-filter:blur(3px);overflow:hidden}
+.пл-шапка{padding:7px 11px;font-size:10px;text-transform:uppercase;letter-spacing:.08em;
+  color:var(--тихий);font-weight:700;border-bottom:1px solid var(--лінія);display:flex;
+  justify-content:space-between;align-items:center}
+.шари{top:12px;left:12px;width:214px}
+.шар{display:flex;align-items:center;gap:8px;padding:5px 11px;font-size:12px;cursor:pointer}
+.шар:hover{background:var(--картка2)}
+.шар input{accent-color:var(--акцент);margin:0}
+.шар .др{margin-left:auto;font:10.5px var(--числа);color:var(--тихий)}
+
+.дії{top:12px;right:12px;width:214px}
+.дія{display:block;width:100%;text-align:left;padding:8px 11px;background:transparent;border:none;
+  border-bottom:1px solid var(--лінія-тиха);color:var(--текст);font:600 12.5px var(--шрифт);cursor:pointer}
+.дія small{display:block;font-weight:400;font-size:10.5px;color:var(--тихий);margin-top:2px}
+.дія:hover{background:var(--картка2)}
+.дія.головна{color:var(--акцент)}
+
+.легенда{right:12px;bottom:calc(var(--ящик,236px) + 12px);width:214px}
+.щабель{display:flex;align-items:center;gap:8px;padding:3px 11px;font:11px var(--числа);color:var(--тихий)}
+.зразок{width:22px;height:9px;border-radius:2px;flex:none}
+
+/* ─── ящик знизу */
+.ящик{flex:none;height:236px;background:var(--картка);border-top:1px solid var(--лінія);
+  display:flex;flex-direction:column;transition:height .18s ease}
+.ящик.смуга{height:46px}
+.ящик.весь{height:calc(100vh - 42px)}
+.ручка{height:46px;flex:none;display:flex;align-items:center;gap:0;padding:0 6px;
+  border-bottom:1px solid var(--лінія)}
+.нт{display:flex;align-items:center;padding:0 12px;height:46px;font-size:12px;color:var(--тихий);
+  cursor:pointer;border-bottom:2px solid transparent}
+.нт:hover{color:var(--текст)}
+.нт.є{color:var(--текст);font-weight:650;border-bottom-color:var(--акцент)}
+.числа-смуги{display:flex;align-items:center;gap:18px;margin-left:auto;padding-right:8px}
+.чс{display:flex;flex-direction:column;line-height:1.15}
+.чс small{font-size:9.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--тихий)}
+.чс b{font:650 13px var(--числа)}
+.чс.вгору b{color:var(--зелень)}.чс.вниз b{color:var(--тривога)}
+.висота{background:none;border:1px solid var(--лінія);color:var(--тихий);border-radius:var(--радіус-дрібний);
+  cursor:pointer;font-size:13px;padding:3px 9px;margin-left:10px}
+.ящик-тіло{flex:1;min-height:0;overflow:auto}
+.ящик.смуга .ящик-тіло{display:none}
+
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{position:sticky;top:0;background:var(--картка);text-align:left;padding:6px 10px;font-size:10px;
+  text-transform:uppercase;letter-spacing:.06em;color:var(--тихий);font-weight:650;
+  border-bottom:1px solid var(--лінія);white-space:nowrap}
+td{padding:6px 10px;border-bottom:1px solid var(--лінія-тиха);white-space:nowrap}
+td.ч{font-family:var(--числа);text-align:right}
+tbody tr:hover{background:var(--картка2)}
+tr.цей td{background:var(--акцент-світлий)}
+.нема{color:var(--тихий)}
+.стовп{display:inline-block;height:8px;background:var(--акцент);border-radius:2px;opacity:.7;
+  vertical-align:middle;margin-right:7px}
+</style>
+</head>
+<body>
+
+<div class="верх">
+  <div class="лого"><i>F</i>FieldFactor</div>
+  <div class="кроки">
+    <div class="к готово"><b>1</b>Прийом</div>
+    <div class="к готово"><b>2</b>Аналізи</div>
+    <div class="к є"><b>3</b>Врожайність</div>
+    <div class="к"><b>4</b>Зони</div>
+    <div class="к"><b>5</b>Норми</div>
+    <div class="к"><b>6</b>Гроші</div>
+    <div class="к"><b>7</b>Видача</div>
+  </div>
+  <div class="розпір"></div>
+  <div class="поле-вибір"><b>Поле Центральне</b><span>КОМАГРО · Бригада 1 · 207,0 га</span><span>▾</span></div>
+</div>
+
+<div class="сцена">
+  <svg class="поле-фігура" viewBox="0 0 600 380" preserveAspectRatio="none">
+    <defs><linearGradient id="г" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7a2f1e"/><stop offset=".35" stop-color="#d9c88b"/>
+      <stop offset=".7" stop-color="#8fbf55"/><stop offset="1" stop-color="#2f7a3a"/></linearGradient>
+      <clipPath id="к"><path d="M40 30 L520 50 L578 200 L520 348 L190 360 L50 240 Z"/></clipPath></defs>
+    <g clip-path="url(#к)"><rect width="600" height="380" fill="url(#г)"/>
+      <ellipse cx="235" cy="145" rx="72" ry="45" fill="#7a2f1e" opacity=".72"/>
+      <ellipse cx="430" cy="255" rx="52" ry="32" fill="#b4472c" opacity=".55"/></g>
+    <path d="M40 30 L520 50 L578 200 L520 348 L190 360 L50 240 Z" fill="none"
+          stroke="#4ea8ff" stroke-width="2"/>
+  </svg>
+
+  <div class="плавуча шари">
+    <div class="пл-шапка"><span>Шари</span><span class="ч">5</span></div>
+    <div class="шар"><input type="checkbox" checked>Врожайність<span class="др">17 102</span></div>
+    <div class="шар"><input type="checkbox" checked>Контур<span class="др">207,0</span></div>
+    <div class="шар"><input type="checkbox">Зони<span class="др">4</span></div>
+    <div class="шар"><input type="checkbox">Проби<span class="др">24</span></div>
+    <div class="шар"><input type="checkbox">Супутник тлом</div>
+  </div>
+
+  <div class="плавуча дії">
+    <div class="пл-шапка"><span>Що зробити далі</span></div>
+    <button class="дія головна">Побудувати зони<small>з цієї карти врожайності</small></button>
+    <button class="дія">Точки відбору<small>сітка або дослідження</small></button>
+    <button class="дія">Карта внесення<small>норми по зонах</small></button>
+    <button class="дія">Бюджет поля<small>грн/га за планом</small></button>
+    <button class="дія" style="border-bottom:none">Видача<small>shape · PDF · пам'ятка SMS</small></button>
+  </div>
+
+  <div class="плавуча легенда">
+    <div class="пл-шапка"><span>Врожайність, т/га</span></div>
+    <div class="щабель"><span class="зразок" style="background:#2f7a3a"></span>11,2 — 14,8</div>
+    <div class="щабель"><span class="зразок" style="background:#8fbf55"></span>9,0 — 11,2</div>
+    <div class="щабель"><span class="зразок" style="background:#d9c88b"></span>6,8 — 9,0</div>
+    <div class="щабель"><span class="зразок" style="background:#b4472c"></span>4,5 — 6,8</div>
+    <div class="щабель"><span class="зразок" style="background:#7a2f1e"></span>3,1 — 4,5</div>
+  </div>
+</div>
+
+<div class="ящик" id="ящик">
+  <div class="ручка">
+    <div class="нт">Паспорт</div>
+    <div class="нт є">Історія</div>
+    <div class="нт">Живлення</div>
+    <div class="нт">Захист</div>
+    <div class="нт">Операції</div>
+    <div class="нт">Бюджет</div>
+    <div class="числа-смуги">
+      <div class="чс"><small>Площа</small><b>207,0</b></div>
+      <div class="чс вгору"><small>Урожай 2025</small><b>3,50</b></div>
+      <div class="чс"><small>Середній 8 р.</small><b>5,05</b></div>
+      <div class="чс вниз"><small>Витрати</small><b>323 $</b></div>
+      <button class="висота" id="перемикач">⌃</button>
+    </div>
+  </div>
+  <div class="ящик-тіло">
+    <table>
+      <thead><tr><th>Рік</th><th>Культура</th><th>Гібрид</th><th>Урожай т/га</th><th>N</th><th>P₂O₅</th>
+        <th>K₂O</th><th>S</th><th>Вапно</th><th>Обробіток</th><th>Витрати $/га</th></tr></thead>
+      <tbody>
+        <tr class="цей"><td class="ч">2025</td><td>Ріпак озимий</td><td>ES Hydromel</td>
+          <td class="ч"><i class="стовп" style="width:30px"></i>3,50</td><td class="ч">191</td>
+          <td class="ч">62</td><td class="ч">76</td><td class="ч">41</td><td class="ч">2,5</td>
+          <td>Чизель 22</td><td class="ч">323</td></tr>
+        <tr><td class="ч">2024</td><td>Кукурудза</td><td>DKC 3511</td>
+          <td class="ч"><i class="стовп" style="width:66px"></i>7,60</td><td class="ч">164</td>
+          <td class="ч">68</td><td class="ч">90</td><td class="ч">19</td><td class="ч нема">—</td>
+          <td>Диск 12</td><td class="ч">446</td></tr>
+        <tr><td class="ч">2023</td><td>Соняшник</td><td>P64LE25</td>
+          <td class="ч"><i class="стовп" style="width:28px"></i>3,20</td><td class="ч">78</td>
+          <td class="ч">34</td><td class="ч">64</td><td class="ч">13</td><td class="ч нема">—</td>
+          <td>Диск 14</td><td class="ч">304</td></tr>
+        <tr><td class="ч">2022</td><td>Пшениця озима</td><td>Шестопалівка</td>
+          <td class="ч"><i class="стовп" style="width:45px"></i>5,20</td><td class="ч">151</td>
+          <td class="ч">50</td><td class="ч">44</td><td class="ч">18</td><td class="ч нема">—</td>
+          <td>Чизель 25</td><td class="ч">295</td></tr>
+        <tr><td class="ч">2021</td><td>Ріпак озимий</td><td>ES Hydromel</td>
+          <td class="ч"><i class="стовп" style="width:34px"></i>3,90</td><td class="ч">143</td>
+          <td class="ч">66</td><td class="ч">60</td><td class="ч">33</td><td class="ч нема">—</td>
+          <td>Чизель 22</td><td class="ч">399</td></tr>
+        <tr><td class="ч">2020</td><td>Кукурудза</td><td>DKC 3511</td>
+          <td class="ч"><i class="стовп" style="width:78px"></i>9,00</td><td class="ч">177</td>
+          <td class="ч">52</td><td class="ч">74</td><td class="ч">15</td><td class="ч нема">—</td>
+          <td>Оранка 25</td><td class="ч">383</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+const ящик = document.getElementById('ящик');
+const стани = ['смуга', '', 'весь'];
+let і = 1;
+document.getElementById('перемикач').onclick = () => {
+  і = (і + 1) % стани.length;
+  ящик.className = 'ящик ' + стани[і];
+  document.getElementById('перемикач').textContent = і === 2 ? '⌄' : '⌃';
+};
+document.querySelectorAll('.нт').forEach(т=>т.onclick=()=>{
+  document.querySelectorAll('.нт').forEach(x=>x.classList.remove('є'));т.classList.add('є');
+  if (ящик.classList.contains('смуга')) { ящик.className='ящик'; і=1; }});
+document.querySelectorAll('.к').forEach(т=>т.onclick=()=>{
+  document.querySelectorAll('.к').forEach(x=>x.classList.remove('є'));т.classList.add('є');});
+</script>
+</body>
+</html>
