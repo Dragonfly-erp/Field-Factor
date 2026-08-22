@@ -60,6 +60,41 @@
 .підсумок-структури .квадрат { width:10px; height:10px; border-radius:2px; }
 .підсумок-структури .га { font:11px/1 var(--моно); color:var(--текст); }
 .порожньо { color:var(--тривога); }
+
+/* ── Варіанти ротації. Картка — це не просто підпис: у ній видно
+   структуру посівів смужкою, бо саме структурою варіанти й різняться. */
+.вкладки { display:flex; gap:2px; margin:0 0 14px; border-bottom:1px solid var(--лінія); }
+.вкладки button {
+  background:none; border:none; border-bottom:2px solid transparent;
+  color:var(--тихий); padding:8px 14px; font:13px/1 var(--шрифт); cursor:pointer;
+}
+.вкладки button.тут { color:var(--акцент); border-bottom-color:var(--акцент); }
+
+.варіанти { display:flex; flex-wrap:wrap; gap:12px; margin-bottom:16px; }
+.варіант {
+  flex:1 1 280px; max-width:340px; background:var(--картка);
+  border:1px solid var(--лінія); border-radius:var(--радіус); padding:12px 14px;
+}
+.варіант.обраний { background:rgba(78,168,255,.10); border-color:var(--акцент); }
+.варіант.порівн { outline:1px solid var(--акцент); }
+.варіант h3 { margin:0 0 3px; font:600 13px/1.2 var(--шрифт); color:var(--текст); }
+.варіант .суть { font-size:10px; color:var(--тихий); margin-bottom:9px; }
+.смужка { display:flex; height:12px; border-radius:2px; overflow:hidden; margin-bottom:9px; }
+.смужка i { display:block; height:100%; }
+.варіант .числа { display:flex; justify-content:space-between; font-size:11px; }
+.варіант .числа b { font:11px/1 var(--моно); font-weight:600; }
+.варіант .дії { display:flex; gap:6px; margin-top:10px; }
+.варіант .дії button { font-size:11px; padding:4px 9px; }
+
+.порівняння { width:100%; border-collapse:collapse; font-size:12px; }
+.порівняння th {
+  font:600 10px/1 var(--шрифт); text-transform:uppercase; color:var(--тихий);
+  text-align:left; padding:0 8px 7px;
+}
+.порівняння td { padding:3px 8px; }
+.порівняння tbody tr:nth-child(even) { background:#181c21; }
+.порівняння td.га { text-align:right; font:11px/1 var(--моно); color:var(--тихий); }
+.нема-різниці { color:var(--лінія); font-style:italic; }
 </style>
 </head>
 <body>
@@ -82,6 +117,11 @@
     <span class="стан-плану" id="стан">чернетка</span>
     <span id="зведення" style="font-size:12px;color:var(--тихий)"></span>
   </div>
+
+  <nav class="вкладки" id="вкладки" hidden>
+    <button data-вкладка="сітка" class="тут">Сітка ротації</button>
+    <button data-вкладка="варіанти">Варіанти й порівняння</button>
+  </nav>
 
   <div id="тіло">
     <p class="вступ" id="повідомлення">Читаю дані…</p>
@@ -115,7 +155,8 @@ function коротко(культура) {
   return н.length > 14 ? н.slice(0, 13) + "…" : н;
 }
 
-const стан = { господарство: null, рік: null, дані: null, пензель: null };
+const стан = { господарство: null, рік: null, дані: null, пензель: null,
+               вкладка: "сітка", порівняти: [] };
 
 function екран(т) {
   const д = document.createElement("div");
@@ -157,7 +198,188 @@ async function завантажити() {
   }
   стан.дані = р;
   стан.рік = р["рік"];
-  намалювати();
+  document.getElementById("вкладки").hidden = false;
+  показати();
+}
+
+function показати() {
+  document.querySelectorAll("#вкладки button").forEach(к =>
+    к.classList.toggle("тут", к.dataset["вкладка"] === стан.вкладка));
+  if (стан.вкладка === "варіанти") намалювати_варіанти();
+  else намалювати();
+}
+
+document.querySelectorAll("#вкладки button").forEach(к =>
+  к.addEventListener("click", () => { стан.вкладка = к.dataset["вкладка"]; показати(); }));
+
+// ── Структура варіанта рахується з тих самих полів, що й сітка. Площа
+// береться з картотеки: поле без межі площі не має і в структуру не
+// входить — інакше частка культури тихо занизилась би.
+function структура_варіанта(поля_варіанта) {
+  const по_культурах = {};
+  let усього = 0, без_площі = 0;
+  (стан.дані["поля"] || []).forEach(п => {
+    const к = поля_варіанта[п["ключ"]];
+    if (!к) return;
+    if (!п["площа_га"]) { без_площі += 1; return; }
+    по_культурах[к] = (по_культурах[к] || 0) + Number(п["площа_га"]);
+    усього += Number(п["площа_га"]);
+  });
+  return { по_культурах, усього, без_площі };
+}
+
+function смужка(поля_варіанта) {
+  const с = структура_варіанта(поля_варіанта);
+  if (!с.усього) return "<div class='смужка'></div>";
+  const частини = Object.keys(с.по_культурах)
+    .sort((а, б) => с.по_культурах[б] - с.по_культурах[а])
+    .map(к => "<i style='width:" + (100 * с.по_культурах[к] / с.усього).toFixed(1)
+              + "%;background:" + колір(к) + "' title='" + екран(к) + " "
+              + с.по_культурах[к].toFixed(1) + " га'></i>");
+  return "<div class='смужка'>" + частини.join("") + "</div>";
+}
+
+function намалювати_варіанти() {
+  const д = стан.дані;
+  const варіанти = д["варіанти"] || [];
+  const частини = [];
+
+  частини.push("<div class='варіанти'>");
+  варіанти.forEach(в => {
+    const с = структура_варіанта(в["поля"] || {});
+    const обраний = в["ключ"] === д["обраний_варіант"];
+    const у_порівнянні = стан.порівняти.includes(в["ключ"]);
+    частини.push("<div class='варіант" + (обраний ? " обраний" : "")
+                 + (у_порівнянні ? " порівн" : "") + "'>");
+    частини.push("<h3>" + екран(в["назва"] || в["ключ"])
+                 + (обраний ? " <span style='color:var(--акцент);font-size:10px'>обраний</span>" : "")
+                 + "</h3>");
+    частини.push("<div class='суть'>" + екран(в["суть"] || "—") + "</div>");
+    частини.push(смужка(в["поля"] || {}));
+    частини.push("<div class='числа'><span>полів</span><b>"
+                 + Object.keys(в["поля"] || {}).length + "</b></div>");
+    частини.push("<div class='числа'><span>га</span><b>" + с.усього.toFixed(1) + "</b></div>");
+    if (с.без_площі) {
+      частини.push("<div class='числа порожньо'><span>без площі</span><b>"
+                   + с.без_площі + "</b></div>");
+    }
+    частини.push("<div class='дії'>");
+    частини.push("<button class='дрібна' data-обрати='" + екран(в["ключ"]) + "'>"
+                 + (обраний ? "перерозкласти" : "обрати") + "</button>");
+    частини.push("<button class='дрібна' data-порівняти='" + екран(в["ключ"]) + "'>"
+                 + (у_порівнянні ? "прибрати" : "у порівняння") + "</button>");
+    частини.push("</div></div>");
+  });
+
+  частини.push("<div class='варіант' style='border-style:dashed'>");
+  частини.push("<h3 style='color:var(--тихий)'>Ще один варіант</h3>");
+  частини.push("<div class='суть'>зліпок того, що зараз стоїть на сітці ротації</div>");
+  частини.push("<div class='дії'><button class='дрібна' id='новий'>зберегти сітку варіантом</button></div>");
+  частини.push("</div></div>");
+
+  if (!варіанти.length) {
+    частини.push("<p class='вступ'>Варіантів ще немає. Розставте культури на сітці "
+                 + "й збережіть це варіантом — далі можна поправити сітку інакше "
+                 + "й зберегти ще один.</p>");
+  }
+
+  частини.push("<div id='порівняння'></div>");
+  document.getElementById("тіло").innerHTML = частини.join("");
+
+  document.querySelectorAll("[data-обрати]").forEach(к =>
+    к.addEventListener("click", () => обрати_варіант(к.dataset["обрати"])));
+  document.querySelectorAll("[data-порівняти]").forEach(к =>
+    к.addEventListener("click", () => перемкнути_порівняння(к.dataset["порівняти"])));
+  const новий = document.getElementById("новий");
+  if (новий) новий.addEventListener("click", зберегти_варіант);
+
+  if (стан.порівняти.length === 2) намалювати_порівняння();
+}
+
+function перемкнути_порівняння(ключ) {
+  const і = стан.порівняти.indexOf(ключ);
+  if (і >= 0) стан.порівняти.splice(і, 1);
+  else {
+    стан.порівняти.push(ключ);
+    // Лоб у лоб — це рівно два. Третій виштовхує найстаріший, а не
+    // мовчки ігнорується: інакше клац нічого не робить і незрозуміло чому.
+    if (стан.порівняти.length > 2) стан.порівняти.shift();
+  }
+  намалювати_варіанти();
+}
+
+async function зберегти_варіант() {
+  const скільки = (стан.дані["варіанти"] || []).length + 1;
+  const назва = prompt("Як назвати варіант?", "Варіант " + скільки);
+  if (!назва) return;
+  const суть = prompt("Одним рядком: у чому суть цього варіанта?", "") || "";
+  const в = await fetch("/api/план/варіант", {
+    method: "POST", headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({господарство: стан.господарство, рік: стан.рік,
+                          назва: назва, суть: суть})
+  });
+  const н = await в.json();
+  if (!н["гаразд"]) { alert(н["помилка"] || "Не збереглось"); return; }
+  await завантажити();
+}
+
+async function обрати_варіант(ключ) {
+  const в = await fetch("/api/план/варіант-обрати", {
+    method: "POST", headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({господарство: стан.господарство, рік: стан.рік, ключ: ключ})
+  });
+  const н = await в.json();
+  if (!н["гаразд"]) { alert(н["помилка"] || "Не обралось"); return; }
+  if ((н["розбіжності"] || []).length) {
+    alert("Обрано. На " + н["розбіжності"].length + " полях культура вже стояла інша — "
+          + "вона лишилась як була, бо це рішення агронома. Розбіжності видно в порівнянні.");
+  }
+  await завантажити();
+}
+
+async function намалювати_порівняння() {
+  const а = стан.порівняти[0], б = стан.порівняти[1];
+  const адреса = "/api/порівняння?господарство=" + encodeURIComponent(стан.господарство)
+                 + "&рік=" + стан.рік + "&а=" + encodeURIComponent(а)
+                 + "&б=" + encodeURIComponent(б);
+  const п = await (await fetch(адреса)).json();
+  if (!п["гаразд"]) return;
+
+  const різні = п["рядки"].filter(р => !р["однакові"]);
+  const частини = ["<h2 style='font-size:13px;margin:18px 0 4px'>Лоб у лоб</h2>"];
+  частини.push("<p class='вступ' style='margin-bottom:12px'>"
+    + екран(п["а"]["назва"]) + " проти " + екран(п["б"]["назва"])
+    + " · показані тільки поля, де є різниця: " + різні.length + " з "
+    + п["рядки"].length + ", разом " + п["га_різниці"] + " га"
+    + (п["без_площі"].length
+       ? " · <span class='порожньо'>" + п["без_площі"].length
+         + " з них без площі й у гектари не входять</span>" : "")
+    + "</p>");
+
+  if (!різні.length) {
+    частини.push("<p class='нема-різниці'>Варіанти однакові — жодне поле не різниться.</p>");
+  } else {
+    частини.push("<table class='порівняння'><thead><tr><th>Поле</th>"
+                 + "<th style='text-align:right'>га</th><th>" + екран(п["а"]["назва"])
+                 + "</th><th>" + екран(п["б"]["назва"]) + "</th></tr></thead><tbody>");
+    різні.forEach(р => {
+      частини.push("<tr><td>" + екран(р["назва"]) + "</td>");
+      частини.push("<td class='га'>" + (р["площа_га"] != null
+                   ? Number(р["площа_га"]).toFixed(1)
+                   : "<span class='порожньо'>немає</span>") + "</td>");
+      [р["а"], р["б"]].forEach(к => {
+        частини.push("<td>" + (к
+          ? "<span class='культура план' style='background:" + колір(к)
+            + ";display:inline-block;min-width:120px'>" + екран(коротко(к)) + "</span>"
+          // Порожня комірка означає, що варіант цього поля не торкався, —
+          // і це теж різниця, яку найлегше не помітити.
+          : "<span class='нема-різниці'>поля немає у варіанті</span>") + "</td>");
+      });
+      частини.push("</tr>");
+    });
+    частини.push("</tbody></table>");
+  }
+  document.getElementById("порівняння").innerHTML = частини.join("");
 }
 
 function намалювати() {
