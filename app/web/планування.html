@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FieldFactor · планування сезону</title>
+<link rel="stylesheet" href="/web/стиль.css">
+<link rel="stylesheet" href="/web/сторінка.css">
+<style>
+/* ── Сітка ротації: поля × роки, культура плиткою.
+   Історія тьмяна — вона вже сталася. Планований рік яскравий і
+   підсвічений: саме його зараз правлять. */
+.планування-шапка { display:flex; align-items:baseline; gap:14px; margin-bottom:10px; }
+.планування-шапка .рік { font:600 15px/1 var(--шрифт); color:var(--текст); }
+.стан-плану {
+  font:11px/1 var(--моно); padding:3px 8px; border-radius:4px;
+  background:var(--картка2); color:var(--увага); border:1px solid var(--лінія);
+}
+.стан-плану.затверджений { color:var(--зелень); }
+
+.ротація { width:100%; border-collapse:collapse; font-size:12px; }
+.ротація th {
+  font:600 10px/1 var(--шрифт); text-transform:uppercase; letter-spacing:.04em;
+  color:var(--тихий); text-align:center; padding:0 0 7px; white-space:nowrap;
+}
+.ротація th.поле, .ротація td.поле { text-align:left; padding-left:10px; }
+.ротація th.га, .ротація td.га { text-align:right; padding-right:12px; }
+.ротація td.га { font:11px/1 var(--моно); color:var(--тихий); }
+.ротація tbody tr:nth-child(even) { background:#181c21; }
+.ротація tbody tr:hover { background:#1d2229; }
+.ротація td { padding:3px 2px; }
+.ротація th.план, .ротація td.план { background:rgba(78,168,255,.09); }
+.ротація th.план { color:var(--акцент); }
+
+.культура {
+  display:block; border-radius:3px; padding:4px 6px; text-align:center;
+  font-size:10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+/* Історія: приглушена плитка з кольоровою рискою культури ліворуч.
+   Колір лишається видним — інакше око не побачить чергування. */
+.культура.було { background:#1e2329; color:var(--тихий); border-left:3px solid; }
+.культура.план { color:#14171b; font-weight:600; cursor:pointer; }
+.культура.немає {
+  background:#171b20; color:var(--лінія); border:1px dashed var(--лінія);
+  cursor:pointer;
+}
+.культура.план:hover, .культура.немає:hover { outline:2px solid var(--акцент); }
+
+.палітра { display:flex; flex-wrap:wrap; gap:6px; margin:10px 0 4px; }
+.палітра button {
+  border:1px solid transparent; border-radius:4px; padding:5px 12px;
+  font:11px/1 var(--шрифт); color:#14171b; cursor:pointer;
+}
+.палітра button.обрана { outline:2px solid var(--текст); }
+.палітра button.чисто {
+  background:#171b20; color:var(--тихий); border-color:var(--лінія);
+}
+.підсумок-структури { display:flex; flex-wrap:wrap; gap:18px; margin-top:12px; }
+.підсумок-структури .частка { display:flex; align-items:center; gap:7px; font-size:11px; }
+.підсумок-структури .квадрат { width:10px; height:10px; border-radius:2px; }
+.підсумок-структури .га { font:11px/1 var(--моно); color:var(--текст); }
+.порожньо { color:var(--тривога); }
+</style>
+</head>
+<body>
+
+<header class="шапка">
+  <div class="шапка-ряд">
+    <div>
+      <div class="назва"><b>Field</b>Factor</div>
+      <div class="гасло">Планування сезону · ротація, культури, норми й бюджет</div>
+    </div>
+    <div class="шапка-права" id="меню"></div>
+  </div>
+</header>
+
+<nav class="функції" id="функції"></nav>
+
+<main class="сторінка">
+  <div class="планування-шапка">
+    <span class="рік" id="заголовок">План сезону</span>
+    <span class="стан-плану" id="стан">чернетка</span>
+    <span id="зведення" style="font-size:12px;color:var(--тихий)"></span>
+  </div>
+
+  <div id="тіло">
+    <p class="вступ" id="повідомлення">Читаю дані…</p>
+  </div>
+</main>
+
+<script src="/web/меню.js"></script>
+<script>
+// ── Колір культури — сталий по всьому продукту й НЕ з палітри статусів.
+// Статус означає стан роботи, культура означає рослину: якби вони ділили
+// кольори, зелена плитка сої читалась би як «готово».
+const КОЛІР_КУЛЬТУРИ = {
+  "пшениця": "#d2a24c", "кукурудза": "#e0c451", "соняшник": "#e08a3c",
+  "соя": "#6fae5a", "ріпак": "#5fb6b0", "горох": "#9a8fd0",
+  "ячмінь": "#c2b184", "жито": "#b9946a", "просо": "#cbb26a",
+  "гречка": "#a88fd0", "люцерна": "#7fae7a", "сорго": "#d08a5a",
+  "пар": "#4a525c", "степ": "#4a525c"
+};
+
+// Назви культур у господарствах пишуться як заманеться: «Кукурудза на
+// зерно», «кукурудза зерно», «Пшениця озима». Колір шукається за коренем,
+// інакше та сама культура в двох господарствах отримає різні кольори.
+function колір(культура) {
+  const н = (культура || "").toLowerCase();
+  for (const корінь in КОЛІР_КУЛЬТУРИ) if (н.includes(корінь)) return КОЛІР_КУЛЬТУРИ[корінь];
+  return "#6b7783";
+}
+
+function коротко(культура) {
+  const н = (культура || "").trim();
+  return н.length > 14 ? н.slice(0, 13) + "…" : н;
+}
+
+const стан = { господарство: null, рік: null, дані: null, пензель: null };
+
+function екран(т) {
+  const д = document.createElement("div");
+  д.textContent = т == null ? "" : String(т);
+  return д.innerHTML;
+}
+
+async function завантажити() {
+  // Господарство береться з адреси, далі з вибору в сеансі. Адреса
+  // важливіша: людина приходить сюди за посиланням на конкретний план.
+  const з_адреси = new URLSearchParams(location.search).get("господарство");
+  const с = await (await fetch("/api/стан")).json();
+  стан.господарство = з_адреси || (с.вибір || {}).господарство;
+  if (!стан.господарство) {
+    // Не женемо на картотеку: план складається для господарства, тож
+    // обрати його можна просто тут.
+    const к = await (await fetch("/api/картотека")).json();
+    const господарства = к["господарства"] || [];
+    document.getElementById("повідомлення").innerHTML = господарства.length
+      ? "Для якого господарства плануємо?<div class='палітра' style='margin-top:10px'>"
+        + господарства.map(г =>
+            "<button class='чисто' data-господарство='" + екран(г["ключ"]) + "'>"
+            + екран(г["назва"]) + " <span style='color:var(--тихий)'>"
+            + (г["поля"] || []).length + " полів</span></button>").join("")
+        + "</div>"
+      : "У картотеці ще немає жодного господарства.";
+    document.querySelectorAll("[data-господарство]").forEach(к2 => {
+      к2.addEventListener("click", () => {
+        location.search = "?господарство=" + encodeURIComponent(к2.dataset["господарство"]);
+      });
+    });
+    return;
+  }
+  const р = await (await fetch("/api/ротація?господарство="
+                               + encodeURIComponent(стан.господарство))).json();
+  if (!р["гаразд"]) {
+    document.getElementById("повідомлення").textContent = р["помилка"] || "Не вдалось прочитати";
+    return;
+  }
+  стан.дані = р;
+  стан.рік = р["рік"];
+  намалювати();
+}
+
+function намалювати() {
+  const д = стан.дані;
+  document.getElementById("заголовок").textContent =
+    "План сезону " + д["рік"] + " · " + стан.господарство;
+  document.getElementById("стан").textContent = д["стан_плану"] || "чернетка";
+  document.getElementById("стан").className =
+    "стан-плану " + (д["стан_плану"] === "затверджений" ? "затверджений" : "");
+
+  const план_рік = String(д["рік"]);
+  const заповнених = д["поля"].filter(п => п["роки"][план_рік]).length;
+  document.getElementById("зведення").innerHTML =
+    заповнених + " з " + д["поля"].length + " полів із культурою на " + план_рік
+    + (заповнених < д["поля"].length
+       ? " · <span class='порожньо'>" + (д["поля"].length - заповнених)
+         + " без культури</span>" : "");
+
+  const частини = [];
+
+  // палітра: чим ставимо плитку
+  частини.push('<div class="палітра" id="палітра">');
+  for (const к in КОЛІР_КУЛЬТУРИ) {
+    if (к === "степ") continue;
+    частини.push('<button data-культура="' + к + '" style="background:'
+                 + КОЛІР_КУЛЬТУРИ[к] + '">' + к + "</button>");
+  }
+  частини.push('<button data-культура="" class="чисто">прибрати</button></div>');
+  частини.push('<div style="font-size:11px;color:var(--тихий);margin-bottom:12px">'
+               + "Оберіть культуру, далі клацайте по комірках "
+               + план_рік + ". Історія лівіше — вона вже сталася й не правиться.</div>");
+
+  частини.push('<table class="ротація"><thead><tr><th class="поле">Поле</th><th class="га">га</th>');
+  д["роки"].forEach(р => {
+    частини.push('<th class="' + (р === план_рік ? "план" : "") + '">' + р + "</th>");
+  });
+  частини.push("</tr></thead><tbody>");
+
+  д["поля"].forEach(п => {
+    частини.push("<tr><td class='поле'>" + екран(п["назва"]) + "</td>");
+    частини.push("<td class='га'>" + (п["площа_га"] != null
+                 ? Number(п["площа_га"]).toFixed(1) : "—") + "</td>");
+    д["роки"].forEach(р => {
+      const культура = п["роки"][р];
+      const план = р === план_рік;
+      частини.push("<td class='" + (план ? "план" : "") + "'>");
+      if (!культура) {
+        частини.push(план
+          ? "<span class='культура немає' data-поле='" + екран(п["ключ"]) + "'>—</span>"
+          : "<span class='культура немає' style='cursor:default'>—</span>");
+      } else if (план) {
+        частини.push("<span class='культура план' data-поле='" + екран(п["ключ"])
+                     + "' style='background:" + колір(культура) + "' title='"
+                     + екран(культура) + "'>" + екран(коротко(культура)) + "</span>");
+      } else {
+        частини.push("<span class='культура було' style='border-left-color:"
+                     + колір(культура) + "' title='" + екран(культура) + "'>"
+                     + екран(коротко(культура)) + "</span>");
+      }
+      частини.push("</td>");
+    });
+    частини.push("</tr>");
+  });
+  частини.push("</tbody></table>");
+  частини.push('<div class="підсумок-структури" id="структура"></div>');
+
+  document.getElementById("тіло").innerHTML = частини.join("");
+
+  document.querySelectorAll("#палітра button").forEach(к => {
+    к.addEventListener("click", () => {
+      стан.пензель = к.dataset["культура"];
+      document.querySelectorAll("#палітра button").forEach(і => і.classList.remove("обрана"));
+      к.classList.add("обрана");
+    });
+  });
+  document.querySelectorAll(".культура[data-поле]").forEach(с => {
+    с.addEventListener("click", () => поставити(с.dataset["поле"]));
+  });
+  структуру();
+}
+
+async function поставити(поле) {
+  if (стан.пензель === null) {
+    alert("Спершу оберіть культуру в палітрі");
+    return;
+  }
+  const відповідь = await fetch("/api/план/культура", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({господарство: стан.господарство, рік: стан.рік,
+                          поле: поле, культура: стан.пензель})
+  });
+  const н = await відповідь.json();
+  if (!н["гаразд"]) { alert(н["помилка"] || "Не записалось"); return; }
+  // Перечитуємо з сервера, а не правимо на екрані: показувати треба те,
+  // що лягло на диск, а не те, що ми туди відправили.
+  await завантажити();
+}
+
+function структуру() {
+  const д = стан.дані, план_рік = String(д["рік"]);
+  const по_культурах = {};
+  let усього = 0, без_площі = 0;
+  д["поля"].forEach(п => {
+    const к = п["роки"][план_рік];
+    if (!к) return;
+    if (!п["площа_га"]) { без_площі += 1; return; }
+    по_культурах[к] = (по_культурах[к] || 0) + Number(п["площа_га"]);
+    усього += Number(п["площа_га"]);
+  });
+  const рядки = Object.keys(по_культурах).sort((а, б) => по_культурах[б] - по_культурах[а]);
+  const частини = рядки.map(к =>
+    "<span class='частка'><span class='квадрат' style='background:" + колір(к)
+    + "'></span>" + екран(к) + " <span class='га'>" + по_культурах[к].toFixed(1)
+    + "</span> <span style='color:var(--тихий)'>"
+    + (усього ? (100 * по_культурах[к] / усього).toFixed(0) : 0) + "%</span></span>");
+  if (без_площі) {
+    // Поле без межі не має площі, і приписати йому нуль означало б тихо
+    // применшити частку культури. Тому воно рахується окремо й видно.
+    частини.push("<span class='частка порожньо'>" + без_площі
+                 + " полів без площі — у структуру не входять</span>");
+  }
+  document.getElementById("структура").innerHTML =
+    частини.length ? частини.join("") : "<span style='color:var(--тихий)'>Структура порожня</span>";
+}
+
+if (typeof намалювати_меню === "function") намалювати_меню("#меню");
+завантажити();
+</script>
+</body>
+</html>
