@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FieldFactor · довідники</title>
+<link rel="stylesheet" href="/web/стиль.css">
+<link rel="stylesheet" href="/web/сторінка.css">
+<style>
+/* Редактор довідників. Розкладка взята з `Management Item Editor` у SMS:
+   ліворуч сутності, посередині елементи з фільтром, праворуч дії. Своєї
+   мови тут не вигадуємо — Власник працює в цій розкладці щодня. */
+.редактор { display: grid; grid-template-columns: 232px 1fr 168px; gap: 0;
+  border: 1px solid var(--лінія); border-radius: var(--радіус); overflow: hidden;
+  background: var(--картка); min-height: 60vh; }
+.сутності { border-right: 1px solid var(--лінія); overflow-y: auto; max-height: 72vh; }
+.сутність { display: flex; align-items: center; gap: 8px; padding: 7px 11px;
+  font-size: 12.5px; cursor: pointer; border-bottom: 1px solid var(--лінія-тиха); }
+.сутність:hover { background: var(--картка2); }
+.сутність.тут { background: var(--акцент-світлий); color: var(--акцент); font-weight: 650; }
+.сутність .значок { width: 18px; text-align: center; }
+.сутність .лічильник { margin-left: auto; font: 11px var(--числа); color: var(--тихий); }
+.сутність .домівка { font-size: 10px; color: var(--тихий); }
+
+.середина { display: flex; flex-direction: column; min-width: 0; }
+.рядок-фільтра { display: flex; gap: 6px; padding: 8px 10px;
+  border-bottom: 1px solid var(--лінія); }
+.рядок-фільтра input { flex: 1; margin: 0; }
+.елементи { flex: 1; overflow-y: auto; max-height: 62vh; }
+.елемент { display: flex; align-items: baseline; gap: 8px; padding: 5px 11px;
+  font-size: 12.5px; cursor: pointer; border-bottom: 1px solid var(--лінія-тиха);
+  white-space: nowrap; }
+.елемент:hover { background: var(--картка2); }
+.елемент.обраний { background: var(--акцент-світлий); color: var(--акцент); }
+.елемент .дрібне { color: var(--тихий); font-size: 11.5px; }
+.елемент .ч { font-family: var(--числа); margin-left: auto; color: var(--тихий); }
+.елемент .зірка { color: var(--увага); }
+.порожньо-довідник { padding: 18px 14px; color: var(--тихий); font-size: 12.5px;
+  line-height: 1.6; }
+
+.дії-довідника { border-left: 1px solid var(--лінія); padding: 8px; display: flex;
+  flex-direction: column; gap: 6px; }
+.дії-довідника button { width: 100%; }
+
+.форма-довідника { border-top: 1px solid var(--лінія); padding: 12px;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px 14px; }
+.форма-довідника label { display: block; font-size: 11.5px; color: var(--тихий);
+  font-weight: 600; }
+.форма-довідника .чому { display: block; font-weight: 400; font-size: 11px;
+  color: var(--тихий); margin-top: 2px; }
+.форма-довідника .широке { grid-column: 1 / -1; }
+.смуга-зауваг { margin: 10px 0 0; padding: 8px 11px; border-radius: var(--радіус-дрібний);
+  font-size: 12px; }
+.смуга-зауваг.помилка { background: rgba(255,122,89,.12); color: var(--тривога); }
+.смуга-зауваг.увага { background: rgba(227,179,65,.12); color: var(--увага); }
+</style>
+</head>
+<body>
+
+<header class="шапка">
+  <div class="шапка-ряд">
+    <div class="назва"><b>Field</b>Factor</div>
+    <div class="шапка-права" id="меню"></div>
+  </div>
+</header>
+
+<!-- Функції поточного етапу. Малює меню.js за адресою сторінки. -->
+<nav class="функції" id="функції"></nav>
+
+<main class="сторінка">
+  <h1>Довідники</h1>
+  <p class="вступ">Одне місце, де заводиться все, з чого складається робота.
+    Розділ показується з тієї домівки, де він живе насправді: продукти — з довідника
+    продуктів, ціни й техніка — з грошей, поля — з картотеки. Другого місця правди
+    ми не заводимо.</p>
+
+  <div class="редактор">
+    <div class="сутності" id="сутності"></div>
+    <div class="середина">
+      <div class="рядок-фільтра">
+        <input id="фільтр" placeholder="Почніть писати, щоб відфільтрувати…">
+        <span class="тиха" id="про-розділ"></span>
+      </div>
+      <div class="елементи" id="елементи"></div>
+      <div id="форма-місце"></div>
+    </div>
+    <div class="дії-довідника">
+      <button class="головна" id="додати">Додати</button>
+      <button id="копіювати">Копіювати</button>
+      <button id="змінити">Змінити</button>
+      <button id="зірочка">У обране</button>
+      <button id="видалити">Видалити</button>
+    </div>
+  </div>
+</main>
+
+<script src="/web/меню.js"></script>
+<script>
+"use strict";
+const $ = с => document.querySelector(с);
+const екран = т => String(т === null || т === undefined ? "" : т);
+let СТАН = { розділи: [], розділ: null, елементи: [], обраний: null, фільтр: "", форма: null };
+
+async function взяти(адреса) {
+  const в = await fetch(адреса);
+  if (!в.ok) throw new Error(await в.text());
+  return в.json();
+}
+async function послати(адреса, тіло) {
+  const в = await fetch(адреса, { method: "POST",
+    headers: { "Content-Type": "application/json" }, body: JSON.stringify(тіло) });
+  return в.json();
+}
+
+async function перечитати(розділ) {
+  const п = new URLSearchParams();
+  if (розділ) п.set("розділ", розділ);
+  const д = await взяти("/api/довідники?" + п.toString());
+  СТАН.розділи = д["розділи"] || СТАН.розділи;
+  if (д["розділ"]) {
+    СТАН.розділ = д["розділ"];
+    СТАН.елементи = д["елементи"] || [];
+    СТАН.куди = д["куди"] || null;
+  }
+  намалювати();
+}
+
+function намалювати() {
+  намалювати_сутності();
+  намалювати_елементи();
+}
+
+function намалювати_сутності() {
+  const місце = $("#сутності");
+  місце.innerHTML = СТАН.розділи.map(р => {
+    const тут = СТАН.розділ && СТАН.розділ.ключ === р.ключ;
+    const домівка = р.де === "тут" ? "" :
+      `<span class="домівка">${р.де === "гроші" ? "гроші" :
+        р.де === "продукти" ? "продукти" : "картотека"}</span>`;
+    return `<div class="сутність${тут ? " тут" : ""}" data-розділ="${екран(р.ключ)}">
+      <span class="значок">${екран(р.значок)}</span>
+      <span>${екран(р.підпис)}</span>${домівка}</div>`;
+  }).join("");
+  місце.querySelectorAll(".сутність").forEach(е =>
+    е.onclick = () => { СТАН.обраний = null; СТАН.форма = null; $("#фільтр").value = "";
+                        СТАН.фільтр = ""; перечитати(е.dataset["розділ"]); });
+}
+
+function підпис_елемента(з) {
+  const назва = з["назва"] || з["ключ"] || "—";
+  const хвіст = [];
+  if (з["вид"]) хвіст.push(з["вид"]);
+  if (з["роль"]) хвіст.push(з["роль"]);
+  if (з["група"]) хвіст.push(з["група"]);
+  if (з["господарство"]) хвіст.push(з["господарство"]);
+  if (з["ферма"]) хвіст.push(з["ферма"]);
+  if (з["тип"]) хвіст.push(з["тип"]);
+  const числа = [];
+  if (з["га"] !== undefined && з["га"] !== null) числа.push(з["га"] + " га");
+  if (з["полів"] !== undefined) числа.push(з["полів"] + " полів");
+  if (з["ціна"] !== undefined && з["ціна"] !== null) числа.push(з["ціна"] + " грн");
+  if (з["CCE"] !== undefined && з["CCE"] !== null) числа.push("CCE " + з["CCE"]);
+  return { назва, хвіст: хвіст.join(" · "), числа: числа.join(" · ") };
+}
+
+function намалювати_елементи() {
+  const місце = $("#елементи");
+  if (!СТАН.розділ) {
+    місце.innerHTML = '<p class="порожньо-довідник">Оберіть сутність зліва.</p>';
+    $("#про-розділ").textContent = "";
+    return;
+  }
+  $("#про-розділ").textContent = СТАН.розділ.пояснення || "";
+  const відібрані = СТАН.елементи.filter(з => {
+    if (!СТАН.фільтр) return true;
+    return JSON.stringify(з).toLowerCase().includes(СТАН.фільтр.toLowerCase());
+  });
+  відібрані.sort((а, б) => (б["улюблене"] ? 1 : 0) - (а["улюблене"] ? 1 : 0));
+
+  if (!відібрані.length) {
+    місце.innerHTML = `<p class="порожньо-довідник">${СТАН.елементи.length
+      ? "Нічого не знайшлось за цим фільтром."
+      : "Тут ще порожньо. " + (СТАН.розділ.де === "тут"
+          ? "Натисніть «Додати»." : "Розділ заводиться на своєму екрані.")}</p>`;
+    return;
+  }
+  місце.innerHTML = відібрані.map(з => {
+    const п = підпис_елемента(з);
+    const обраний = СТАН.обраний && СТАН.обраний["ключ"] === з["ключ"];
+    return `<div class="елемент${обраний ? " обраний" : ""}" data-ключ="${екран(з["ключ"])}">
+      ${з["улюблене"] ? '<span class="зірка">★</span>' : ""}
+      <span>${екран(п.назва)}</span>
+      ${п.хвіст ? `<span class="дрібне">${екран(п.хвіст)}</span>` : ""}
+      ${п.числа ? `<span class="ч">${екран(п.числа)}</span>` : ""}</div>`;
+  }).join("");
+  місце.querySelectorAll(".елемент").forEach(е => е.onclick = () => {
+    СТАН.обраний = СТАН.елементи.find(з => String(з["ключ"]) === е.dataset["ключ"]) || null;
+    СТАН.форма = null; $("#форма-місце").innerHTML = ""; намалювати_елементи();
+  });
+}
+
+function показати_форму(зразок) {
+  if (!СТАН.розділ || СТАН.розділ.де !== "тут") {
+    alert("Цей розділ редагується на своєму екрані: " + (СТАН.куди || "—"));
+    return;
+  }
+  СТАН.форма = Object.assign({}, зразок || {});
+  const поля = (СТАН.розділ.поля || []).map(п => {
+    const значення = екран(СТАН.форма[п.ключ]);
+    const чому = п.пояснення ? `<span class="чому">${екран(п.пояснення)}</span>` : "";
+    if (п.вид === "вибір") {
+      const варіанти = (п.варіанти || []).map(([к, підпис]) =>
+        `<option value="${екран(к)}"${значення === к ? " selected" : ""}>${екран(підпис)}</option>`);
+      return `<label>${екран(п.підпис)}${чому}
+        <select data-поле="${екран(п.ключ)}"><option value=""></option>${варіанти.join("")}</select></label>`;
+    }
+    const тип = п.вид === "число" ? "number" : "text";
+    return `<label>${екран(п.підпис)}${п.одиниця ? ", " + екран(п.одиниця) : ""}${чому}
+      <input type="${тип}" data-поле="${екран(п.ключ)}" value="${екран(значення)}"></label>`;
+  });
+  $("#форма-місце").innerHTML = `<div class="форма-довідника">${поля.join("")}
+    <div class="широке"><button class="головна" id="зберегти">Зберегти</button>
+      <button id="скасувати">Скасувати</button></div></div><div id="зауваги"></div>`;
+  $("#зберегти").onclick = зберегти;
+  $("#скасувати").onclick = () => { СТАН.форма = null; $("#форма-місце").innerHTML = ""; };
+}
+
+async function зберегти() {
+  const елемент = Object.assign({}, СТАН.форма);
+  document.querySelectorAll("[data-поле]").forEach(е => {
+    елемент[е.dataset["поле"]] = е.value.trim ? е.value.trim() : е.value;
+  });
+  const наслідок = await послати("/api/довідник-запис",
+    { розділ: СТАН.розділ.ключ, елемент });
+  const зауваги = наслідок["зауваги"] || [];
+  if (!наслідок["гаразд"]) {
+    $("#зауваги").innerHTML = зауваги.map(з =>
+      `<div class="смуга-зауваг ${з.вага}"><b>${екран(з.що)}</b> — ${екран(з.чому)}</div>`).join("")
+      || `<div class="смуга-зауваг помилка">${екран(наслідок["повідомлення"])}</div>`;
+    return;
+  }
+  СТАН.форма = null; $("#форма-місце").innerHTML = "";
+  await перечитати(СТАН.розділ.ключ);
+}
+
+$("#фільтр").addEventListener("input", п => { СТАН.фільтр = п.target.value; намалювати_елементи(); });
+$("#додати").onclick = () => показати_форму(null);
+$("#копіювати").onclick = () => {
+  if (!СТАН.обраний) { alert("Спершу оберіть запис"); return; }
+  const копія = Object.assign({}, СТАН.обраний);
+  delete копія["ключ"];
+  копія["назва"] = (копія["назва"] || "") + " (копія)";
+  показати_форму(копія);
+};
+$("#змінити").onclick = () => {
+  if (!СТАН.обраний) { alert("Спершу оберіть запис"); return; }
+  показати_форму(СТАН.обраний);
+};
+$("#зірочка").onclick = async () => {
+  if (!СТАН.обраний) { alert("Спершу оберіть запис"); return; }
+  await послати("/api/довідник-запис", { розділ: СТАН.розділ.ключ,
+    ключ: СТАН.обраний["ключ"], улюблене: !СТАН.обраний["улюблене"] });
+  await перечитати(СТАН.розділ.ключ);
+};
+$("#видалити").onclick = async () => {
+  if (!СТАН.обраний) { alert("Спершу оберіть запис"); return; }
+  if (!confirm(`Видалити «${СТАН.обраний["назва"] || СТАН.обраний["ключ"]}»?`)) return;
+  await послати("/api/довідник-запис",
+    { розділ: СТАН.розділ.ключ, ключ: СТАН.обраний["ключ"], видалити: true });
+  СТАН.обраний = null;
+  await перечитати(СТАН.розділ.ключ);
+};
+
+перечитати("люди");
+</script>
+</body>
+</html>
