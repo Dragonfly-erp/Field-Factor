@@ -614,6 +614,13 @@ body.робоче-місце .шапка { padding: 0 12px; }
 }
 .шари-панель { top: 10px; left: 10px; width: 238px; }
 .список-шарів { max-height: 34vh; overflow-y: auto; padding: 3px; }
+/* Вибір тла. Стоїть під шарами, бо це не шар: по тлу не рахують, воно лише
+   відповідає на питання «чи це те поле». */
+.тло-вибір { padding: 7px 10px; border-top: 1px solid var(--лінія); }
+.тло-вибір select { width: 100%; margin: 3px 0 0; }
+.тло-вибір .дрібно { margin: 4px 0 0; line-height: 1.45; }
+.звірка-добре { margin: 0; padding: 7px 11px; font-size: 11.5px; color: var(--зелень);
+  border-top: 1px solid var(--лінія-тиха); }
 .шари-дії { display: flex; gap: 4px; padding: 6px; border-top: 1px solid var(--лінія); }
 .шари-дії button { flex: 1; }
 
