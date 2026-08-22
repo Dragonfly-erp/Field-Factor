@@ -29,15 +29,11 @@ import urllib.request
 
 import numpy as np
 
+# Джерело одне — рішення Власника 22.08.2026. Вибір із шести перевірили на
+# живому полі й відмовились: у консультанта одне питання до тла — «чи це те
+# поле», і супутник відповідає на нього краще за решту. Менше джерел —
+# менше того, що може мовчки не завантажитись.
 ДЖЕРЕЛА = {
-    "карта": {
-        "підпис_джерела": "OpenStreetMap",
-        "адреса": "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-        "підпис": "© OpenStreetMap contributors",
-        "стеля": 19,
-        "ключ": None,
-        "чому": "вільна карта, ODbL. Дороги, села, лісосмуги. Кеш дозволено",
-    },
     "супутник": {
         "підпис_джерела": "Esri World Imagery",
         "адреса": "https://server.arcgisonline.com/ArcGIS/rest/services/"
@@ -47,43 +43,6 @@ import numpy as np
         "ключ": None,
         "чому": "супутник без ключа. Для комерційної роботи ліцензію Esri "
                 "треба звірити окремо",
-    },
-    "рельєф": {
-        "підпис_джерела": "OpenTopoMap",
-        "адреса": "https://tile.opentopomap.org/{z}/{x}/{y}.png",
-        "підпис": "© OpenTopoMap (CC-BY-SA), © OpenStreetMap contributors",
-        "стеля": 17,
-        "ключ": None,
-        "чому": "горизонталі й форми рельєфу. Корисно там, де схил вирішує",
-    },
-    # ── платні. Обидва дозволяють кешувати плитки — саме тому вони тут, а
-    # не Google: тому потрібна портативна програма, яка їде в поле без мережі.
-    "mapbox-супутник": {
-        "підпис_джерела": "Mapbox Satellite",
-        "адреса": "https://api.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}@2x.jpg90"
-                  "?access_token={ключ}",
-        "підпис": "© Mapbox © Maxar",
-        "стеля": 20,
-        "ключ": "mapbox",
-        "чому": "різкіший супутник, оновлюється частіше. Потрібен ключ Mapbox",
-    },
-    "maptiler-супутник": {
-        "підпис_джерела": "MapTiler Satellite",
-        "адреса": "https://api.maptiler.com/tiles/satellite-v2/{z}/{x}/{y}.jpg?key={ключ}",
-        "підпис": "© MapTiler © OpenStreetMap contributors",
-        "стеля": 20,
-        "ключ": "maptiler",
-        "чому": "європейський супутник, дозволяє тримати плитки офлайн. "
-                "Потрібен ключ MapTiler",
-    },
-    "maptiler-карта": {
-        "підпис_джерела": "MapTiler Streets",
-        "адреса": "https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key={ключ}",
-        "підпис": "© MapTiler © OpenStreetMap contributors",
-        "стеля": 20,
-        "ключ": "maptiler",
-        "чому": "та сама карта, що й OSM, але власним стилем і без обмежень "
-                "чужого сервера",
     },
 }
 
