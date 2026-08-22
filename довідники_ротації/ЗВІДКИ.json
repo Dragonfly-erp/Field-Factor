@@ -1,0 +1,26 @@
+{
+  "знято": "2026-08-22",
+  "звідки": "Dragonfly-erp/agroplace-weather",
+  "як": "знімок, не живий join · у чужий репозиторій не пишемо",
+  "файли": {
+    "післядія_ЗЗР.json": {
+      "шлях_у_джерелі": "lib/data/carryover_catalog.json",
+      "sha256_16": "a63b9366fc4a00fd",
+      "рядків": 309,
+      "джерело_даних": "ingredient_catalog carryover (atom_kb + research)",
+      "примітка": "Післядія ЗЗР (carryover) — крос-розріз усіх д.р. за ризиком фітотоксичності наступній культурі. Обчислено з atom_kb (DT50/Koc/HRAC/pH) + reconciled agent-research (NDSU/Purdue/Iowa/GRDC/PPDB, foreign). Оранка розбавляє, не розкладає; сухий сезон — домінантний підсилювач. Живить сівозміну за попередніми внесеннями. NO YIELD; немає DT50 → HOLD."
+    },
+    "інтервали_повернення.csv": {
+      "шлях_у_джерелі": "data/synthetic/reference/rotation_rules.csv",
+      "sha256_16": "dd499ec4af301b29",
+      "рядків": 8,
+      "статус": "PROVISIONAL — курована таблиця без ланцюга доказів; має право попереджати, не забороняти (підписано Власником, lib/data/rotationEvidence.ts)"
+    },
+    "матриця_сумісності.csv": {
+      "шлях_у_джерелі": "data/synthetic/reference/rotation_compatibility_matrix.csv",
+      "sha256_16": "352d0c63c46cdce7",
+      "рядків": 64,
+      "статус": "PROVISIONAL — курована таблиця без ланцюга доказів; має право попереджати, не забороняти (підписано Власником, lib/data/rotationEvidence.ts)"
+    }
+  }
+}
