@@ -25,7 +25,12 @@ $packages = @(
   'rasterio',
   'requests',
   'pystac-client',
-  'planetary-computer'
+  'planetary-computer',
+  # Excel. Gospodarstva viddaiut istoriiu poliv tablytseiu, a ne bazoiu:
+  # master table z rokamy, kulturamy, hibrydamy i operatsiiamy. Bez tsioho
+  # paketa .xlsx ne chytaietsia vzahali.
+  'openpyxl',
+  'Pillow'
 )
 
 function Say($text) { Write-Host "  $text" -ForegroundColor Cyan }
