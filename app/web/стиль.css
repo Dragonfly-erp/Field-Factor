@@ -19,6 +19,9 @@
 :root {
   /* поверхні: три рівні глибини, не більше */
   --тло:        #15181c;
+  /* Найглибша поверхня. На ній стоїть рейка етапів: вона має читатись як
+     тло, а не як ще одна панель. */
+  --смуга:      #12151a;
   --картка:     #1b1f24;
   --картка2:    #20252b;
   --лінія:      #2b323a;
@@ -48,6 +51,7 @@
    інші поверхні. Потрібен для яскравої кабіни й для друку з екрана. */
 :root[data-theme="light"] {
   --тло:        #eef1f4;
+  --смуга:      #e4e8ed;
   --картка:     #ffffff;
   --картка2:    #f5f7f9;
   --лінія:      #d8dee5;
@@ -336,22 +340,58 @@ body.робоче-місце .шапка { padding: 0 12px; }
    Права колонка теж поділена навпіл за змістом: зверху інструменти над
    тим, що зараз на екрані, знизу — дії, які готують наступний крок. */
 
-.пайплайн { display: flex; align-items: stretch; gap: 1px; margin-left: 6px; }
-.етап {
-  display: flex; align-items: center; gap: 7px; padding: 0 11px; height: 44px;
-  color: var(--тихий); text-decoration: none; white-space: nowrap;
-  border-bottom: 2px solid transparent; font-size: 12.5px;
+/* ── РЕЙКА. Обрано Власником 22.08.2026 з трьох варіантів головного меню
+   (`_макети/меню_*.png`). Етапи вертикально й з лічильниками: горизонтально
+   девʼять етапів зі станом не влазять — підписи довелось би різати, і це
+   було видно на самому макеті, а не в міркуваннях про нього. */
+.рейка {
+  background: var(--смуга, #12151a); border-right: 1px solid var(--лінія);
+  display: flex; flex-direction: column; padding: 8px 0; overflow-y: auto;
 }
-.етап:hover { color: var(--текст); background: var(--картка2); }
-.етап.тут { color: var(--текст); border-bottom-color: var(--акцент); font-weight: 650; }
+.рейка-шапка {
+  font-size: 9.5px; text-transform: uppercase; letter-spacing: .09em;
+  color: var(--тихий); font-weight: 700; padding: 6px 14px 8px;
+}
+.етап {
+  display: flex; align-items: flex-start; gap: 10px; padding: 8px 12px;
+  color: var(--текст); text-decoration: none; cursor: pointer;
+  border-left: 2px solid transparent;
+}
+.етап:hover { background: var(--картка2); }
+.етап.тут { background: var(--акцент-світлий); border-left-color: var(--акцент); }
+.етап.тут .назва-етапу { color: var(--акцент); font-weight: 650; }
 .етап i {
-  width: 20px; height: 20px; border-radius: 5px; background: var(--картка2);
-  display: grid; place-items: center; font-style: normal;
-  font: 700 10.5px var(--числа); color: var(--тихий); flex: none;
+  width: 20px; height: 20px; border-radius: 50%; background: var(--картка2);
+  display: grid; place-items: center; font-style: normal; flex: none;
+  font: 700 10px var(--числа); color: var(--тихий); margin-top: 1px;
 }
 .етап.тут i { background: var(--акцент); color: var(--на-акценті); }
-.етап.зроблено i { background: rgba(87, 201, 106, .2); color: var(--зелень); }
-.пайплайн-стрілка { display: flex; align-items: center; color: var(--лінія); font-size: 10px; }
+.етап.зроблено i { background: rgba(87, 201, 106, .22); color: var(--зелень); }
+.етап.стоп i { background: rgba(255, 122, 89, .2); color: var(--тривога); }
+.етап.чекає i { background: rgba(227, 179, 65, .2); color: var(--увага); }
+.етап.тьмяно { opacity: .45; }
+.етап-текст { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.назва-етапу { font-size: 12.5px; }
+.стан-етапу { font: 10px var(--числа); color: var(--тихий); }
+.етап.стоп .стан-етапу { color: var(--тривога); }
+.етап.чекає .стан-етапу { color: var(--увага); }
+.рейка-розрив { height: 1px; background: var(--лінія); margin: 8px 14px; flex: none; }
+
+/* Жетони господарств у шапці. Знято всі — у дереві видно всіх. */
+.жетони-господарств { display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  margin-left: 14px; }
+.жетон-господарства {
+  display: inline-flex; align-items: center; gap: 6px; padding: 4px 11px;
+  border-radius: 12px; border: 1px solid var(--лінія); background: var(--картка2);
+  color: var(--тихий); font-size: 12px; cursor: pointer; white-space: nowrap;
+}
+.жетон-господарства:hover { color: var(--текст); }
+.жетон-господарства.обране {
+  background: var(--акцент-світлий); border-color: transparent;
+  color: var(--акцент); font-weight: 600;
+}
+.жетон-господарства small { font: 400 10.5px var(--числа); color: var(--тихий); }
+.жетон-господарства.обране small { color: var(--акцент); }
 
 .функції {
   flex: none; height: 32px; display: flex; align-items: stretch; padding: 0 10px;
@@ -538,7 +578,8 @@ body.робоче-місце .шапка { padding: 0 12px; }
    коли вони починають виштовхувати панелі вгорі, права колонка ламається. */
 .права-колонка .операції { flex: 0 1 auto; overflow-y: auto; min-height: 0; }
 
-.сітка { flex: 1; min-height: 0; display: grid; grid-template-columns: 246px 1fr 300px; }
+/* Чотири колонки: рейка · дерево · робота · інструменти й дії. */
+.сітка { flex: 1; min-height: 0; display: grid; grid-template-columns: 198px 244px 1fr 292px; }
 
 .колонка {
   background: var(--картка); border-right: 1px solid var(--лінія);
